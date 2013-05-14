@@ -270,8 +270,9 @@ public class EditDocumentAction extends BaseEditAction implements Preparable {
                 opportunities = new HashSet<Opportunity>();
             }
             opportunities.add(opportunity);
-        } else if ("Case".equals(this.getRelationKey())) {
-            CaseInstance caseInstance = caseService.getEntityById(CaseInstance.class,
+        } else if ("CaseInstance".equals(this.getRelationKey())) {
+            CaseInstance caseInstance = caseService.getEntityById(
+                    CaseInstance.class,
                     Integer.valueOf(this.getRelationValue()));
             Set<CaseInstance> cases = document.getCases();
             if (cases == null) {

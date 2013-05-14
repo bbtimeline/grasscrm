@@ -129,6 +129,7 @@ public class ListTargetAction extends BaseListAction {
                     .getFirst_name());
             String lastName = CommonUtil.fromNullToEmpty(instance
                     .getLast_name());
+            String name = instance.getName();
             String title = CommonUtil.fromNullToEmpty(instance.getTitle());
 
             Account account = instance.getAccount();
@@ -185,8 +186,7 @@ public class ListTargetAction extends BaseListAction {
                         .append(updatedOnName).append("\"]}");
             } else {
                 jsonBuilder.append("{\"id\":\"").append(id)
-                        .append("\",\"first_name\":\"").append(firstName)
-                        .append("\",\"last_name\":\"").append(lastName)
+                        .append("\",\"name\":\"").append(name)
                         .append("\",\"title\":\"").append(title)
                         .append("\",\"account.name\":\"")
                         .append(accountName + "\",\"email\":\"").append(email)

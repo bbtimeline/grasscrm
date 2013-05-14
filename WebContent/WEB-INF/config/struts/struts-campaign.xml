@@ -74,9 +74,21 @@
         <action name="sendInvitesCampaign" class="editCampaignAction" method="sendInvites">
 			<interceptor-ref name="prepareInterceptor" /> 
             <result name="input">/jsp/crm/editCampaign.jsp</result>          
-    	    <result>/jsp/crm/editCampaign.jsp</result>
+    	    <result>/jsp/crm/sendCampaignEmail.jsp</result>
         </action>
-                        
+  
+        <action name="sendEmailCampaign" class="editCampaignAction" method="send">
+			<interceptor-ref name="prepareInterceptor" /> 
+            <result name="input">/jsp/crm/sendCampaignEmail.jsp</result>          
+    	    <result>/jsp/crm/editCampaign.action</result>
+        </action>
+                   
+        <action name="selectCampaignTemplate" class="editCampaignAction" method="selectTemplate">
+			<interceptor-ref name="prepareInterceptor" /> 
+            <result name="input">/jsp/crm/sendCampaignEmail.jsp</result>
+    	    <result>/jsp/crm/sendCampaignEmail.jsp</result>
+        </action>
+                                
         <action name="deleteCampaign" class="listCampaignAction" method="delete">
 			<result name="input">/jsp/crm/listCampaign.jsp</result>
 			<result type="redirect">/jsp/crm/listCampaign.jsp</result>

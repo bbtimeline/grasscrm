@@ -36,19 +36,19 @@
     	  <result>/jsp/crm/filterCase.jsp</result>
         </action>
               
-      	<action name="relateCaseContact" class="listCaseAction" method="relateCaseContact">
+      	<action name="relateCaseInstanceContact" class="listCaseAction" method="relateCaseContact">
     	  <result name="success" type="json"></result>
         </action>
                         
-    	<action name="relateCaseContactPage" class="listCaseAction" method="filterPage">
+    	<action name="relateCaseInstanceContactPage" class="listCaseAction" method="filterPage">
     	  <result>/jsp/crm/relateContact.jsp</result>
         </action>
         
-      	<action name="relateCaseDocument" class="listCaseAction" method="relateCaseDocument">
+      	<action name="relateCaseInstanceDocument" class="listCaseAction" method="relateCaseDocument">
     	  <result name="success" type="json"></result>
         </action>
                 
-    	<action name="relateCaseDocumentPage" class="listCaseAction" method="filterPage">
+    	<action name="relateCaseInstanceDocumentPage" class="listCaseAction" method="filterPage">
     	  <result>/jsp/crm/relateDocument.jsp</result>
         </action>        
                         

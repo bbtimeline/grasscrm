@@ -221,7 +221,7 @@ public class ListDocumentAction extends BaseListAction {
             opportunity = opportunityService.getEntityById(Opportunity.class,
                     Integer.valueOf(this.getRelationValue()));
             documents = opportunity.getDocuments();
-        } else if ("Case".equals(this.getRelationKey())) {
+        } else if ("CaseInstance".equals(this.getRelationKey())) {
             caseInstance = caseService.getEntityById(CaseInstance.class,
                     Integer.valueOf(this.getRelationValue()));
             documents = caseInstance.getDocuments();
@@ -242,7 +242,7 @@ public class ListDocumentAction extends BaseListAction {
             contactService.makePersistent(contact);
         } else if ("Opportunity".equals(this.getRelationKey())) {
             opportunityService.makePersistent(opportunity);
-        } else if ("Case".equals(this.getRelationKey())) {
+        } else if ("CaseInstance".equals(this.getRelationKey())) {
             caseService.makePersistent(caseInstance);
         }
         return SUCCESS;
@@ -271,7 +271,7 @@ public class ListDocumentAction extends BaseListAction {
             opportunity = opportunityService.getEntityById(Opportunity.class,
                     Integer.valueOf(this.getRelationValue()));
             documents = opportunity.getDocuments();
-        } else if ("Case".equals(this.getRelationKey())) {
+        } else if ("CaseInstance".equals(this.getRelationKey())) {
             caseInstance = caseService.getEntityById(CaseInstance.class,
                     Integer.valueOf(this.getRelationValue()));
             documents = caseInstance.getDocuments();
@@ -298,7 +298,7 @@ public class ListDocumentAction extends BaseListAction {
             contactService.makePersistent(contact);
         } else if ("Opportunity".equals(this.getRelationKey())) {
             opportunityService.makePersistent(opportunity);
-        } else if ("Case".equals(this.getRelationKey())) {
+        } else if ("CaseInstance".equals(this.getRelationKey())) {
             caseService.makePersistent(caseInstance);
         }
         return SUCCESS;

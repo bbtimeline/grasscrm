@@ -90,7 +90,19 @@
         <action name="sendInvitesCall" class="editCallAction" method="sendInvites">
 			<interceptor-ref name="prepareInterceptor" /> 
             <result name="input">/jsp/crm/editCall.jsp</result>          
-    	    <result>/jsp/crm/editCall.jsp</result>
+    	    <result>/jsp/crm/sendCallEmail.jsp</result>
+        </action>
+  
+        <action name="sendEmailCall" class="editCallAction" method="send">
+			<interceptor-ref name="prepareInterceptor" /> 
+            <result name="input">/jsp/crm/sendCallEmail.jsp</result>          
+    	    <result>/jsp/crm/editCall.action</result>
+        </action>
+                   
+        <action name="selectCallTemplate" class="editCallAction" method="selectTemplate">
+			<interceptor-ref name="prepareInterceptor" /> 
+            <result name="input">/jsp/crm/sendCallEmail.jsp</result>
+    	    <result>/jsp/crm/sendCallEmail.jsp</result>
         </action>
                                 
         <action name="deleteCall" class="listCallAction" method="delete">

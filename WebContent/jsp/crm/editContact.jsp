@@ -654,7 +654,7 @@
 												style="overflow: auto; padding: 10px;"
 												selected="true">
 												<a
-													href="filterTaskPage.action?filter_key=contact.id&id=<s:property value="contact.id" />&createKey=contactID&removeKey=Contact"
+													href="filterTaskPage.action?filter_key=related_record&id=<s:property value="contact.id" />&moreFilterKey=relationKey&moreFilterValue=Contact&createKey=relationValue&removeKey=Contact"
 													target="contentFrame"><label
 													class="record-value menuLink"><s:text
 															name="menu.tasks.title" /></label></a>

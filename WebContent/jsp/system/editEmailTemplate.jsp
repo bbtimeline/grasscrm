@@ -17,6 +17,7 @@
 <script type="text/javascript" src="../../js/global.js"></script>
 <script type="text/javascript" src="../../js/datagrid-<%=(String)session.getAttribute("locale")%>.js"></script> 
 <script type="text/javascript" src="../../js/locale/easyui-lang-<%=(String)session.getAttribute("locale")%>.js"></script>
+<script type="text/javascript" src="../../ckeditor/ckeditor.js"></script>
 
 <script type="text/javascript">
     function save() {
@@ -31,6 +32,57 @@
 		baseCancel("EmailTemplate");
 	}
 	
+	function insertCampaign() {
+		var value = $('#variableCampain').children('option:selected').val();
+		if ($("#text_only").attr("checked")){
+			$('#text_body').val($('#text_body').val() + value);
+		}else{
+		   CKEDITOR.instances.html_body.insertHtml(value);
+		}
+	}
+
+	function insertMeeting() {
+		var value = $('#variableMeeting').children('option:selected').val();
+		if ($("#text_only").attr("checked")){
+			$('#text_body').val($('#text_body').val() + value);
+		}else{
+		   CKEDITOR.instances.html_body.insertHtml(value);
+		}
+	}
+	
+	function insertCall() {
+		var value = $('#variableCall').children('option:selected').val();
+		if ($("#text_only").attr("checked")){
+			$('#text_body').val($('#text_body').val() + value);
+		}else{
+		   CKEDITOR.instances.html_body.insertHtml(value);
+		}
+	}
+	
+	function checkType() {
+		var type = $('#type').children('option:selected')
+				.val();
+		if (type == 'meeting') {
+			$("span[id^='span']").css("display", "none");
+			$('#spanMeeting').css("display", "block");
+		} else if (type == 'call') {
+			$("span[id^='span']").css("display", "none");
+			$('#spanCall').css("display", "block");
+		} else if (type == 'campaign') {
+			$("span[id^='span']").css("display", "none");
+			$('#spanCampaign').css("display", "block");
+		} 
+	}	
+
+	function checkText() {
+		if ($("#text_only").attr("checked")){
+			$('#ckeditor').css("display", "none");
+			$('#texteditor').css("display", "block");
+		} else{
+			$('#ckeditor').css("display", "block");
+			$('#texteditor').css("display", "none");
+		}
+	}	
 	
 	  $(document).ready(function(){
 		if ($("#saveFlag").val() == "true"){
@@ -41,7 +93,27 @@
 	          showType:'slide'  
 	      });  
 			$("#saveFlag").val("");
-	    }		
+	    }	
+		$("#type ").val('<s:property value="emailTemplate.type"/>');
+		if ("<%=(String)session.getAttribute("locale")%>" == "zh_CN"){
+		    CKEDITOR.config.language = "zh-cn";
+	    } else{
+	    	 CKEDITOR.config.language = "en-us";
+	    }
+		$('#type').change(function() {
+			checkType();
+		});
+		checkType();
+		if ($.browser.msie) { 
+			$('input:checkbox').click(function () { 
+			  this.blur(); 
+			  this.focus(); 
+			}); 
+		}; 
+		$("#text_only").change(function() { 
+			checkText();
+		}); 
+		checkText();
     }); 	  
     </script>
 </head>
@@ -122,60 +194,107 @@
 								value="<s:property value="emailTemplate.name" />" /></td>
 							<td class="td-label"><label class="record-label"><s:text
 										name="entity.type.label"></s:text>：</label></td>
-							<td class="td-value"><s:textfield name="emailTemplate.type"
-									cssClass="record-value" /></td>
+							<td class="td-value">
+								<select id="type" name="emailTemplate.type" style="width:150px;">  
+								    <option value="meeting"><s:text name="entity.meeting.label" /></option>
+								    <option value="call"><s:text name="entity.call.label" /></option>  
+								    <option value="campaign"><s:text name="entity.campaign.label" /></option>
+								</select> 
+							</td>
+						</tr>
+					</table>	
+ 					<table style="padding: 10px;" cellspacing="10" cellpadding="0"
+						width="100%">
+						<tr>
+							<td class="td-label"><label class="record-label"><s:text
+										name="entity.description.label"></s:text>：</label></td>
+							<td><s:textfield name="emailTemplate.description" cssClass="record-value" size="80"/></td>
+						</tr>
+						<tr>
+							<td class="td-label"><label class="record-label"><s:text
+										name="emailTemplate.variable.label"></s:text>：</label></td>
+							<td>
+							  <span id="spanCampaign"> 
+								<select id="variableCampain" name="variableCampain" style="width:150px;">  
+								    <option value="$campain.start_date"><s:text name="entity.campaign.label" />.<s:text name="entity.start_date.label" /></option>  
+								    <option value="$campaign.end_date"><s:text name="entity.campaign.label" />.<s:text name="entity.end_date.label" /></option>  
+								</select>
+								<a id="insert_campaign_btn" href="#" class="easyui-linkbutton" iconCls="icon-import" onclick="insertCampaign()" plain="true"><s:text name="title.action.insert" /></a>
+							  </span>
+							  <span id="spanMeeting"> 
+								<select id="variableMeeting" name="variableMeeting" style="width:150px;">  
+								    <option value="$meeting.subject"><s:text name="entity.meeting.label" />.<s:text name="entity.subject.label" /></option>  
+								    <option value="$meeting.start_date"><s:text name="entity.meeting.label" />.<s:text name="entity.start_date.label" /></option>  
+								    <option value="$meeting.end_date"><s:text name="entity.meeting.label" />.<s:text name="entity.end_date.label" /></option>  
+								    <option value="$meeting.location"><s:text name="entity.meeting.label" />.<s:text name="meeting.location.label" /></option>  
+								</select>
+								<a id="insert_meeting_btn" href="#" class="easyui-linkbutton" iconCls="icon-import" onclick="insertMeeting()" plain="true"><s:text name="title.action.insert" /></a>
+							  </span>							  
+							  <span id="spanCall"> 
+								<select id="variableCall" name="variableCall" style="width:150px;">  
+								    <option value="$call.subject"><s:text name="entity.call.label" />.<s:text name="entity.subject.label" /></option>  
+								    <option value="$call.start_date"><s:text name="entity.call.label" />.<s:text name="entity.start_date.label" /></option>  
+								</select>
+								<a id="insert_call_btn" href="#" class="easyui-linkbutton" iconCls="icon-import" onclick="insertCall()" plain="true"><s:text name="title.action.insert" /></a>
+							  </span>							  
+							</td>
+						</tr>
+						<tr>
+							<td class="td-label"><label class="record-label"><s:text
+										name="entity.subject.label"></s:text>：</label></td>
+							<td><s:textfield name="emailTemplate.subject" cssClass="record-value" size="80"/></td>
+						</tr>
+						<tr>
+							<td class="td-label"><label class="record-label"><s:text
+										name="emailTemplate.text_only.label"></s:text>：</label></td>
+							<td><s:checkbox id="text_only"
+									name="emailTemplate.text_only" cssClass="record-value"/></td>
+						</tr>
+						<tr>
+							<td class="td-label"><label class="record-label"><s:text
+										name="emailTemplate.body.label"></s:text>：</label></td>
+							<td>
+                               <span id="ckeditor">
+                                 <s:textarea id="html_body" rows="30" cols="100" name="emailTemplate.html_body"/>
+                                 <script type="text/javascript">CKEDITOR.replace('emailTemplate.html_body');</script>
+                               </span>
+                               <span id="texteditor">
+                                 <s:textarea id="text_body" rows="30" cols="100" name="emailTemplate.text_body"/>
+                               </span>
+							</td>
+						</tr>								
+					</table>	
+ 					<table style="padding: 10px;" cellspacing="10" cellpadding="0"
+						width="100%">
+						<tr>
+							<td class="td-label"><label class="record-label"><s:text
+										name="entity.createdBy.label"></s:text>：</label></td>
+							<td class="td-value"><label class="record-value"><s:property
+										value="createdBy" /></label></td>
+							<td class="td-label"><label class="record-label"><s:text
+										name="entity.createdOn.label"></s:text>：</label></td>
+							<td class="td-value"><label class="record-value"><s:property
+										value="createdOn" /></label></td>
+						</tr>
+						<tr>
+							<td class="td-label"><label class="record-label"><s:text
+										name="entity.updatedBy.label"></s:text>：</label></td>
+							<td class="td-value"><label class="record-value"><s:property
+										value="updatedBy" /></label></td>
+							<td class="td-label"><label class="record-label"><s:text
+										name="entity.updatedOn.label"></s:text>：</label></td>
+							<td class="td-value"><label class="record-value"><s:property
+										value="updatedOn" /></label></td>
+						</tr>
+						<tr>
+							<td class="td-label"><label class="record-label"><s:text
+										name="entity.id.label"></s:text>：</label></td>
+							<td class="td-value"><label class="record-value"><s:property
+										value="id" /></label></td>
+							<td class="td-label"></td>
+							<td class="td-value"></td>
 						</tr>
 					</table>
-
-					<div id="tab" class="easyui-tabs">					
-						<div title="<s:text name='tab.overview'/>" style="padding: 10px;">
-							<table style="" cellspacing="10" cellpadding="0" width="100%">
-								<tr>
-									<td class="td-label"><label class="record-label"><s:text
-												name="entity.description.label"></s:text>：</label></td>
-									<td class="td-value"><s:textfield name="emailTemplate.description" cssClass="record-value" /></td>
-								</tr>
-							</table>		
-						</div>
-
-						<div title="<s:text name='tab.details'/>"
-							style="padding: 10px;">
-							<div class="section-header">
-								<span><s:text name="span.description" /></span>
-							</div>								
-							<table style="" cellspacing="10" cellpadding="0" width="100%">
-								<tr>
-									<td class="td-label"><label class="record-label"><s:text
-												name="entity.createdBy.label"></s:text>：</label></td>
-									<td class="td-value"><label class="record-value"><s:property
-												value="createdBy" /></label></td>
-									<td class="td-label"><label class="record-label"><s:text
-												name="entity.createdOn.label"></s:text>：</label></td>
-									<td class="td-value"><label class="record-value"><s:property
-												value="createdOn" /></label></td>
-								</tr>
-								<tr>
-									<td class="td-label"><label class="record-label"><s:text
-												name="entity.updatedBy.label"></s:text>：</label></td>
-									<td class="td-value"><label class="record-value"><s:property
-												value="updatedBy" /></label></td>
-									<td class="td-label"><label class="record-label"><s:text
-												name="entity.updatedOn.label"></s:text>：</label></td>
-									<td class="td-value"><label class="record-value"><s:property
-												value="updatedOn" /></label></td>
-								</tr>
-								<tr>
-									<td class="td-label"><label class="record-label"><s:text
-												name="entity.id.label"></s:text>：</label></td>
-									<td class="td-value"><label class="record-value"><s:property
-												value="id" /></label></td>
-									<td class="td-label"></td>
-									<td class="td-value"></td>
-								</tr>
-							</table>
-						</div>
-					</div>
-
 				</s:form>
 			</div>
 		</div>

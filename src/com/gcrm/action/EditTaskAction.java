@@ -167,8 +167,8 @@ public class EditTaskAction extends BaseEditAction implements Preparable {
                     Account.class, relatedRecord).getName();
         } else if ("Case".equals(relatedObject)) {
             this.relatedCaseID = relatedRecord;
-            this.relatedCaseText = this.caseService.getEntityById(CaseInstance.class,
-                    relatedRecord).getSubject();
+            this.relatedCaseText = this.caseService.getEntityById(
+                    CaseInstance.class, relatedRecord).getSubject();
         } else if ("Contact".equals(relatedObject)) {
             this.relatedContactID = relatedRecord;
             this.relatedContactText = this.contactService.getEntityById(

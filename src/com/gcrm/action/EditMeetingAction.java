@@ -27,7 +27,7 @@ import java.util.Set;
 import com.gcrm.domain.Account;
 import com.gcrm.domain.CaseInstance;
 import com.gcrm.domain.Contact;
-import com.gcrm.domain.EmailSetting;
+import com.gcrm.domain.EmailTemplate;
 import com.gcrm.domain.Lead;
 import com.gcrm.domain.Meeting;
 import com.gcrm.domain.MeetingStatus;
@@ -67,11 +67,14 @@ public class EditMeetingAction extends BaseEditAction implements Preparable {
     private IBaseService<Target> targetService;
     private IBaseService<Task> taskService;
     private MailService mailService;
+    private IBaseService<EmailTemplate> emailTemplateService;
     private Meeting meeting;
     private List<MeetingStatus> statuses;
     private List<ReminderOption> reminderOptions;
+    private List<EmailTemplate> emailTemplates;
     private Integer statusID = null;
     private Integer reminderOptionEmailID = null;
+    private Integer emailTemplateID = null;
     private String startDate = null;
     private String endDate = null;
     private Integer relatedAccountID = null;
@@ -88,6 +91,12 @@ public class EditMeetingAction extends BaseEditAction implements Preparable {
     private String relatedTargetText = null;
     private Integer relatedTaskID = null;
     private String relatedTaskText = null;
+    private String subject;
+    boolean text_only;
+    private String html_body;
+    private String text_body;
+    private String from;
+    private String to;
 
     /**
      * Saves the entity.
@@ -114,17 +123,16 @@ public class EditMeetingAction extends BaseEditAction implements Preparable {
         Date start_date = meeting.getStart_date();
         SimpleDateFormat dateFormat = new SimpleDateFormat(
                 Constant.DATE_TIME_FORMAT);
-        String startDateS = "";
+        startDate = "";
         if (start_date != null) {
-            startDateS = dateFormat.format(start_date);
+            startDate = dateFormat.format(start_date);
         }
         Date end_date = meeting.getEnd_date();
-        String endDateS = "";
+        endDate = "";
         if (end_date != null) {
-            endDateS = dateFormat.format(end_date);
+            endDate = dateFormat.format(end_date);
         }
-        String subject = CommonUtil.fromNullToEmpty(meeting.getSubject());
-        String location = CommonUtil.fromNullToEmpty(meeting.getLocation());
+        this.setId(meeting.getId());
         ActionContext context = ActionContext.getContext();
         Map<String, Object> session = context.getSession();
         User loginUser = (User) session
@@ -157,12 +165,16 @@ public class EditMeetingAction extends BaseEditAction implements Preparable {
                 targetEmails.append(email);
             }
         }
-        String from = loginUser.getEmail();
+        from = loginUser.getEmail();
+        if (from == null) {
+            from = "";
+        }
         Set<User> users = meeting.getUsers();
         if (users != null) {
             for (User user : users) {
                 String email = user.getEmail();
-                if (CommonUtil.isNullOrEmpty(email) || email.endsWith(from)) {
+                if (CommonUtil.isNullOrEmpty(email)
+                        || (from != null && email.endsWith(from))) {
                     continue;
                 }
                 if (targetEmails.length() > 0) {
@@ -172,29 +184,79 @@ public class EditMeetingAction extends BaseEditAction implements Preparable {
             }
         }
         if (targetEmails.length() > 0) {
-            String targetEmail = targetEmails.toString();
-            String[] to = targetEmail.split(",");
-            String mailSubject = getText("entity.meeting.label") + " : "
-                    + subject + " " + startDateS;
-            StringBuilder content = new StringBuilder("<html><head>");
-            content.append("<meta http-equiv=\"content-type\" content=\"text/html;charset=utf-8\"></head><body>");
-            content.append("<b>").append(getText("entity.subject.label"))
-                    .append("</b> : ").append(subject).append("<br>");
-            content.append("<b>").append(getText("meeting.location.label"))
-                    .append("</b> : ").append(location).append("<br>");
-            content.append("<b>").append(getText("entity.start_date.label"))
-                    .append("</b> : ").append(startDateS).append("<br>");
-            content.append("<b>").append(getText("entity.end_date.label"))
-                    .append("</b> : ").append(endDateS).append("<br>");
-            content.append("</body></html>");
-            if (CommonUtil.isNullOrEmpty(from)) {
-                from = null;
-            }
-            String text = content.toString();
-            mailService.asynSendHtmlMail(from, to, mailSubject, text);
+            to = targetEmails.toString();
         }
 
-        this.setSaveFlag(EmailSetting.STATUS_SENT);
+        // Gets email template list
+        String hql = "select new EmailTemplate(id,name) from EmailTemplate where type = 'meeting' order by created_on";
+        emailTemplates = emailTemplateService.findByHQL(hql);
+        return SUCCESS;
+    }
+
+    public String selectTemplate() throws Exception {
+        UserUtil.permissionCheck("update_meeting");
+        meeting = baseService.getEntityById(Meeting.class, this.getId());
+        Date start_date = meeting.getStart_date();
+        SimpleDateFormat dateFormat = new SimpleDateFormat(
+                Constant.DATE_TIME_FORMAT);
+        startDate = "";
+        if (start_date != null) {
+            startDate = dateFormat.format(start_date);
+        }
+        Date end_date = meeting.getEnd_date();
+        endDate = "";
+        if (end_date != null) {
+            endDate = dateFormat.format(end_date);
+        }
+
+        EmailTemplate emailTemplte = emailTemplateService.getEntityById(
+                EmailTemplate.class, emailTemplateID);
+        this.setText_only(emailTemplte.isText_only());
+        this.setSubject(CommonUtil.fromNullToEmpty(emailTemplte.getSubject()));
+        String content = "";
+        if (this.isText_only()) {
+            content = emailTemplte.getText_body();
+        } else {
+            content = emailTemplte.getHtml_body();
+        }
+        // Replaces the variable in the body
+        if (content != null) {
+            content = content.replaceAll("\\$meeting.subject",
+                    CommonUtil.fromNullToEmpty(meeting.getSubject()));
+            content = content.replaceAll("\\$meeting.start_date", startDate);
+            content = content.replaceAll("\\$meeting.end_date", endDate);
+            content = content.replaceAll("\\$meeting.location",
+                    CommonUtil.fromNullToEmpty(meeting.getLocation()));
+        }
+        if (this.isText_only()) {
+            this.setText_body(content);
+        } else {
+            this.setHtml_body(content);
+        }
+        // Gets email template list
+        String hql = "select new EmailTemplate(id,name) from EmailTemplate where type = 'meeting' order by created_on";
+        emailTemplates = emailTemplateService.findByHQL(hql);
+        return SUCCESS;
+    }
+
+    /**
+     * Sends invitation mail to all participants.
+     * 
+     * @return the SUCCESS result
+     */
+    public String send() throws Exception {
+
+        UserUtil.permissionCheck("update_meeting");
+        String content = "";
+        if (to != null && to.trim().length() > 0) {
+            String[] tos = to.split(",");
+            if (this.isText_only()) {
+                content = this.getText_body();
+            } else {
+                content = this.getHtml_body();
+            }
+            mailService.asynSendHtmlMail(from, tos, subject, content);
+        }
         return SUCCESS;
     }
 
@@ -261,10 +323,10 @@ public class EditMeetingAction extends BaseEditAction implements Preparable {
             this.relatedAccountID = relatedRecord;
             this.relatedAccountText = this.accountService.getEntityById(
                     Account.class, relatedRecord).getName();
-        } else if ("Case".equals(relatedObject)) {
+        } else if ("CaseInstance".equals(relatedObject)) {
             this.relatedCaseID = relatedRecord;
-            this.relatedCaseText = this.caseService.getEntityById(CaseInstance.class,
-                    relatedRecord).getSubject();
+            this.relatedCaseText = this.caseService.getEntityById(
+                    CaseInstance.class, relatedRecord).getSubject();
         } else if ("Contact".equals(relatedObject)) {
             this.relatedContactID = relatedRecord;
             this.relatedContactText = this.contactService.getEntityById(
@@ -375,7 +437,7 @@ public class EditMeetingAction extends BaseEditAction implements Preparable {
         String relatedObject = meeting.getRelated_object();
         if ("Account".equals(relatedObject)) {
             meeting.setRelated_record(relatedAccountID);
-        } else if ("Case".equals(relatedObject)) {
+        } else if ("CaseInstance".equals(relatedObject)) {
             meeting.setRelated_record(relatedCaseID);
         } else if ("Contact".equals(relatedObject)) {
             meeting.setRelated_record(relatedContactID);
@@ -901,6 +963,142 @@ public class EditMeetingAction extends BaseEditAction implements Preparable {
      */
     public void setMailService(MailService mailService) {
         this.mailService = mailService;
+    }
+
+    /**
+     * @return the emailTemplateService
+     */
+    public IBaseService<EmailTemplate> getEmailTemplateService() {
+        return emailTemplateService;
+    }
+
+    /**
+     * @param emailTemplateService
+     *            the emailTemplateService to set
+     */
+    public void setEmailTemplateService(
+            IBaseService<EmailTemplate> emailTemplateService) {
+        this.emailTemplateService = emailTemplateService;
+    }
+
+    /**
+     * @return the emailTemplates
+     */
+    public List<EmailTemplate> getEmailTemplates() {
+        return emailTemplates;
+    }
+
+    /**
+     * @param emailTemplates
+     *            the emailTemplates to set
+     */
+    public void setEmailTemplates(List<EmailTemplate> emailTemplates) {
+        this.emailTemplates = emailTemplates;
+    }
+
+    /**
+     * @return the emailTemplateID
+     */
+    public Integer getEmailTemplateID() {
+        return emailTemplateID;
+    }
+
+    /**
+     * @param emailTemplateID
+     *            the emailTemplateID to set
+     */
+    public void setEmailTemplateID(Integer emailTemplateID) {
+        this.emailTemplateID = emailTemplateID;
+    }
+
+    /**
+     * @return the subject
+     */
+    public String getSubject() {
+        return subject;
+    }
+
+    /**
+     * @param subject
+     *            the subject to set
+     */
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
+
+    /**
+     * @return the text_only
+     */
+    public boolean isText_only() {
+        return text_only;
+    }
+
+    /**
+     * @param text_only
+     *            the text_only to set
+     */
+    public void setText_only(boolean text_only) {
+        this.text_only = text_only;
+    }
+
+    /**
+     * @return the html_body
+     */
+    public String getHtml_body() {
+        return html_body;
+    }
+
+    /**
+     * @param html_body
+     *            the html_body to set
+     */
+    public void setHtml_body(String html_body) {
+        this.html_body = html_body;
+    }
+
+    /**
+     * @return the text_body
+     */
+    public String getText_body() {
+        return text_body;
+    }
+
+    /**
+     * @param text_body
+     *            the text_body to set
+     */
+    public void setText_body(String text_body) {
+        this.text_body = text_body;
+    }
+
+    /**
+     * @return the from
+     */
+    public String getFrom() {
+        return from;
+    }
+
+    /**
+     * @param from
+     *            the from to set
+     */
+    public void setFrom(String from) {
+        this.from = from;
+    }
+
+    /**
+     * @return the to
+     */
+    public String getTo() {
+        return to;
+    }
+
+    /**
+     * @param to
+     *            the to to set
+     */
+    public void setTo(String to) {
+        this.to = to;
     }
 
 }

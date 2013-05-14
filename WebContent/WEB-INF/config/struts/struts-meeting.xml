@@ -90,7 +90,19 @@
         <action name="sendInvitesMeeting" class="editMeetingAction" method="sendInvites">
 			<interceptor-ref name="prepareInterceptor" /> 
             <result name="input">/jsp/crm/editMeeting.jsp</result>          
-    	    <result>/jsp/crm/editMeeting.jsp</result>
+    	    <result>/jsp/crm/sendMeetingEmail.jsp</result>
+        </action>
+  
+        <action name="sendEmailMeeting" class="editMeetingAction" method="send">
+			<interceptor-ref name="prepareInterceptor" /> 
+            <result name="input">/jsp/crm/sendMeetingEmail.jsp</result>          
+    	    <result>/jsp/crm/editMeeting.action</result>
+        </action>
+                   
+        <action name="selectMeetingTemplate" class="editMeetingAction" method="selectTemplate">
+			<interceptor-ref name="prepareInterceptor" /> 
+            <result name="input">/jsp/crm/sendMeetingEmail.jsp</result>
+    	    <result>/jsp/crm/sendMeetingEmail.jsp</result>
         </action>
                                 
         <action name="deleteMeeting" class="listMeetingAction" method="delete">

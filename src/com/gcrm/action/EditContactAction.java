@@ -275,8 +275,9 @@ public class EditContactAction extends BaseEditAction implements Preparable {
                 documents = new HashSet<Document>();
             }
             documents.add(document);
-        } else if ("Case".equals(this.getRelationKey())) {
-            CaseInstance caseInstance = caseService.getEntityById(CaseInstance.class,
+        } else if ("CaseInstance".equals(this.getRelationKey())) {
+            CaseInstance caseInstance = caseService.getEntityById(
+                    CaseInstance.class,
                     Integer.valueOf(this.getRelationValue()));
             Set<CaseInstance> cases = contact.getCases();
             if (cases == null) {

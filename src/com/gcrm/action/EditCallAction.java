@@ -30,7 +30,7 @@ import com.gcrm.domain.CallDirection;
 import com.gcrm.domain.CallStatus;
 import com.gcrm.domain.CaseInstance;
 import com.gcrm.domain.Contact;
-import com.gcrm.domain.EmailSetting;
+import com.gcrm.domain.EmailTemplate;
 import com.gcrm.domain.Lead;
 import com.gcrm.domain.Opportunity;
 import com.gcrm.domain.ReminderOption;
@@ -69,10 +69,13 @@ public class EditCallAction extends BaseEditAction implements Preparable {
     private IBaseService<Target> targetService;
     private IBaseService<Task> taskService;
     private MailService mailService;
+    private IBaseService<EmailTemplate> emailTemplateService;
     private Call call;
     private List<CallStatus> statuses;
     private List<CallDirection> directions;
     private List<ReminderOption> reminderOptions;
+    private List<EmailTemplate> emailTemplates;
+    private Integer emailTemplateID = null;
     private Integer statusID = null;
     private Integer directionID = null;
     private Integer reminderOptionEmailID = null;
@@ -91,6 +94,12 @@ public class EditCallAction extends BaseEditAction implements Preparable {
     private Integer relatedTaskID = null;
     private String relatedTaskText = null;
     private String startDate = null;
+    private String subject;
+    boolean text_only;
+    private String html_body;
+    private String text_body;
+    private String from;
+    private String to;
 
     /**
      * Saves the entity.
@@ -111,17 +120,17 @@ public class EditCallAction extends BaseEditAction implements Preparable {
      * @return the SUCCESS result
      */
     public String sendInvites() throws Exception {
+
         UserUtil.permissionCheck("update_call");
         call = baseService.getEntityById(Call.class, call.getId());
         Date start_date = call.getStart_date();
         SimpleDateFormat dateFormat = new SimpleDateFormat(
                 Constant.DATE_TIME_FORMAT);
-        String startDateS = "";
+        startDate = "";
         if (start_date != null) {
-            startDateS = dateFormat.format(start_date);
+            startDate = dateFormat.format(start_date);
         }
-        String subject = CommonUtil.fromNullToEmpty(call.getSubject());
-
+        this.setId(call.getId());
         ActionContext context = ActionContext.getContext();
         Map<String, Object> session = context.getSession();
         User loginUser = (User) session
@@ -154,12 +163,16 @@ public class EditCallAction extends BaseEditAction implements Preparable {
                 targetEmails.append(email);
             }
         }
-        String from = loginUser.getEmail();
+        from = loginUser.getEmail();
+        if (from == null) {
+            from = "";
+        }
         Set<User> users = call.getUsers();
         if (users != null) {
             for (User user : users) {
                 String email = user.getEmail();
-                if (CommonUtil.isNullOrEmpty(email) || email.endsWith(from)) {
+                if (CommonUtil.isNullOrEmpty(email)
+                        || (from != null && email.endsWith(from))) {
                     continue;
                 }
                 if (targetEmails.length() > 0) {
@@ -169,24 +182,71 @@ public class EditCallAction extends BaseEditAction implements Preparable {
             }
         }
         if (targetEmails.length() > 0) {
-            String targetEmail = targetEmails.toString();
-            String[] to = targetEmail.split(",");
-            String mailSubject = getText("entity.call.label") + " : " + subject
-                    + " " + startDateS;
-            StringBuilder content = new StringBuilder("<html><head>");
-            content.append("<meta http-equiv=\"content-type\" content=\"text/html;charset=utf-8\"></head><body>");
-            content.append("<b>").append(getText("entity.subject.label"))
-                    .append("</b> : ").append(subject).append("<br>");
-            content.append("<b>").append(getText("entity.start_date.label"))
-                    .append("</b> : ").append(startDateS);
-            content.append("</body></html>");
-            if (CommonUtil.isNullOrEmpty(from)) {
-                from = null;
-            }
-            String text = content.toString();
-            mailService.asynSendHtmlMail(from, to, mailSubject, text);
+            to = targetEmails.toString();
         }
-        this.setSaveFlag(EmailSetting.STATUS_SENT);
+
+        // Gets email template list
+        String hql = "select new EmailTemplate(id,name) from EmailTemplate where type = 'call' order by created_on";
+        emailTemplates = emailTemplateService.findByHQL(hql);
+        return SUCCESS;
+    }
+
+    public String selectTemplate() throws Exception {
+        UserUtil.permissionCheck("update_call");
+        call = baseService.getEntityById(Call.class, this.getId());
+        Date start_date = call.getStart_date();
+        SimpleDateFormat dateFormat = new SimpleDateFormat(
+                Constant.DATE_TIME_FORMAT);
+        startDate = "";
+        if (start_date != null) {
+            startDate = dateFormat.format(start_date);
+        }
+
+        EmailTemplate emailTemplte = emailTemplateService.getEntityById(
+                EmailTemplate.class, emailTemplateID);
+        this.setText_only(emailTemplte.isText_only());
+        this.setSubject(CommonUtil.fromNullToEmpty(emailTemplte.getSubject()));
+        String content = "";
+        if (this.isText_only()) {
+            content = emailTemplte.getText_body();
+        } else {
+            content = emailTemplte.getHtml_body();
+        }
+        // Replaces the variable in the body
+        if (content != null) {
+            content = content.replaceAll("\\$call.subject",
+                    CommonUtil.fromNullToEmpty(call.getSubject()));
+            content = content.replaceAll("\\$call.start_date", startDate);
+        }
+        if (this.isText_only()) {
+            this.setText_body(content);
+        } else {
+            this.setHtml_body(content);
+        }
+        // Gets email template list
+        String hql = "select new EmailTemplate(id,name) from EmailTemplate where type = 'call' order by created_on";
+        emailTemplates = emailTemplateService.findByHQL(hql);
+        return SUCCESS;
+    }
+
+    /**
+     * Sends invitation mail to all participants.
+     * 
+     * @return the SUCCESS result
+     */
+    public String send() throws Exception {
+
+        UserUtil.permissionCheck("update_call");
+        String content = "";
+        if (to != null && to.trim().length() > 0) {
+            String[] tos = to.split(",");
+            if (this.isText_only()) {
+                content = this.getText_body();
+            } else {
+                content = this.getHtml_body();
+            }
+            mailService.asynSendHtmlMail(from, tos, subject, content);
+        }
         return SUCCESS;
     }
 
@@ -257,7 +317,7 @@ public class EditCallAction extends BaseEditAction implements Preparable {
                 this.relatedAccountText = this.accountService.getEntityById(
                         Account.class, relatedRecord).getName();
             }
-        } else if ("Case".equals(relatedObject)) {
+        } else if ("CaseInstance".equals(relatedObject)) {
             this.relatedCaseID = relatedRecord;
             if (relatedRecord != null) {
                 this.relatedCaseText = this.caseService.getEntityById(
@@ -395,7 +455,7 @@ public class EditCallAction extends BaseEditAction implements Preparable {
         String relatedObject = call.getRelated_object();
         if ("Account".equals(relatedObject)) {
             call.setRelated_record(relatedAccountID);
-        } else if ("Case".equals(relatedObject)) {
+        } else if ("CaseInstance".equals(relatedObject)) {
             call.setRelated_record(relatedCaseID);
         } else if ("Contact".equals(relatedObject)) {
             call.setRelated_record(relatedContactID);
@@ -906,6 +966,198 @@ public class EditCallAction extends BaseEditAction implements Preparable {
      */
     public void setMailService(MailService mailService) {
         this.mailService = mailService;
+    }
+
+    /**
+     * @return the emailTemplateService
+     */
+    public IBaseService<EmailTemplate> getEmailTemplateService() {
+        return emailTemplateService;
+    }
+
+    /**
+     * @param emailTemplateService
+     *            the emailTemplateService to set
+     */
+    public void setEmailTemplateService(
+            IBaseService<EmailTemplate> emailTemplateService) {
+        this.emailTemplateService = emailTemplateService;
+    }
+
+    /**
+     * @return the subject
+     */
+    public String getSubject() {
+        return subject;
+    }
+
+    /**
+     * @param subject
+     *            the subject to set
+     */
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
+
+    /**
+     * @return the text_only
+     */
+    public boolean isText_only() {
+        return text_only;
+    }
+
+    /**
+     * @param text_only
+     *            the text_only to set
+     */
+    public void setText_only(boolean text_only) {
+        this.text_only = text_only;
+    }
+
+    /**
+     * @return the html_body
+     */
+    public String getHtml_body() {
+        return html_body;
+    }
+
+    /**
+     * @param html_body
+     *            the html_body to set
+     */
+    public void setHtml_body(String html_body) {
+        this.html_body = html_body;
+    }
+
+    /**
+     * @return the text_body
+     */
+    public String getText_body() {
+        return text_body;
+    }
+
+    /**
+     * @param text_body
+     *            the text_body to set
+     */
+    public void setText_body(String text_body) {
+        this.text_body = text_body;
+    }
+
+    /**
+     * @return the from
+     */
+    public String getFrom() {
+        return from;
+    }
+
+    /**
+     * @param from
+     *            the from to set
+     */
+    public void setFrom(String from) {
+        this.from = from;
+    }
+
+    /**
+     * @return the to
+     */
+    public String getTo() {
+        return to;
+    }
+
+    /**
+     * @param to
+     *            the to to set
+     */
+    public void setTo(String to) {
+        this.to = to;
+    }
+
+    /**
+     * @param relatedAccountText
+     *            the relatedAccountText to set
+     */
+    public void setRelatedAccountText(String relatedAccountText) {
+        this.relatedAccountText = relatedAccountText;
+    }
+
+    /**
+     * @param relatedCaseText
+     *            the relatedCaseText to set
+     */
+    public void setRelatedCaseText(String relatedCaseText) {
+        this.relatedCaseText = relatedCaseText;
+    }
+
+    /**
+     * @param relatedContactText
+     *            the relatedContactText to set
+     */
+    public void setRelatedContactText(String relatedContactText) {
+        this.relatedContactText = relatedContactText;
+    }
+
+    /**
+     * @param relatedLeadText
+     *            the relatedLeadText to set
+     */
+    public void setRelatedLeadText(String relatedLeadText) {
+        this.relatedLeadText = relatedLeadText;
+    }
+
+    /**
+     * @param relatedOpportunityText
+     *            the relatedOpportunityText to set
+     */
+    public void setRelatedOpportunityText(String relatedOpportunityText) {
+        this.relatedOpportunityText = relatedOpportunityText;
+    }
+
+    /**
+     * @param relatedTargetText
+     *            the relatedTargetText to set
+     */
+    public void setRelatedTargetText(String relatedTargetText) {
+        this.relatedTargetText = relatedTargetText;
+    }
+
+    /**
+     * @param relatedTaskText
+     *            the relatedTaskText to set
+     */
+    public void setRelatedTaskText(String relatedTaskText) {
+        this.relatedTaskText = relatedTaskText;
+    }
+
+    /**
+     * @return the emailTemplates
+     */
+    public List<EmailTemplate> getEmailTemplates() {
+        return emailTemplates;
+    }
+
+    /**
+     * @param emailTemplates
+     *            the emailTemplates to set
+     */
+    public void setEmailTemplates(List<EmailTemplate> emailTemplates) {
+        this.emailTemplates = emailTemplates;
+    }
+
+    /**
+     * @return the emailTemplateID
+     */
+    public Integer getEmailTemplateID() {
+        return emailTemplateID;
+    }
+
+    /**
+     * @param emailTemplateID
+     *            the emailTemplateID to set
+     */
+    public void setEmailTemplateID(Integer emailTemplateID) {
+        this.emailTemplateID = emailTemplateID;
     }
 
 }

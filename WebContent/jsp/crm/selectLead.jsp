@@ -33,12 +33,7 @@
 		columns:[[
 				{field:'ck',checkbox:true},
 				{field:'id',title:'<s:text name="entity.id.label" />',width:80,align:'center',sortable:'true'},
-				{field:'first_name',title:'<s:text name="entity.first_name.label" />',width:80,align:'center',sortable:'true',formatter:function(value,row,index){  
-					   new_format_value = "<a href='editLead.action?id=" + row.id + "'>" + value + "</a>";
-					   return new_format_value 
-	             }  
-	            },
-				{field:'last_name',title:'<s:text name="entity.last_name.label" />',width:80,align:'center',sortable:'true',formatter:function(value,row,index){  
+				{field:'name',title:'<s:text name="entity.name.label" />',width:80,align:'center',sortable:'true',formatter:function(value,row,index){  
 					   new_format_value = "<a href='editLead.action?id=" + row.id + "'>" + value + "</a>";
 					   return new_format_value 
 	             }  

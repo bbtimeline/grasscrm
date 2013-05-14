@@ -145,6 +145,7 @@ public class ListContactAction extends BaseListAction {
             int id = instance.getId();
             String firstName = instance.getFirst_name();
             String lastName = instance.getLast_name();
+            String name = instance.getName();
             String title = CommonUtil.fromNullToEmpty(instance.getTitle());
 
             Account account = instance.getAccount();
@@ -200,8 +201,7 @@ public class ListContactAction extends BaseListAction {
                         .append(updatedOnName).append("\"]}");
             } else {
                 jsonBuilder.append("{\"id\":\"").append(id)
-                        .append("\",\"first_name\":\"").append(firstName)
-                        .append("\",\"last_name\":\"").append(lastName)
+                        .append("\",\"name\":\"").append(name)
                         .append("\",\"title\":\"").append(title)
                         .append("\",\"account.name\":\"").append(accountName)
                         .append("\",\"email\":\"").append(email)
@@ -255,7 +255,7 @@ public class ListContactAction extends BaseListAction {
             document = documentService.getEntityById(Document.class,
                     Integer.valueOf(this.getRelationValue()));
             contacts = document.getContacts();
-        } else if ("Case".equals(this.getRelationKey())) {
+        } else if ("CaseInstance".equals(this.getRelationKey())) {
             caseInstance = caseService.getEntityById(CaseInstance.class,
                     Integer.valueOf(this.getRelationValue()));
             contacts = caseInstance.getContacts();
@@ -280,7 +280,7 @@ public class ListContactAction extends BaseListAction {
             meetingService.makePersistent(meeting);
         } else if ("Document".equals(this.getRelationKey())) {
             documentService.makePersistent(document);
-        } else if ("Case".equals(this.getRelationKey())) {
+        } else if ("CaseInstance".equals(this.getRelationKey())) {
             caseService.makePersistent(caseInstance);
         }
         return SUCCESS;
@@ -319,7 +319,7 @@ public class ListContactAction extends BaseListAction {
             document = documentService.getEntityById(Document.class,
                     Integer.valueOf(this.getRelationValue()));
             contacts = document.getContacts();
-        } else if ("Case".equals(this.getRelationKey())) {
+        } else if ("CaseInstance".equals(this.getRelationKey())) {
             caseInstance = caseService.getEntityById(CaseInstance.class,
                     Integer.valueOf(this.getRelationValue()));
             contacts = caseInstance.getContacts();
@@ -349,7 +349,7 @@ public class ListContactAction extends BaseListAction {
             meetingService.makePersistent(meeting);
         } else if ("Document".equals(this.getRelationKey())) {
             documentService.makePersistent(document);
-        } else if ("Case".equals(this.getRelationKey())) {
+        } else if ("CaseInstance".equals(this.getRelationKey())) {
             caseService.makePersistent(caseInstance);
         }
         return SUCCESS;

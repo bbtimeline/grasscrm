@@ -49,6 +49,7 @@
 				<prop key="hibernate.c3p0.idle_test_period">120</prop>
 				<prop key="hibernate.c3p0.acquire_increment">5</prop>
 				<prop key="hibernate.c3p0.validate">true</prop>
+				<prop key="hibernate.connection.SetBigStringTryClob">true</prop>
 			</props>
 		</property>   
 		<property name="lobHandler">   
@@ -219,6 +220,7 @@
         <property name="currencyService" ref="baseService" /> 
         <property name="userService" ref="baseService" /> 
         <property name="mailService" ref="mailService" />
+        <property name="emailTemplateService" ref="baseService" />
     </bean>         
 
     <bean id="listCallAction" class="com.gcrm.action.ListCallAction" scope="prototype">   
@@ -243,6 +245,7 @@
         <property name="targetService" ref="baseService" />
         <property name="taskService" ref="baseService" />
         <property name="mailService" ref="mailService" />
+        <property name="emailTemplateService" ref="baseService" />
     </bean>  
 
     <bean id="listCaseAction" class="com.gcrm.action.ListCaseAction" scope="prototype">   
@@ -374,7 +377,8 @@
         <property name="opportunityService" ref="baseService" />
         <property name="targetService" ref="baseService" />
         <property name="taskService" ref="baseService" /> 
-        <property name="mailService" ref="mailService" />               
+        <property name="mailService" ref="mailService" /> 
+        <property name="emailTemplateService" ref="baseService" />
     </bean>
 
     <bean id="listOpportunityAction" class="com.gcrm.action.ListOpportunityAction" scope="prototype">   

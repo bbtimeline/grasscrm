@@ -347,11 +347,11 @@
 												style="overflow: auto; padding: 10px;"
 												selected="true">
 												<a
-													href="relateCaseContactPage.action?id=<s:property value="caseInstance.id" />"
+													href="relateCaseInstanceContactPage.action?id=<s:property value="caseInstance.id" />"
 													target="contentFrame"><label
 													class="record-value menuLink"><s:text
 															name="menu.contacts.title" /></label></a><br /> <a
-													href="relateCaseDocumentPage.action?id=<s:property value="caseInstance.id" />"
+													href="relateCaseInstanceDocumentPage.action?id=<s:property value="caseInstance.id" />"
 													target="contentFrame"><label
 													class="record-value menuLink"><s:text
 															name="menu.documents.title" /></label></a>
