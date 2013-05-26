@@ -15,6 +15,7 @@
  */
 package com.gcrm.util.mail;
 
+import java.io.File;
 import java.util.List;
 import java.util.Properties;
 
@@ -59,11 +60,12 @@ public class MailService {
     }
 
     public void asynSendHtmlMail(final String from, final String[] to,
-            final String subject, final String text) {
+            final String subject, final String text, final String[] fileNames,
+            final File[] files) {
         taskExecutor.execute(new Runnable() {
             public void run() {
                 try {
-                    sendHtmlMail(from, to, subject, text);
+                    sendHtmlMail(from, to, subject, text, fileNames, files);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -72,7 +74,7 @@ public class MailService {
     }
 
     public void sendHtmlMail(String from, String[] to, String subject,
-            String text) throws Exception {
+            String text, String[] fileNames, File[] files) throws Exception {
         List<EmailSetting> emailSettings = baseService
                 .getAllObjects(EmailSetting.class.getSimpleName());
         EmailSetting emailSetting = null;
@@ -87,12 +89,23 @@ public class MailService {
         JavaMailSenderImpl sender = this.prepareSender(emailSetting);
         if (sender != null) {
             MimeMessage msg = sender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(msg, false,
-                    "utf-8");
+            MimeMessageHelper helper = new MimeMessageHelper(msg, true, "utf-8");
             helper.setFrom(from);
             helper.setTo(to);
             helper.setSubject(subject);
             helper.setText(text, true);
+            if (fileNames != null && files != null) {
+                String fileName = null;
+                File file = null;
+                for (int i = 0; i < fileNames.length; i++) {
+                    fileName = fileNames[i];
+                    file = files[i];
+                    if (fileName != null && file != null) {
+                        helper.addAttachment(fileName, file);
+                    }
+                }
+            }
+
             sender.send(msg);
         }
 

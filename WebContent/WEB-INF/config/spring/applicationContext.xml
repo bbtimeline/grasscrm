@@ -111,6 +111,7 @@
 		<property name="callService" ref="callService" />
 		<property name="meetingService" ref="meetingService" />
 		<property name="mailService" ref="mailService" />
+		<property name="emailTemplateService" ref="baseService" />
 	</bean>	
 	
 	<!-- Dao Config -->    

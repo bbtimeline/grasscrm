@@ -175,7 +175,7 @@
 			        <s:hidden id="seleteIDs" name="seleteIDs" value="%{seleteIDs}" />
 					
 					<table style="" cellspacing="10" cellpadding="0" width="100%">
-						<s:actionerror />
+						<font color="red"><s:actionerror /></font>
 						<s:if test="hasFieldErrors()">
 							<tr>
 								<td align="left" colspan="4"><s:actionerror /> <s:iterator
@@ -484,9 +484,18 @@
 										    <s:select name="reminderOptionEmailID"
 												list="reminderOptions" listKey="id" listValue="label"
 												cssClass="record-value" />
-										  </td>  
-										</tr>  
-									  </table>																						
+										  </td>
+										</tr>
+									  </table>
+									</td>
+						            <td class="td-mass-update"><input id="massUpdate"
+										        name="massUpdate" type="checkbox" class="massUpdate" value="reminder_template"/></td>
+									<td class="td-label"><label class="record-label"><s:text
+												name="entity.reminder_template.label"></s:text>：</label></td>
+									<td class="td-value">
+									  <s:select name="reminderTemplateID"
+											list="reminderTemplates" listKey="id" listValue="name"
+											cssClass="record-value" />
 									</td>
 								</tr>
 								<tr>

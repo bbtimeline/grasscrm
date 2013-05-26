@@ -17,6 +17,7 @@ public class Call extends BaseEntity implements Serializable {
     private Integer related_record;
     private boolean reminder_email;
     private ReminderOption reminder_option_email;
+    private EmailTemplate reminder_template;
     private String description;
     private String notes;
     private User assigned_to;
@@ -255,6 +256,21 @@ public class Call extends BaseEntity implements Serializable {
     @Override
     public String getName() {
         return this.getSubject();
+    }
+
+    /**
+     * @return the reminder_template
+     */
+    public EmailTemplate getReminder_template() {
+        return reminder_template;
+    }
+
+    /**
+     * @param reminder_template
+     *            the reminder_template to set
+     */
+    public void setReminder_template(EmailTemplate reminder_template) {
+        this.reminder_template = reminder_template;
     }
 
 }

@@ -76,7 +76,7 @@ public class ListEmailTemplateAction extends BaseListAction {
      * 
      * @return list JSON data
      */
-    public static void getListJson(Iterator<EmailTemplate> emailTemplates,
+    public void getListJson(Iterator<EmailTemplate> emailTemplates,
             long totalRecords, SearchCondition searchCondition, boolean isList)
             throws Exception {
 
@@ -89,6 +89,19 @@ public class ListEmailTemplateAction extends BaseListAction {
             int id = instance.getId();
             String name = CommonUtil.fromNullToEmpty(instance.getName());
             String type = CommonUtil.fromNullToEmpty(instance.getType());
+            // Get type label
+            String typeLabel = "";
+            if ("meetingInvite".equals(type)) {
+                typeLabel = getText("emailTemplate.meetingInvite.label");
+            } else if ("meetingRemind".equals(type)) {
+                typeLabel = getText("emailTemplate.meetingRemind.label");
+            } else if ("callInvite".equals(type)) {
+                typeLabel = getText("emailTemplate.callInvite.label");
+            } else if ("callRemind".equals(type)) {
+                typeLabel = getText("emailTemplate.callRemind.label");
+            } else if ("campaignInvite".equals(type)) {
+                typeLabel = getText("emailTemplate.campaignInvite.label");
+            }
             String description = CommonUtil.fromNullToEmpty(instance
                     .getDescription());
             if (isList) {
@@ -117,7 +130,7 @@ public class ListEmailTemplateAction extends BaseListAction {
                     updatedOnName = dateFormat.format(updatedOn);
                 }
                 jsonBuilder.append("{\"cell\":[\"").append(id).append("\",\"")
-                        .append(name).append("\",\"").append(type)
+                        .append(name).append("\",\"").append(typeLabel)
                         .append("\",\"").append(description).append("\",\"")
                         .append(createdByName).append("\",\"")
                         .append(updatedByName).append("\",\"")

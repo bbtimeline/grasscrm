@@ -13,6 +13,8 @@
 <link rel="stylesheet" type="text/css" href="../../css/global.css" />
 
 <script type="text/javascript" src="../../js/jquery-1.8.3.min.js"></script>
+<script type="text/javascript" src="../../js/jquery.MultiFile.js"></script>
+<script type="text/javascript" src="../../js/jquery.MetaData.js"></script>
 <script type="text/javascript" src="../../js/jquery.easyui.min.js"></script>
 <script type="text/javascript" src="../../js/locale/easyui-lang-<%=(String)session.getAttribute("locale")%>.js"></script>
 <script type="text/javascript" src="../../js/global.js"></script>
@@ -115,7 +117,7 @@
 
 			<div id="feature-content">
 				<s:form id="addObjectForm" validate="true" namespace="/jsp/crm"
-					method="post">
+					method="post" enctype="multipart/form-data">
 					<s:hidden id="id" name="id" value="%{id}" />
 					<s:hidden id="saveFlag" name="saveFlag"/>
 					
@@ -199,7 +201,12 @@
                                  <s:textarea id="text_body" rows="30" cols="100" cssClass="record-value" name="text_body"/>
                                </span>
 							</td>
-						</tr>								
+						</tr>
+						<tr>
+							<td class="td-label"><label class="record-label"><s:text
+										name="emailTemplate.attachment.label"></s:text>：</label></td>
+							<td><input type="file" class="multi" name="upload" id="file-upload" class="record-value" /></td>
+						</tr>						
 					</table>	
 				</s:form>
 			</div>

@@ -8,9 +8,11 @@ import java.util.TimerTask;
 
 import com.gcrm.domain.Call;
 import com.gcrm.domain.Contact;
+import com.gcrm.domain.EmailTemplate;
 import com.gcrm.domain.Lead;
 import com.gcrm.domain.Meeting;
 import com.gcrm.domain.User;
+import com.gcrm.service.IBaseService;
 import com.gcrm.util.CommonUtil;
 import com.gcrm.util.Constant;
 import com.gcrm.util.mail.MailService;
@@ -19,6 +21,7 @@ public class MailTimerTask extends TimerTask {
     private Call call = null;
     private Meeting meeting = null;
     private MailService mailService;
+    private IBaseService<EmailTemplate> emailTemplateService;
 
     @Override
     public void run() {
@@ -41,7 +44,6 @@ public class MailTimerTask extends TimerTask {
         if (start_date != null) {
             startDateS = dateFormat.format(start_date);
         }
-        String subject = CommonUtil.fromNullToEmpty(call.getSubject());
 
         StringBuilder targetEmails = new StringBuilder("");
         Set<Contact> contacts = call.getContacts();
@@ -89,23 +91,27 @@ public class MailTimerTask extends TimerTask {
             }
         }
         if (targetEmails.length() > 0) {
+            EmailTemplate remindEmailTemplte = call.getReminder_template();
             String targetEmail = targetEmails.toString();
             String[] to = targetEmail.split(",");
-            String mailSubject = rb.getString("entity.call.label") + " : "
-                    + subject + " " + startDateS;
-            StringBuilder content = new StringBuilder("<html><head>");
-            content.append("<meta http-equiv=\"content-type\" content=\"text/html;charset=utf-8\"></head><body>");
-            content.append("<b>").append(rb.getString("entity.subject.label"))
-                    .append("</b> : ").append(subject).append("<br>");
-            content.append("<b>")
-                    .append(rb.getString("entity.start_date.label"))
-                    .append("</b> : ").append(startDateS);
-            content.append("</body></html>");
+            String mailSubject = remindEmailTemplte.getSubject();
+            String content = "";
+            if (remindEmailTemplte.isText_only()) {
+                content = remindEmailTemplte.getText_body();
+            } else {
+                content = remindEmailTemplte.getHtml_body();
+            }
+            // Replaces the variable in the body
+            if (content != null) {
+                content = content.replaceAll("\\$call.subject",
+                        CommonUtil.fromNullToEmpty(call.getSubject()));
+                content = content.replaceAll("\\$call.start_date", startDateS);
+            }
             if (CommonUtil.isNullOrEmpty(from)) {
                 from = null;
             }
-            String text = content.toString();
-            mailService.asynSendHtmlMail(from, to, mailSubject, text);
+            mailService.asynSendHtmlMail(from, to, mailSubject, content, null,
+                    null);
         }
     }
 
@@ -121,8 +127,6 @@ public class MailTimerTask extends TimerTask {
         if (end_date != null) {
             endDateS = dateFormat.format(end_date);
         }
-        String subject = CommonUtil.fromNullToEmpty(meeting.getSubject());
-        String location = CommonUtil.fromNullToEmpty(meeting.getLocation());
 
         StringBuilder targetEmails = new StringBuilder("");
         Set<Contact> contacts = meeting.getContacts();
@@ -169,29 +173,35 @@ public class MailTimerTask extends TimerTask {
                 targetEmails.append(email);
             }
         }
+
         if (targetEmails.length() > 0) {
+            EmailTemplate remindEmailTemplte = meeting.getReminder_template();
             String targetEmail = targetEmails.toString();
             String[] to = targetEmail.split(",");
-            String mailSubject = rb.getString("entity.meeting.label") + " : "
-                    + subject + " " + startDateS;
-            StringBuilder content = new StringBuilder("<html><head>");
-            content.append("<meta http-equiv=\"content-type\" content=\"text/html;charset=utf-8\"></head><body>");
-            content.append("<b>").append(rb.getString("entity.subject.label"))
-                    .append("</b> : ").append(subject).append("<br>");
-            content.append("<b>")
-                    .append(rb.getString("meeting.location.label"))
-                    .append("</b> : ").append(location).append("<br>");
-            content.append("<b>")
-                    .append(rb.getString("entity.start_date.label"))
-                    .append("</b> : ").append(startDateS).append("<br>");
-            content.append("<b>").append(rb.getString("entity.end_date.label"))
-                    .append("</b> : ").append(endDateS).append("<br>");
-            content.append("</body></html>");
+            String mailSubject = remindEmailTemplte.getSubject();
+
+            String content = "";
+            if (remindEmailTemplte.isText_only()) {
+                content = remindEmailTemplte.getText_body();
+            } else {
+                content = remindEmailTemplte.getHtml_body();
+            }
+            // Replaces the variable in the body
+            if (content != null) {
+                content = content.replaceAll("\\$meeting.subject",
+                        CommonUtil.fromNullToEmpty(meeting.getSubject()));
+                content = content.replaceAll("\\$meeting.start_date",
+                        startDateS);
+                content = content.replaceAll("\\$meeting.end_date", endDateS);
+                content = content.replaceAll("\\$meeting.location",
+                        CommonUtil.fromNullToEmpty(meeting.getLocation()));
+            }
+
             if (CommonUtil.isNullOrEmpty(from)) {
                 from = null;
             }
-            String text = content.toString();
-            mailService.asynSendHtmlMail(from, to, mailSubject, text);
+            mailService.asynSendHtmlMail(from, to, mailSubject, content, null,
+                    null);
         }
     }
 
@@ -231,5 +241,21 @@ public class MailTimerTask extends TimerTask {
 
     public void setMailService(MailService mailService) {
         this.mailService = mailService;
+    }
+
+    /**
+     * @return the emailTemplateService
+     */
+    public IBaseService<EmailTemplate> getEmailTemplateService() {
+        return emailTemplateService;
+    }
+
+    /**
+     * @param emailTemplateService
+     *            the emailTemplateService to set
+     */
+    public void setEmailTemplateService(
+            IBaseService<EmailTemplate> emailTemplateService) {
+        this.emailTemplateService = emailTemplateService;
     }
 }

@@ -6,8 +6,10 @@ import java.util.List;
 import java.util.Timer;
 
 import com.gcrm.domain.Call;
+import com.gcrm.domain.EmailTemplate;
 import com.gcrm.domain.Meeting;
 import com.gcrm.domain.ReminderOption;
+import com.gcrm.service.IBaseService;
 import com.gcrm.service.ICallService;
 import com.gcrm.service.IMeetingService;
 import com.gcrm.util.CommonUtil;
@@ -18,6 +20,7 @@ public class MailRemind {
     private ICallService callService;
     private IMeetingService meetingService;
     private MailService mailService;
+    private IBaseService<EmailTemplate> emailTemplateService;
 
     /**
      * Gets the scheduled instances for example calls or meetings, then schedule
@@ -44,6 +47,7 @@ public class MailRemind {
                     Timer timer = new Timer();
                     MailTimerTask task = new MailTimerTask();
                     task.setMailService(mailService);
+                    task.setEmailTemplateService(emailTemplateService);
                     task.setCall(call);
                     timer.schedule(task, dueDateTime);
 
@@ -118,6 +122,22 @@ public class MailRemind {
      */
     public void setMeetingService(IMeetingService meetingService) {
         this.meetingService = meetingService;
+    }
+
+    /**
+     * @return the emailTemplateService
+     */
+    public IBaseService<EmailTemplate> getEmailTemplateService() {
+        return emailTemplateService;
+    }
+
+    /**
+     * @param emailTemplateService
+     *            the emailTemplateService to set
+     */
+    public void setEmailTemplateService(
+            IBaseService<EmailTemplate> emailTemplateService) {
+        this.emailTemplateService = emailTemplateService;
     }
 
 }

@@ -62,13 +62,13 @@
 	function checkType() {
 		var type = $('#type').children('option:selected')
 				.val();
-		if (type == 'meeting') {
+		if (type == 'meetingInvite' || type == 'meetingRemind') {
 			$("span[id^='span']").css("display", "none");
 			$('#spanMeeting').css("display", "block");
-		} else if (type == 'call') {
+		} else if (type == 'callInvite' || type == 'callRemind') {
 			$("span[id^='span']").css("display", "none");
 			$('#spanCall').css("display", "block");
-		} else if (type == 'campaign') {
+		} else if (type == 'campaignInvite') {
 			$("span[id^='span']").css("display", "none");
 			$('#spanCampaign').css("display", "block");
 		} 
@@ -191,14 +191,16 @@
 							<td class="td-value"><input name="emailTemplate.name"
 								class="easyui-validatebox record-value"
 								data-options="required:true"
-								value="<s:property value="emailTemplate.name" />" /></td>
+								value="<s:property value="emailTemplate.name"/>" size="60"/></td>
 							<td class="td-label"><label class="record-label"><s:text
 										name="entity.type.label"></s:text>：</label></td>
 							<td class="td-value">
 								<select id="type" name="emailTemplate.type" style="width:150px;">  
-								    <option value="meeting"><s:text name="entity.meeting.label" /></option>
-								    <option value="call"><s:text name="entity.call.label" /></option>  
-								    <option value="campaign"><s:text name="entity.campaign.label" /></option>
+								    <option value="meetingInvite"><s:text name="emailTemplate.meetingInvite.label" /></option>
+								    <option value="meetingRemind"><s:text name="emailTemplate.meetingRemind.label" /></option>
+								    <option value="callInvite"><s:text name="emailTemplate.callInvite.label" /></option>
+								    <option value="callRemind"><s:text name="emailTemplate.callRemind.label" /></option> 
+								    <option value="campaignInvite"><s:text name="emailTemplate.campaignInvite.label" /></option>
 								</select> 
 							</td>
 						</tr>

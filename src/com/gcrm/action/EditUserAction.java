@@ -28,7 +28,6 @@ import org.springframework.security.authentication.encoding.Md5PasswordEncoder;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-import com.gcrm.domain.Account;
 import com.gcrm.domain.Role;
 import com.gcrm.domain.User;
 import com.gcrm.domain.UserStatus;
@@ -112,7 +111,7 @@ public class EditUserAction extends BaseEditAction implements Preparable {
             accessMap.put(1, rb.getString("access.enabled.value"));
             accessMap.put(2, rb.getString("access.disabled.value"));
             user.setAccessMap(accessMap);
-            this.getBaseInfo(user, Account.class.getSimpleName(),
+            this.getBaseInfo(user, User.class.getSimpleName(),
                     Constant.SYSTEM_NAMESPACE);
         }
         return SUCCESS;

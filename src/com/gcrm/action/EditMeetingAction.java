@@ -15,6 +15,8 @@
  */
 package com.gcrm.action;
 
+import java.io.File;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -22,7 +24,11 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.struts2.ServletActionContext;
 
 import com.gcrm.domain.Account;
 import com.gcrm.domain.CaseInstance;
@@ -72,9 +78,11 @@ public class EditMeetingAction extends BaseEditAction implements Preparable {
     private List<MeetingStatus> statuses;
     private List<ReminderOption> reminderOptions;
     private List<EmailTemplate> emailTemplates;
+    private List<EmailTemplate> reminderTemplates;
     private Integer statusID = null;
     private Integer reminderOptionEmailID = null;
     private Integer emailTemplateID = null;
+    private Integer reminderTemplateID = null;
     private String startDate = null;
     private String endDate = null;
     private Integer relatedAccountID = null;
@@ -97,6 +105,9 @@ public class EditMeetingAction extends BaseEditAction implements Preparable {
     private String text_body;
     private String from;
     private String to;
+    private File[] uploads;
+    private String[] uploadFileNames;
+    private String[] uploadContentTypes;
 
     /**
      * Saves the entity.
@@ -105,6 +116,12 @@ public class EditMeetingAction extends BaseEditAction implements Preparable {
      */
     public String save() throws Exception {
         saveEntity();
+        // Validate Reminder Email Template
+        if (meeting.isReminder_email() && reminderTemplateID == null) {
+            String errorMessage = getText("error.reminderEamilTemplate");
+            super.addActionError(errorMessage);
+            return INPUT;
+        }
         meeting = getBaseService().makePersistent(meeting);
         this.setId(meeting.getId());
         this.setSaveFlag("true");
@@ -188,7 +205,7 @@ public class EditMeetingAction extends BaseEditAction implements Preparable {
         }
 
         // Gets email template list
-        String hql = "select new EmailTemplate(id,name) from EmailTemplate where type = 'meeting' order by created_on";
+        String hql = "select new EmailTemplate(id,name) from EmailTemplate where type = 'meetingInvite' order by created_on";
         emailTemplates = emailTemplateService.findByHQL(hql);
         return SUCCESS;
     }
@@ -234,7 +251,7 @@ public class EditMeetingAction extends BaseEditAction implements Preparable {
             this.setHtml_body(content);
         }
         // Gets email template list
-        String hql = "select new EmailTemplate(id,name) from EmailTemplate where type = 'meeting' order by created_on";
+        String hql = "select new EmailTemplate(id,name) from EmailTemplate where type = 'meetingInvite' order by created_on";
         emailTemplates = emailTemplateService.findByHQL(hql);
         return SUCCESS;
     }
@@ -255,9 +272,40 @@ public class EditMeetingAction extends BaseEditAction implements Preparable {
             } else {
                 content = this.getHtml_body();
             }
-            mailService.asynSendHtmlMail(from, tos, subject, content);
+            // Gets attachments
+            String realPath = ServletActionContext.getRequest().getSession()
+                    .getServletContext().getRealPath("/upload");
+            String targetDirectory = realPath;
+            String[] tNames = new String[uploads.length];
+            File[] tFiles = new File[uploads.length];
+            for (int i = 0; i < uploads.length; i++) {
+                tNames[i] = generateFileName(uploadFileNames[i]);
+                File target = new File(targetDirectory, tNames[i]);
+                FileUtils.copyFile(uploads[i], target);
+                tFiles[i] = target;
+            }
+
+            mailService.asynSendHtmlMail(from, tos, subject, content,
+                    this.getUploadFileName(), tFiles);
         }
         return SUCCESS;
+    }
+
+    /**
+     * Generates file name for upload file automatically to invoid duplicate
+     * file names
+     * 
+     * @param fileName
+     *            original file names
+     * @return generated file name
+     */
+    private String generateFileName(String fileName) {
+        DateFormat format = new SimpleDateFormat("yyMMddHHmmss");
+        String formatDate = format.format(new Date());
+        int random = new Random().nextInt(10000);
+        int position = fileName.lastIndexOf(".");
+        String extension = fileName.substring(position);
+        return formatDate + random + extension;
     }
 
     /**
@@ -276,6 +324,10 @@ public class EditMeetingAction extends BaseEditAction implements Preparable {
                     .getReminder_option_email();
             if (reminderOptionEmail != null) {
                 reminderOptionEmailID = reminderOptionEmail.getId();
+            }
+            EmailTemplate reminderTemplate = meeting.getReminder_template();
+            if (reminderTemplate != null) {
+                reminderTemplateID = reminderTemplate.getId();
             }
             User assignedTo = meeting.getAssigned_to();
             if (assignedTo != null) {
@@ -410,6 +462,12 @@ public class EditMeetingAction extends BaseEditAction implements Preparable {
                     ReminderOption.class, reminderOptionEmailID);
         }
         meeting.setReminder_option_email(reminderOptionEmail);
+        EmailTemplate reminderTemplate = null;
+        if (reminderTemplateID != null) {
+            reminderTemplate = emailTemplateService.getEntityById(
+                    EmailTemplate.class, reminderTemplateID);
+        }
+        meeting.setReminder_template(reminderTemplate);
         User assignedTo = null;
         if (this.getAssignedToID() != null) {
             assignedTo = userService.getEntityById(User.class,
@@ -465,6 +523,9 @@ public class EditMeetingAction extends BaseEditAction implements Preparable {
                 MeetingStatus.class.getSimpleName(), local);
         this.reminderOptions = reminderOptionService.getOptions(
                 ReminderOption.class.getSimpleName(), local);
+        // Gets reminder email template list
+        String hql = "select new EmailTemplate(id,name) from EmailTemplate where type = 'meetingRemind' order by created_on";
+        reminderTemplates = emailTemplateService.findByHQL(hql);
     }
 
     /**
@@ -1099,6 +1160,60 @@ public class EditMeetingAction extends BaseEditAction implements Preparable {
      */
     public void setTo(String to) {
         this.to = to;
+    }
+
+    public File[] getUpload() {
+        return this.uploads;
+    }
+
+    public void setUpload(File[] upload) {
+        this.uploads = upload;
+    }
+
+    public String[] getUploadFileName() {
+        return this.uploadFileNames;
+    }
+
+    public void setUploadFileName(String[] uploadFileName) {
+        this.uploadFileNames = uploadFileName;
+    }
+
+    public String[] getUploadContentType() {
+        return this.uploadContentTypes;
+    }
+
+    public void setUploadContentType(String[] uploadContentType) {
+        this.uploadContentTypes = uploadContentType;
+    }
+
+    /**
+     * @return the reminderTemplates
+     */
+    public List<EmailTemplate> getReminderTemplates() {
+        return reminderTemplates;
+    }
+
+    /**
+     * @param reminderTemplates
+     *            the reminderTemplates to set
+     */
+    public void setReminderTemplates(List<EmailTemplate> reminderTemplates) {
+        this.reminderTemplates = reminderTemplates;
+    }
+
+    /**
+     * @return the reminderTemplateID
+     */
+    public Integer getReminderTemplateID() {
+        return reminderTemplateID;
+    }
+
+    /**
+     * @param reminderTemplateID
+     *            the reminderTemplateID to set
+     */
+    public void setReminderTemplateID(Integer reminderTemplateID) {
+        this.reminderTemplateID = reminderTemplateID;
     }
 
 }

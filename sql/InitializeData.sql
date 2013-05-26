@@ -565,6 +565,44 @@ WITH (
 ALTER TABLE users_role
   OWNER TO postgres;
    
+CREATE TABLE emailtemplate
+(
+  id integer NOT NULL,
+  name character varying(255) NOT NULL,
+  type character varying(255),
+  description character varying(255),
+  notes character varying(255),
+  subject character varying(255),
+  text_only boolean,
+  html_body character varying(20000),
+  assigned_to integer,
+  owner integer,
+  created_by integer,
+  updated_by integer,
+  created_on timestamp without time zone,
+  updated_on timestamp without time zone,
+  content character varying(255),
+  text_body character varying(20000),
+  CONSTRAINT emailtemplate_pkey PRIMARY KEY (id ),
+  CONSTRAINT fk3f1020364c37dd59 FOREIGN KEY (created_by)
+      REFERENCES users (id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION,
+  CONSTRAINT fk3f10203662681ed7 FOREIGN KEY (assigned_to)
+      REFERENCES users (id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION,
+  CONSTRAINT fk3f102036e826fe FOREIGN KEY (owner)
+      REFERENCES users (id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION,
+  CONSTRAINT fk3f102036e8f7c6a6 FOREIGN KEY (updated_by)
+      REFERENCES users (id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE emailtemplate
+  OWNER TO postgres;  
+  
 INSERT INTO userstatus(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'Active', 'Active', '启用',1);
 INSERT INTO userstatus(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'Inactive', 'Inactive','停用',2);
 
@@ -781,6 +819,7 @@ INSERT INTO taskstatus(id, value, label_en_us, label_zh_cn, sequence) VALUES (ne
 update users set created_by=3,owner=3,created_on=now();
 update role set created_by=3,owner=3,created_on=now();
 
-
+INSERT INTO emailtemplate(id, name, type, subject, text_only, html_body) VALUES (nextval('hibernate_sequence'),'Default Meeting Remind Email Template', 'meetingRemind','Meeting Remind', false, '<p>Subject:$meeting.subject</p><p>Sart Date:$meeting.start_date</p><p>Location:$meeting.location</p>');
+INSERT INTO emailtemplate(id, name, type, subject, text_only, html_body) VALUES (nextval('hibernate_sequence'),'Default Call Remind Email Template', 'callRemind','Call Remind', false, '<p>Subject:$call.subject</p><p>Sart Date:$call.start_date</p>');
 
 
