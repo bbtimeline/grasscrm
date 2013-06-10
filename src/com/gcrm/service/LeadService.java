@@ -30,7 +30,7 @@ public class LeadService extends BaseService<Lead> implements ILeadService {
     private IBaseService<Account> accountService;
     private IBaseService<Contact> contactService;
     private IBaseService<Opportunity> opportunityService;
-    private IBaseService<LeadStatus> leadStatusService;
+    private IOptionService<LeadStatus> leadStatusService;
 
     /*
      * (non-Javadoc)
@@ -106,7 +106,7 @@ public class LeadService extends BaseService<Lead> implements ILeadService {
             opportunity.setOwner(lead.getOwner());
             this.getOpportunityService().makePersistent(opportunity);
         }
-        LeadStatus status = this.getLeadStatusService().findByName(
+        LeadStatus status = this.getLeadStatusService().findByValue(
                 LeadStatus.class.getSimpleName(), "Converted");
         lead.setStatus(status);
         this.makePersistent(lead);
@@ -161,7 +161,7 @@ public class LeadService extends BaseService<Lead> implements ILeadService {
     /**
      * @return the leadStatusService
      */
-    public IBaseService<LeadStatus> getLeadStatusService() {
+    public IOptionService<LeadStatus> getLeadStatusService() {
         return leadStatusService;
     }
 
@@ -169,7 +169,8 @@ public class LeadService extends BaseService<Lead> implements ILeadService {
      * @param leadStatusService
      *            the leadStatusService to set
      */
-    public void setLeadStatusService(IBaseService<LeadStatus> leadStatusService) {
+    public void setLeadStatusService(
+            IOptionService<LeadStatus> leadStatusService) {
         this.leadStatusService = leadStatusService;
     }
 

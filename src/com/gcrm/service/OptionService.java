@@ -48,4 +48,16 @@ public class OptionService<T extends OptionBase> extends BaseService<T>
         }
         return option;
     }
+
+    public T findByValue(String clazz, String value) {
+        String hql = "from " + clazz + " where value = ?";
+        T object = null;
+        List<T> result = null;
+
+        result = findByParam(hql, value);
+        if (result != null && result.size() > 0) {
+            object = result.get(0);
+        }
+        return object;
+    }
 }

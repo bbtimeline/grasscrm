@@ -28,4 +28,6 @@ public interface IOptionService<T extends OptionBase> extends IBaseService<T> {
 
     public T getOptionById(Class<T> entityClass, Integer id, String local);
 
+    public T findByValue(String clazz, String value);
+
 }

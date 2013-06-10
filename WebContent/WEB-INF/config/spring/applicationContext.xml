@@ -155,7 +155,7 @@
     	<property name="accountService" ref="baseService" /> 
         <property name="contactService" ref="baseService" />
         <property name="opportunityService" ref="baseService" /> 
-        <property name="leadStatusService" ref="baseService" />            	
+        <property name="leadStatusService" ref="optionService" />            	
     </bean>    
 
     <bean id="meetingService" class="com.gcrm.service.MeetingService">
