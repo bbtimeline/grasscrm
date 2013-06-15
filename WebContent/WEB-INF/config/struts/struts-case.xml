@@ -13,15 +13,15 @@
         </action>
         
     	<action name="listCasePage">
-    	  <result type="redirect">/jsp/crm/listCase.jsp</result>
+    	  <result type="redirect">/jsp/crm/listCaseInstance.jsp</result>
         </action>
   
     	<action name="selectCase" class="listCaseAction" method="select">
-    	  <result type="redirect">/jsp/crm/listCase.jsp</result>
+    	  <result type="redirect">/jsp/crm/listCaseInstance.jsp</result>
         </action>
         
     	<action name="unselectCase" class="listCaseAction" method="unselect">
-    	  <result type="redirect">/jsp/crm/listCase.jsp</result>
+    	  <result type="redirect">/jsp/crm/listCaseInstance.jsp</result>
         </action>
                 
     	<action name="selectCasePage" class="listCaseAction" method="selectPage">
@@ -78,46 +78,46 @@
         </action>
 
          <action name="copyCase" class="listCaseAction" method="copy">
-        	<result name="input">/jsp/crm/listCase.jsp</result>
-			<result>/jsp/crm/listCase.jsp</result>            	  
+        	<result name="input">/jsp/crm/listCaseInstance.jsp</result>
+			<result>/jsp/crm/listCaseInstance.jsp</result>            	  
         </action>
                                 
         <action name="editCase" class="editCaseAction" method="get">
 			<interceptor-ref name="prepareInterceptor" /> 
-			<result>/jsp/crm/editCase.jsp</result>
+			<result>/jsp/crm/editCaseInstance.jsp</result>
         </action>
                         
         <action name="saveCase" class="editCaseAction" method="save">
 			<interceptor-ref name="prepareInterceptor" /> 
-            <result name="input">/jsp/crm/editCase.jsp</result>          
-    	    <result>/jsp/crm/editCase.jsp</result>
+            <result name="input">/jsp/crm/editCaseInstance.jsp</result>          
+    	    <result>/jsp/crm/editCaseInstance.jsp</result>
         </action>
 
         <action name="saveCloseCase" class="editCaseAction" method="save">
 			<interceptor-ref name="prepareInterceptor" /> 
-            <result name="input">/jsp/crm/editCase.jsp</result>          
-    	  <result type="redirect">/jsp/crm/listCase.jsp</result>
+            <result name="input">/jsp/crm/editCaseInstance.jsp</result>          
+    	  <result type="redirect">/jsp/crm/listCaseInstance.jsp</result>
         </action>
                         
         <action name="deleteCase" class="listCaseAction" method="delete">
-			<result name="input">/jsp/crm/listCase.jsp</result>
-			<result type="redirect">/jsp/crm/listCase.jsp</result>
+			<result name="input">/jsp/crm/listCaseInstance.jsp</result>
+			<result type="redirect">/jsp/crm/listCaseInstance.jsp</result>
         </action>    
         
         <action name="removeCase" class="listCaseAction" method="remove">
-			<result type="redirect">/jsp/crm/listCase.jsp</result>
+			<result type="redirect">/jsp/crm/listCaseInstance.jsp</result>
         </action> 
         
         <action name="massUpdateCase" class="editCaseAction" method="massUpdate">
 			<interceptor-ref name="prepareInterceptor" /> 
-            <result name="input">/jsp/crm/editCase.jsp</result>          
-    	    <result>/jsp/crm/editCase.jsp</result>
+            <result name="input">/jsp/crm/editCaseInstance.jsp</result>          
+    	    <result>/jsp/crm/editCaseInstance.jsp</result>
         </action> 
         
         <action name="massUpdateCloseCase" class="editCaseAction" method="massUpdate">
 			<interceptor-ref name="prepareInterceptor" /> 
-            <result name="input">/jsp/crm/editCase.jsp</result>          
-    	  <result type="redirect">/jsp/crm/listCase.jsp</result>
+            <result name="input">/jsp/crm/editCaseInstance.jsp</result>          
+    	  <result type="redirect">/jsp/crm/listCaseInstance.jsp</result>
         </action>                    
   </package>      
     

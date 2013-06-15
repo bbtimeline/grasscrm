@@ -83,6 +83,7 @@
 		<div class="menu-sep"></div>
 		<div onClick="openPage('/system/editEmailSetting.action')"><s:text name='menu.emailSetting.title'/></div>
 		<div onClick="openPage('/system/listEmailTemplatePage.action')"><s:text name='menu.emailTemplate.title'/></div>
+		<div onClick="openPage('/system/listChangeLogPage.action')"><s:text name='menu.changeLog.title'/></div>
 	</div>
 	</s:if>
 	<div id="mm7" style="width:100px;display:none">

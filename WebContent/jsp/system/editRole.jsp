@@ -238,7 +238,7 @@
 									</td>
 								</tr>
 								<tr>
-								    <td class="view-column"><s:text name="entity.case.label"/></td>
+								    <td class="view-column"><s:text name="entity.caseInstance.label"/></td>
 									<td class="view-column">
 										<s:select id="scope_case" name="role.scope_case" list="scopeMap" style="width:100px;"/>  
 									</td>

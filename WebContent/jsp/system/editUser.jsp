@@ -533,7 +533,7 @@
 									</td>
 								</tr>
 																																																<tr>
-								    <td class="view-column"><s:text name="entity.case.label"/></td>
+								    <td class="view-column"><s:text name="entity.caseInstance.label"/></td>
 									<td class="view-column">
 										<s:property value="user.scope_case_text" />
 									</td>

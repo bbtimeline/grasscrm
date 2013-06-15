@@ -25,8 +25,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.core.task.TaskExecutor;
+
 import com.gcrm.domain.Account;
 import com.gcrm.domain.Campaign;
+import com.gcrm.domain.ChangeLog;
 import com.gcrm.domain.Contact;
 import com.gcrm.domain.Currency;
 import com.gcrm.domain.Document;
@@ -35,6 +38,7 @@ import com.gcrm.domain.Opportunity;
 import com.gcrm.domain.OpportunityType;
 import com.gcrm.domain.SalesStage;
 import com.gcrm.domain.User;
+import com.gcrm.security.AuthenticationSuccessListener;
 import com.gcrm.service.IBaseService;
 import com.gcrm.service.IOptionService;
 import com.gcrm.util.BeanUtil;
@@ -62,6 +66,8 @@ public class EditOpportunityAction extends BaseEditAction implements Preparable 
     private IBaseService<Contact> contactService;
     private IBaseService<Document> documentService;
     private IBaseService<User> userService;
+    private IBaseService<ChangeLog> changeLogService;
+    private TaskExecutor taskExecutor;
     private Opportunity opportunity;
     private List<OpportunityType> types;
     private List<Currency> currencies;
@@ -83,11 +89,230 @@ public class EditOpportunityAction extends BaseEditAction implements Preparable 
      * @return the SUCCESS result
      */
     public String save() throws Exception {
-        saveEntity();
+        Opportunity originalOpportunity = saveEntity();
+        final Collection<ChangeLog> changeLogs = changeLog(originalOpportunity,
+                opportunity);
         opportunity = getBaseService().makePersistent(opportunity);
         this.setId(opportunity.getId());
         this.setSaveFlag("true");
+        if (changeLogs != null) {
+            taskExecutor.execute(new Runnable() {
+                public void run() {
+                    batchInserChangeLogs(changeLogs);
+                }
+            });
+        }
         return SUCCESS;
+    }
+
+    private void batchInserChangeLogs(Collection<ChangeLog> changeLogs) {
+        this.getChangeLogService().batchUpdate(changeLogs);
+    }
+
+    private Collection<ChangeLog> changeLog(Opportunity originalOpportunity,
+            Opportunity opportunity) {
+        Collection<ChangeLog> changeLogs = null;
+        if (originalOpportunity != null) {
+            ActionContext context = ActionContext.getContext();
+            Map<String, Object> session = context.getSession();
+            String entityName = Opportunity.class.getSimpleName();
+            Integer recordID = opportunity.getId();
+            User loginUser = (User) session
+                    .get(AuthenticationSuccessListener.LOGIN_USER);
+            changeLogs = new ArrayList<ChangeLog>();
+
+            String oldName = CommonUtil.fromNullToEmpty(originalOpportunity
+                    .getName());
+            String newName = CommonUtil.fromNullToEmpty(opportunity.getName());
+            if (!oldName.equals(newName)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.name.label", oldName, newName, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldAccountName = "";
+            Account oldAccount = originalOpportunity.getAccount();
+            if (oldAccount != null) {
+                oldAccountName = CommonUtil.fromNullToEmpty(oldAccount
+                        .getName());
+            }
+            String newAccountName = "";
+            Account newAccount = opportunity.getAccount();
+            if (newAccount != null) {
+                newAccountName = CommonUtil.fromNullToEmpty(newAccount
+                        .getName());
+            }
+            if (oldAccountName != newAccountName) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.account.label", oldAccountName, newAccountName,
+                        loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldCurrencyName = "";
+            Currency oldCurrency = originalOpportunity.getCurrency();
+            if (oldCurrency != null) {
+                oldCurrencyName = CommonUtil.fromNullToEmpty(oldCurrency
+                        .getName());
+            }
+            String newCurrencyName = "";
+            Currency newCurrency = opportunity.getCurrency();
+            if (newCurrency != null) {
+                newCurrencyName = CommonUtil.fromNullToEmpty(newCurrency
+                        .getName());
+            }
+            if (oldCurrencyName != newCurrencyName) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.currency.label", oldCurrencyName,
+                        newCurrencyName, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            SimpleDateFormat dateFormat = new SimpleDateFormat(
+                    Constant.DATE_EDIT_FORMAT);
+            String oldExpectCloseDateValue = "";
+            Date oldExpectCloseDate = originalOpportunity
+                    .getExpect_close_date();
+            if (oldExpectCloseDate != null) {
+                oldExpectCloseDateValue = dateFormat.format(oldExpectCloseDate);
+            }
+            String newExpectCloseDateValue = "";
+            Date newExpectCloseDate = opportunity.getExpect_close_date();
+            if (newExpectCloseDate != null) {
+                newExpectCloseDateValue = dateFormat.format(newExpectCloseDate);
+            }
+            if (!oldExpectCloseDateValue.equals(newExpectCloseDateValue)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "opportunity.expect_close_date.label",
+                        oldExpectCloseDateValue, newExpectCloseDateValue,
+                        loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldOpportunityAmount = CommonUtil
+                    .fromNullToEmpty(originalOpportunity
+                            .getOpportunity_amount());
+            String newOpportunityAmount = CommonUtil
+                    .fromNullToEmpty(opportunity.getOpportunity_amount());
+            if (!oldOpportunityAmount.equals(newOpportunityAmount)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "opportunity.opportunity_amount.label",
+                        oldOpportunityAmount, newOpportunityAmount, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldOpportunityType = getOptionValue(originalOpportunity
+                    .getType());
+            String newOpportunityType = getOptionValue(opportunity.getType());
+            if (!oldOpportunityType.equals(newOpportunityType)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.type.label", oldOpportunityType,
+                        newOpportunityType, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldSalesStage = getOptionValue(originalOpportunity
+                    .getSales_stage());
+            String newSalesStage = getOptionValue(opportunity.getSales_stage());
+            if (!oldSalesStage.equals(newSalesStage)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "menu.salesStage.title", oldSalesStage, newSalesStage,
+                        loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldLeadSource = getOptionValue(originalOpportunity
+                    .getLead_source());
+            String newLeadSource = getOptionValue(opportunity.getLead_source());
+            if (!oldLeadSource.equals(newLeadSource)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "menu.leadSource.title", oldLeadSource, newLeadSource,
+                        loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldProbability = String.valueOf(originalOpportunity
+                    .getProbability());
+            String newProbability = String
+                    .valueOf(opportunity.getProbability());
+            if (!oldProbability.equals(newProbability)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "opportunity.probability.label", oldProbability,
+                        newProbability, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldCampaignName = "";
+            Campaign oldCampaign = originalOpportunity.getCampaign();
+            if (oldCampaign != null) {
+                oldCampaignName = CommonUtil.fromNullToEmpty(oldCampaign
+                        .getName());
+            }
+            String newCampaignName = "";
+            Campaign newCampaign = opportunity.getCampaign();
+            if (newCampaign != null) {
+                newCampaignName = CommonUtil.fromNullToEmpty(newCampaign
+                        .getName());
+            }
+            if (oldCampaignName != newCampaignName) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.campaign.label", oldCampaignName,
+                        newCampaignName, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldDescription = CommonUtil
+                    .fromNullToEmpty(originalOpportunity.getDescription());
+            String newDescription = CommonUtil.fromNullToEmpty(opportunity
+                    .getDescription());
+            if (!oldDescription.equals(newDescription)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.description.label", oldDescription,
+                        newDescription, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldNextStep = CommonUtil.fromNullToEmpty(originalOpportunity
+                    .getNext_step());
+            String newNextStep = CommonUtil.fromNullToEmpty(opportunity
+                    .getNext_step());
+            if (!oldNextStep.equals(newNextStep)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "opportunity.next_step.label", oldNextStep,
+                        newNextStep, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldNotes = CommonUtil.fromNullToEmpty(originalOpportunity
+                    .getNotes());
+            String newNotes = CommonUtil
+                    .fromNullToEmpty(opportunity.getNotes());
+            if (!oldNotes.equals(newNotes)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.notes.label", oldNotes, newNotes, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldAssignedToName = "";
+            User oldAssignedTo = originalOpportunity.getAssigned_to();
+            if (oldAssignedTo != null) {
+                oldAssignedToName = oldAssignedTo.getName();
+            }
+            String newAssignedToName = "";
+            User newAssignedTo = opportunity.getAssigned_to();
+            if (newAssignedTo != null) {
+                newAssignedToName = newAssignedTo.getName();
+            }
+            if (oldAssignedToName != newAssignedToName) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.assigned_to.label",
+                        CommonUtil.fromNullToEmpty(oldAssignedToName),
+                        CommonUtil.fromNullToEmpty(newAssignedToName),
+                        loginUser);
+                changeLogs.add(changeLog);
+            }
+        }
+        return changeLogs;
     }
 
     /**
@@ -159,10 +384,12 @@ public class EditOpportunityAction extends BaseEditAction implements Preparable 
             User loginUser = this.getLoginUser();
             User user = userService
                     .getEntityById(User.class, loginUser.getId());
+            Collection<ChangeLog> allChangeLogs = new ArrayList<ChangeLog>();
             for (String IDString : selectIDArray) {
                 int id = Integer.parseInt(IDString);
                 Opportunity opportunityInstance = this.baseService
                         .getEntityById(Opportunity.class, id);
+                Opportunity originalOpportunity = opportunityInstance.clone();
                 for (String fieldName : fieldNames) {
                     Object value = BeanUtil.getFieldValue(opportunity,
                             fieldName);
@@ -171,10 +398,19 @@ public class EditOpportunityAction extends BaseEditAction implements Preparable 
                 }
                 opportunityInstance.setUpdated_by(user);
                 opportunityInstance.setUpdated_on(new Date());
+                Collection<ChangeLog> changeLogs = changeLog(
+                        originalOpportunity, opportunityInstance);
+                allChangeLogs.addAll(changeLogs);
                 opportunities.add(opportunityInstance);
             }
+            final Collection<ChangeLog> changeLogsForSave = allChangeLogs;
             if (opportunities.size() > 0) {
                 this.baseService.batchUpdate(opportunities);
+                taskExecutor.execute(new Runnable() {
+                    public void run() {
+                        batchInserChangeLogs(changeLogsForSave);
+                    }
+                });
             }
         }
         return SUCCESS;
@@ -183,15 +419,17 @@ public class EditOpportunityAction extends BaseEditAction implements Preparable 
     /**
      * Saves entity field
      * 
+     * @return original opportunity record
      * @throws ParseException
      */
-    private void saveEntity() throws Exception {
+    private Opportunity saveEntity() throws Exception {
+        Opportunity originalOpportunity = null;
         if (opportunity.getId() == null) {
             UserUtil.permissionCheck("create_opportunity");
         } else {
             UserUtil.permissionCheck("update_opportunity");
-            Opportunity originalOpportunity = baseService.getEntityById(
-                    Opportunity.class, opportunity.getId());
+            originalOpportunity = baseService.getEntityById(Opportunity.class,
+                    opportunity.getId());
             opportunity.setContacts(originalOpportunity.getContacts());
             opportunity.setLeads(originalOpportunity.getLeads());
             opportunity.setDocuments(originalOpportunity.getDocuments());
@@ -277,6 +515,7 @@ public class EditOpportunityAction extends BaseEditAction implements Preparable 
             documents.add(document);
         }
         super.updateBaseInfo(opportunity);
+        return originalOpportunity;
     }
 
     /**
@@ -642,6 +881,36 @@ public class EditOpportunityAction extends BaseEditAction implements Preparable 
     public void setLeadSourceService(
             IOptionService<LeadSource> leadSourceService) {
         this.leadSourceService = leadSourceService;
+    }
+
+    /**
+     * @return the changeLogService
+     */
+    public IBaseService<ChangeLog> getChangeLogService() {
+        return changeLogService;
+    }
+
+    /**
+     * @param changeLogService
+     *            the changeLogService to set
+     */
+    public void setChangeLogService(IBaseService<ChangeLog> changeLogService) {
+        this.changeLogService = changeLogService;
+    }
+
+    /**
+     * @return the taskExecutor
+     */
+    public TaskExecutor getTaskExecutor() {
+        return taskExecutor;
+    }
+
+    /**
+     * @param taskExecutor
+     *            the taskExecutor to set
+     */
+    public void setTaskExecutor(TaskExecutor taskExecutor) {
+        this.taskExecutor = taskExecutor;
     }
 
 }

@@ -29,12 +29,14 @@ import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.struts2.ServletActionContext;
+import org.springframework.core.task.TaskExecutor;
 
 import com.gcrm.domain.Account;
 import com.gcrm.domain.Call;
 import com.gcrm.domain.CallDirection;
 import com.gcrm.domain.CallStatus;
 import com.gcrm.domain.CaseInstance;
+import com.gcrm.domain.ChangeLog;
 import com.gcrm.domain.Contact;
 import com.gcrm.domain.EmailTemplate;
 import com.gcrm.domain.Lead;
@@ -76,6 +78,8 @@ public class EditCallAction extends BaseEditAction implements Preparable {
     private IBaseService<Task> taskService;
     private MailService mailService;
     private IBaseService<EmailTemplate> emailTemplateService;
+    private IBaseService<ChangeLog> changeLogService;
+    private TaskExecutor taskExecutor;
     private Call call;
     private List<CallStatus> statuses;
     private List<CallDirection> directions;
@@ -118,7 +122,8 @@ public class EditCallAction extends BaseEditAction implements Preparable {
      * @return the SUCCESS result
      */
     public String save() throws Exception {
-        saveEntity();
+        Call originalCall = saveEntity();
+        final Collection<ChangeLog> changeLogs = changeLog(originalCall, call);
         // Validate Reminder Email Template
         if (call.isReminder_email() && reminderTemplateID == null) {
             String errorMessage = getText("error.reminderEamilTemplate");
@@ -128,7 +133,171 @@ public class EditCallAction extends BaseEditAction implements Preparable {
         call = getbaseService().makePersistent(call);
         this.setId(call.getId());
         this.setSaveFlag("true");
+        if (changeLogs != null) {
+            taskExecutor.execute(new Runnable() {
+                public void run() {
+                    batchInserChangeLogs(changeLogs);
+                }
+            });
+        }
         return SUCCESS;
+    }
+
+    private void batchInserChangeLogs(Collection<ChangeLog> changeLogs) {
+        this.getChangeLogService().batchUpdate(changeLogs);
+    }
+
+    private Collection<ChangeLog> changeLog(Call originalCall, Call call) {
+        Collection<ChangeLog> changeLogs = null;
+        if (originalCall != null) {
+            ActionContext context = ActionContext.getContext();
+            Map<String, Object> session = context.getSession();
+            String entityName = Call.class.getSimpleName();
+            Integer recordID = call.getId();
+            User loginUser = (User) session
+                    .get(AuthenticationSuccessListener.LOGIN_USER);
+            changeLogs = new ArrayList<ChangeLog>();
+
+            String oldSubject = CommonUtil.fromNullToEmpty(originalCall
+                    .getSubject());
+            String newSubject = CommonUtil.fromNullToEmpty(call.getSubject());
+            if (!oldSubject.equals(newSubject)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.subject.label", oldSubject, newSubject,
+                        loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldStatus = getOptionValue(originalCall.getStatus());
+            String newStatus = getOptionValue(call.getStatus());
+            if (!oldStatus.equals(newStatus)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.status.label", oldStatus, newStatus, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            SimpleDateFormat dateFormat = new SimpleDateFormat(
+                    Constant.DATE_EDIT_FORMAT);
+            String oldStartDateValue = "";
+            Date oldStartDate = originalCall.getStart_date();
+            if (oldStartDate != null) {
+                oldStartDateValue = dateFormat.format(oldStartDate);
+            }
+            String newStartDateValue = "";
+            Date newStartDate = call.getStart_date();
+            if (newStartDate != null) {
+                newStartDateValue = dateFormat.format(newStartDate);
+            }
+            if (!oldStartDateValue.equals(newStartDateValue)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.start_date.label", oldStartDateValue,
+                        newStartDateValue, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldRelatedObject = CommonUtil.fromNullToEmpty(originalCall
+                    .getRelated_object());
+            String newRelatedObject = CommonUtil.fromNullToEmpty(call
+                    .getRelated_object());
+            if (!oldRelatedObject.equals(newRelatedObject)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.related_object.label", oldRelatedObject,
+                        newRelatedObject, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldRelatedRecord = String.valueOf(originalCall
+                    .getRelated_record());
+            String newRelatedRecord = String.valueOf(call.getRelated_record());
+            if (!oldRelatedRecord.equals(newRelatedRecord)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.related_record.label", oldRelatedRecord,
+                        newRelatedRecord, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            boolean oldReminderEmail = originalCall.isReminder_email();
+            boolean newReminderEmail = call.isReminder_email();
+            if (oldReminderEmail != newReminderEmail) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.reminder.label",
+                        String.valueOf(oldReminderEmail),
+                        String.valueOf(newReminderEmail), loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldReminderOption = getOptionValue(originalCall
+                    .getReminder_option_email());
+            String newReminderOption = getOptionValue(call
+                    .getReminder_option_email());
+            if (!oldReminderOption.equals(newReminderOption)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.reminder_option_email_name.label",
+                        oldReminderOption, newReminderOption, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldReminderTemplateName = "";
+            EmailTemplate oldReminderTemplate = originalCall
+                    .getReminder_template();
+            if (oldReminderTemplate != null) {
+                oldReminderTemplateName = CommonUtil
+                        .fromNullToEmpty(oldReminderTemplate.getName());
+            }
+            String newReminderTemplateName = "";
+            EmailTemplate newReminderTemplate = call.getReminder_template();
+            if (newReminderTemplate != null) {
+                newReminderTemplateName = CommonUtil
+                        .fromNullToEmpty(newReminderTemplate.getName());
+            }
+            if (oldReminderTemplateName != newReminderTemplateName) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.reminder_template.label",
+                        oldReminderTemplateName, newReminderTemplateName,
+                        loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldDescription = CommonUtil.fromNullToEmpty(originalCall
+                    .getDescription());
+            String newDescription = CommonUtil.fromNullToEmpty(call
+                    .getDescription());
+            if (!oldDescription.equals(newDescription)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.description.label", oldDescription,
+                        newDescription, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldNotes = CommonUtil.fromNullToEmpty(originalCall
+                    .getNotes());
+            String newNotes = CommonUtil.fromNullToEmpty(call.getNotes());
+            if (!oldNotes.equals(newNotes)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.notes.label", oldNotes, newNotes, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldAssignedToName = "";
+            User oldAssignedTo = originalCall.getAssigned_to();
+            if (oldAssignedTo != null) {
+                oldAssignedToName = oldAssignedTo.getName();
+            }
+            String newAssignedToName = "";
+            User newAssignedTo = call.getAssigned_to();
+            if (newAssignedTo != null) {
+                newAssignedToName = newAssignedTo.getName();
+            }
+            if (oldAssignedToName != newAssignedToName) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.assigned_to.label",
+                        CommonUtil.fromNullToEmpty(oldAssignedToName),
+                        CommonUtil.fromNullToEmpty(newAssignedToName),
+                        loginUser);
+                changeLogs.add(changeLog);
+            }
+        }
+        return changeLogs;
     }
 
     /**
@@ -431,20 +600,31 @@ public class EditCallAction extends BaseEditAction implements Preparable {
             User loginUser = this.getLoginUser();
             User user = userService
                     .getEntityById(User.class, loginUser.getId());
+            Collection<ChangeLog> allChangeLogs = new ArrayList<ChangeLog>();
             for (String IDString : selectIDArray) {
                 int id = Integer.parseInt(IDString);
                 Call callInstance = this.baseService.getEntityById(Call.class,
                         id);
+                Call originalCall = callInstance.clone();
                 for (String fieldName : feildNameCollection) {
                     Object value = BeanUtil.getFieldValue(call, fieldName);
                     BeanUtil.setFieldValue(callInstance, fieldName, value);
                 }
                 callInstance.setUpdated_by(user);
                 callInstance.setUpdated_on(new Date());
+                Collection<ChangeLog> changeLogs = changeLog(originalCall,
+                        callInstance);
+                allChangeLogs.addAll(changeLogs);
                 calls.add(callInstance);
             }
+            final Collection<ChangeLog> changeLogsForSave = allChangeLogs;
             if (calls.size() > 0) {
                 this.baseService.batchUpdate(calls);
+                taskExecutor.execute(new Runnable() {
+                    public void run() {
+                        batchInserChangeLogs(changeLogsForSave);
+                    }
+                });
             }
         }
         return SUCCESS;
@@ -453,15 +633,16 @@ public class EditCallAction extends BaseEditAction implements Preparable {
     /**
      * Saves entity field
      * 
+     * @return original call record
      * @throws ParseException
      */
-    private void saveEntity() throws Exception {
+    private Call saveEntity() throws Exception {
+        Call originalCall = null;
         if (call.getId() == null) {
             UserUtil.permissionCheck("create_call");
         } else {
             UserUtil.permissionCheck("update_call");
-            Call originalCall = baseService.getEntityById(Call.class,
-                    call.getId());
+            originalCall = baseService.getEntityById(Call.class, call.getId());
             call.setContacts(originalCall.getContacts());
             call.setLeads(originalCall.getLeads());
             call.setUsers(originalCall.getUsers());
@@ -527,6 +708,7 @@ public class EditCallAction extends BaseEditAction implements Preparable {
             call.setRelated_record(relatedTaskID);
         }
         super.updateBaseInfo(call);
+        return originalCall;
     }
 
     /**
@@ -1273,6 +1455,22 @@ public class EditCallAction extends BaseEditAction implements Preparable {
      */
     public void setReminderTemplateID(Integer reminderTemplateID) {
         this.reminderTemplateID = reminderTemplateID;
+    }
+
+    public IBaseService<ChangeLog> getChangeLogService() {
+        return changeLogService;
+    }
+
+    public void setChangeLogService(IBaseService<ChangeLog> changeLogService) {
+        this.changeLogService = changeLogService;
+    }
+
+    public TaskExecutor getTaskExecutor() {
+        return taskExecutor;
+    }
+
+    public void setTaskExecutor(TaskExecutor taskExecutor) {
+        this.taskExecutor = taskExecutor;
     }
 
 }

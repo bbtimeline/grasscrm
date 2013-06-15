@@ -23,8 +23,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.core.task.TaskExecutor;
+
 import com.gcrm.domain.Account;
 import com.gcrm.domain.CaseInstance;
+import com.gcrm.domain.ChangeLog;
 import com.gcrm.domain.Contact;
 import com.gcrm.domain.Lead;
 import com.gcrm.domain.Opportunity;
@@ -33,6 +36,7 @@ import com.gcrm.domain.Task;
 import com.gcrm.domain.TaskPriority;
 import com.gcrm.domain.TaskStatus;
 import com.gcrm.domain.User;
+import com.gcrm.security.AuthenticationSuccessListener;
 import com.gcrm.service.IBaseService;
 import com.gcrm.service.IOptionService;
 import com.gcrm.util.BeanUtil;
@@ -61,6 +65,8 @@ public class EditTaskAction extends BaseEditAction implements Preparable {
     private IBaseService<Opportunity> opportunityService;
     private IBaseService<Target> targetService;
     private IBaseService<Task> taskService;
+    private IBaseService<ChangeLog> changeLogService;
+    private TaskExecutor taskExecutor;
     private Task task = new Task();
     private List<TaskStatus> statuses;
     private List<TaskPriority> priorities;
@@ -91,11 +97,179 @@ public class EditTaskAction extends BaseEditAction implements Preparable {
      * @return the SUCCESS result
      */
     public String save() throws Exception {
-        saveEntity();
+        Task originalTask = saveEntity();
+        final Collection<ChangeLog> changeLogs = changeLog(originalTask, task);
         task = getBaseService().makePersistent(task);
         this.setId(task.getId());
         this.setSaveFlag("true");
+        if (changeLogs != null) {
+            taskExecutor.execute(new Runnable() {
+                public void run() {
+                    batchInserChangeLogs(changeLogs);
+                }
+            });
+        }
         return SUCCESS;
+    }
+
+    private void batchInserChangeLogs(Collection<ChangeLog> changeLogs) {
+        this.getChangeLogService().batchUpdate(changeLogs);
+    }
+
+    private Collection<ChangeLog> changeLog(Task originalTask, Task task) {
+        Collection<ChangeLog> changeLogs = null;
+        if (originalTask != null) {
+            ActionContext context = ActionContext.getContext();
+            Map<String, Object> session = context.getSession();
+            String entityName = Task.class.getSimpleName();
+            Integer recordID = task.getId();
+            User loginUser = (User) session
+                    .get(AuthenticationSuccessListener.LOGIN_USER);
+            changeLogs = new ArrayList<ChangeLog>();
+
+            String oldSubject = CommonUtil.fromNullToEmpty(originalTask
+                    .getSubject());
+            String newSubject = CommonUtil.fromNullToEmpty(task.getSubject());
+            if (!oldSubject.equals(newSubject)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.subject.label", oldSubject, newSubject,
+                        loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldStatus = getOptionValue(originalTask.getStatus());
+            String newStatus = getOptionValue(task.getStatus());
+            if (!oldStatus.equals(newStatus)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.status.label", oldStatus, newStatus, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            SimpleDateFormat dateFormat = new SimpleDateFormat(
+                    Constant.DATE_EDIT_FORMAT);
+            String oldStartDateValue = "";
+            Date oldStartDate = originalTask.getStart_date();
+            if (oldStartDate != null) {
+                oldStartDateValue = dateFormat.format(oldStartDate);
+            }
+            String newStartDateValue = "";
+            Date newStartDate = task.getStart_date();
+            if (newStartDate != null) {
+                newStartDateValue = dateFormat.format(newStartDate);
+            }
+            if (!oldStartDateValue.equals(newStartDateValue)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.start_date.label", oldStartDateValue,
+                        newStartDateValue, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldDueDateValue = "";
+            Date oldDueDate = originalTask.getDue_date();
+            if (oldDueDate != null) {
+                oldDueDateValue = dateFormat.format(oldDueDate);
+            }
+            String newDueDateValue = "";
+            Date newDueDate = task.getDue_date();
+            if (newDueDate != null) {
+                newDueDateValue = dateFormat.format(newDueDate);
+            }
+            if (!oldDueDateValue.equals(newDueDateValue)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "task.due_date.label", oldDueDateValue,
+                        newDueDateValue, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldRelatedObject = CommonUtil.fromNullToEmpty(originalTask
+                    .getRelated_object());
+            String newRelatedObject = CommonUtil.fromNullToEmpty(task
+                    .getRelated_object());
+            if (!oldRelatedObject.equals(newRelatedObject)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.related_object.label", oldRelatedObject,
+                        newRelatedObject, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldRelatedRecord = String.valueOf(originalTask
+                    .getRelated_record());
+            String newRelatedRecord = String.valueOf(task.getRelated_record());
+            if (!oldRelatedRecord.equals(newRelatedRecord)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.related_record.label", oldRelatedRecord,
+                        newRelatedRecord, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldContactName = "";
+            Contact oldContact = originalTask.getContact();
+            if (oldContact != null) {
+                oldContactName = CommonUtil.fromNullToEmpty(oldContact
+                        .getName());
+            }
+            String newContactName = "";
+            Contact newContact = task.getContact();
+            if (newContact != null) {
+                newContactName = CommonUtil.fromNullToEmpty(newContact
+                        .getName());
+            }
+            if (oldContactName != newContactName) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.contact.label", oldContactName, newContactName,
+                        loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldTaskPriority = getOptionValue(originalTask.getPriority());
+            String newTaskPriority = getOptionValue(task.getPriority());
+            if (!oldTaskPriority.equals(newTaskPriority)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.priority.label", oldTaskPriority,
+                        newTaskPriority, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldDescription = CommonUtil.fromNullToEmpty(originalTask
+                    .getDescription());
+            String newDescription = CommonUtil.fromNullToEmpty(task
+                    .getDescription());
+            if (!oldDescription.equals(newDescription)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.description.label", oldDescription,
+                        newDescription, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldNotes = CommonUtil.fromNullToEmpty(originalTask
+                    .getNotes());
+            String newNotes = CommonUtil.fromNullToEmpty(task.getNotes());
+            if (!oldNotes.equals(newNotes)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.notes.label", oldNotes, newNotes, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldAssignedToName = "";
+            User oldAssignedTo = originalTask.getAssigned_to();
+            if (oldAssignedTo != null) {
+                oldAssignedToName = oldAssignedTo.getName();
+            }
+            String newAssignedToName = "";
+            User newAssignedTo = task.getAssigned_to();
+            if (newAssignedTo != null) {
+                newAssignedToName = newAssignedTo.getName();
+            }
+            if (oldAssignedToName != newAssignedToName) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.assigned_to.label",
+                        CommonUtil.fromNullToEmpty(oldAssignedToName),
+                        CommonUtil.fromNullToEmpty(newAssignedToName),
+                        loginUser);
+                changeLogs.add(changeLog);
+            }
+        }
+        return changeLogs;
     }
 
     /**
@@ -204,20 +378,31 @@ public class EditTaskAction extends BaseEditAction implements Preparable {
             User loginUser = this.getLoginUser();
             User user = userService
                     .getEntityById(User.class, loginUser.getId());
+            Collection<ChangeLog> allChangeLogs = new ArrayList<ChangeLog>();
             for (String IDString : selectIDArray) {
                 int id = Integer.parseInt(IDString);
                 Task taskInstance = this.baseService.getEntityById(Task.class,
                         id);
+                Task originalTask = taskInstance.clone();
                 for (String fieldName : fieldNames) {
                     Object value = BeanUtil.getFieldValue(task, fieldName);
                     BeanUtil.setFieldValue(taskInstance, fieldName, value);
                 }
                 taskInstance.setUpdated_by(user);
                 taskInstance.setUpdated_on(new Date());
+                Collection<ChangeLog> changeLogs = changeLog(originalTask,
+                        taskInstance);
+                allChangeLogs.addAll(changeLogs);
                 tasks.add(taskInstance);
             }
+            final Collection<ChangeLog> changeLogsForSave = allChangeLogs;
             if (tasks.size() > 0) {
                 this.baseService.batchUpdate(tasks);
+                taskExecutor.execute(new Runnable() {
+                    public void run() {
+                        batchInserChangeLogs(changeLogsForSave);
+                    }
+                });
             }
         }
         return SUCCESS;
@@ -226,13 +411,16 @@ public class EditTaskAction extends BaseEditAction implements Preparable {
     /**
      * Saves entity field
      * 
+     * @return original task record
      * @throws ParseException
      */
-    private void saveEntity() throws Exception {
+    private Task saveEntity() throws Exception {
+        Task originalTask = null;
         if (task.getId() == null) {
             UserUtil.permissionCheck("create_task");
         } else {
             UserUtil.permissionCheck("update_task");
+            originalTask = baseService.getEntityById(Task.class, task.getId());
         }
 
         TaskStatus status = null;
@@ -292,6 +480,7 @@ public class EditTaskAction extends BaseEditAction implements Preparable {
             task.setRelated_record(relatedTaskID);
         }
         super.updateBaseInfo(task);
+        return originalTask;
     }
 
     /**
@@ -819,6 +1008,22 @@ public class EditTaskAction extends BaseEditAction implements Preparable {
     public void setTaskPriorityService(
             IOptionService<TaskPriority> taskPriorityService) {
         this.taskPriorityService = taskPriorityService;
+    }
+
+    public IBaseService<ChangeLog> getChangeLogService() {
+        return changeLogService;
+    }
+
+    public void setChangeLogService(IBaseService<ChangeLog> changeLogService) {
+        this.changeLogService = changeLogService;
+    }
+
+    public TaskExecutor getTaskExecutor() {
+        return taskExecutor;
+    }
+
+    public void setTaskExecutor(TaskExecutor taskExecutor) {
+        this.taskExecutor = taskExecutor;
     }
 
 }

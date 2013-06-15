@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.core.task.TaskExecutor;
+
 import com.gcrm.domain.Account;
 import com.gcrm.domain.CaseInstance;
 import com.gcrm.domain.CaseOrigin;
@@ -30,12 +32,15 @@ import com.gcrm.domain.CasePriority;
 import com.gcrm.domain.CaseReason;
 import com.gcrm.domain.CaseStatus;
 import com.gcrm.domain.CaseType;
+import com.gcrm.domain.ChangeLog;
 import com.gcrm.domain.Contact;
 import com.gcrm.domain.Document;
 import com.gcrm.domain.User;
+import com.gcrm.security.AuthenticationSuccessListener;
 import com.gcrm.service.IBaseService;
 import com.gcrm.service.IOptionService;
 import com.gcrm.util.BeanUtil;
+import com.gcrm.util.CommonUtil;
 import com.gcrm.util.Constant;
 import com.gcrm.util.security.UserUtil;
 import com.opensymphony.xwork2.ActionContext;
@@ -59,6 +64,8 @@ public class EditCaseAction extends BaseEditAction implements Preparable {
     private IBaseService<Document> documentService;
     private IBaseService<Contact> contactService;
     private IBaseService<User> userService;
+    private IBaseService<ChangeLog> changeLogService;
+    private TaskExecutor taskExecutor;
     private CaseInstance caseInstance;
     private List<CaseStatus> statuses;
     private List<CasePriority> casePriorities;
@@ -79,11 +86,162 @@ public class EditCaseAction extends BaseEditAction implements Preparable {
      * @return the SUCCESS result
      */
     public String save() throws Exception {
-        saveEntity();
+        CaseInstance originalCase = saveEntity();
+        final Collection<ChangeLog> changeLogs = changeLog(originalCase,
+                caseInstance);
         caseInstance = getBaseService().makePersistent(caseInstance);
         this.setId(caseInstance.getId());
         this.setSaveFlag("true");
+        if (changeLogs != null) {
+            taskExecutor.execute(new Runnable() {
+                public void run() {
+                    batchInserChangeLogs(changeLogs);
+                }
+            });
+        }
         return SUCCESS;
+    }
+
+    private void batchInserChangeLogs(Collection<ChangeLog> changeLogs) {
+        this.getChangeLogService().batchUpdate(changeLogs);
+    }
+
+    private Collection<ChangeLog> changeLog(CaseInstance originalCaseInstance,
+            CaseInstance caseInstance) {
+        Collection<ChangeLog> changeLogs = null;
+        if (originalCaseInstance != null) {
+            ActionContext context = ActionContext.getContext();
+            Map<String, Object> session = context.getSession();
+            String entityName = CaseInstance.class.getSimpleName();
+            Integer recordID = caseInstance.getId();
+            User loginUser = (User) session
+                    .get(AuthenticationSuccessListener.LOGIN_USER);
+            changeLogs = new ArrayList<ChangeLog>();
+
+            String oldSubject = CommonUtil.fromNullToEmpty(originalCaseInstance
+                    .getSubject());
+            String newSubject = CommonUtil.fromNullToEmpty(caseInstance
+                    .getSubject());
+            if (!oldSubject.equals(newSubject)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.subject.label", oldSubject, newSubject,
+                        loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldPriority = getOptionValue(originalCaseInstance
+                    .getPriority());
+            String newPriority = getOptionValue(caseInstance.getPriority());
+            if (!oldPriority.equals(newPriority)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.priority.label", oldPriority, newPriority,
+                        loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldStatus = getOptionValue(originalCaseInstance.getStatus());
+            String newStatus = getOptionValue(caseInstance.getStatus());
+            if (!oldStatus.equals(newStatus)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.status.label", oldStatus, newStatus, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldAccountName = "";
+            Account oldAccount = originalCaseInstance.getAccount();
+            if (oldAccount != null) {
+                oldAccountName = CommonUtil.fromNullToEmpty(oldAccount
+                        .getName());
+            }
+            String newAccountName = "";
+            Account newAccount = caseInstance.getAccount();
+            if (newAccount != null) {
+                newAccountName = CommonUtil.fromNullToEmpty(newAccount
+                        .getName());
+            }
+            if (oldAccountName != newAccountName) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.account.label", oldAccountName, newAccountName,
+                        loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldType = getOptionValue(originalCaseInstance.getType());
+            String newType = getOptionValue(caseInstance.getType());
+            if (!oldType.equals(newType)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "case.type.label", oldType, newType, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldOrigin = getOptionValue(originalCaseInstance.getOrigin());
+            String newOrigin = getOptionValue(caseInstance.getOrigin());
+            if (!oldOrigin.equals(newOrigin)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "case.origin.label", oldOrigin, newOrigin, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldReason = getOptionValue(originalCaseInstance.getReason());
+            String newReason = getOptionValue(caseInstance.getReason());
+            if (!oldReason.equals(newReason)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "case.reason.label", oldReason, newReason, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldResolution = CommonUtil
+                    .fromNullToEmpty(originalCaseInstance.getResolution());
+            String newResolution = CommonUtil.fromNullToEmpty(caseInstance
+                    .getResolution());
+            if (!oldResolution.equals(newResolution)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "case.resolution.label", oldResolution, newResolution,
+                        loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldDescription = CommonUtil
+                    .fromNullToEmpty(originalCaseInstance.getDescription());
+            String newDescription = CommonUtil.fromNullToEmpty(caseInstance
+                    .getDescription());
+            if (!oldDescription.equals(newDescription)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.description.label", oldDescription,
+                        newDescription, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldNotes = CommonUtil.fromNullToEmpty(originalCaseInstance
+                    .getNotes());
+            String newNotes = CommonUtil.fromNullToEmpty(caseInstance
+                    .getNotes());
+            if (!oldNotes.equals(newNotes)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.notes.label", oldNotes, newNotes, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldAssignedToName = "";
+            User oldAssignedTo = originalCaseInstance.getAssigned_to();
+            if (oldAssignedTo != null) {
+                oldAssignedToName = oldAssignedTo.getName();
+            }
+            String newAssignedToName = "";
+            User newAssignedTo = caseInstance.getAssigned_to();
+            if (newAssignedTo != null) {
+                newAssignedToName = newAssignedTo.getName();
+            }
+            if (oldAssignedToName != newAssignedToName) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.assigned_to.label",
+                        CommonUtil.fromNullToEmpty(oldAssignedToName),
+                        CommonUtil.fromNullToEmpty(newAssignedToName),
+                        loginUser);
+                changeLogs.add(changeLog);
+            }
+        }
+        return changeLogs;
     }
 
     /**
@@ -93,7 +251,8 @@ public class EditCaseAction extends BaseEditAction implements Preparable {
      */
     public String get() throws Exception {
         if (this.getId() != null) {
-            caseInstance = baseService.getEntityById(CaseInstance.class, this.getId());
+            caseInstance = baseService.getEntityById(CaseInstance.class,
+                    this.getId());
             CaseStatus status = caseInstance.getStatus();
             if (status != null) {
                 statusID = status.getId();
@@ -144,10 +303,12 @@ public class EditCaseAction extends BaseEditAction implements Preparable {
             User loginUser = this.getLoginUser();
             User user = userService
                     .getEntityById(User.class, loginUser.getId());
+            Collection<ChangeLog> allChangeLogs = new ArrayList<ChangeLog>();
             for (String IDString : selectIDArray) {
                 int id = Integer.parseInt(IDString);
                 CaseInstance newCaseInstance = this.baseService.getEntityById(
                         CaseInstance.class, id);
+                CaseInstance originalCaseInstance = newCaseInstance.clone();
                 for (String fieldName : fieldNames) {
                     Object value = BeanUtil.getFieldValue(caseInstance,
                             fieldName);
@@ -155,10 +316,19 @@ public class EditCaseAction extends BaseEditAction implements Preparable {
                 }
                 newCaseInstance.setUpdated_by(user);
                 newCaseInstance.setUpdated_on(new Date());
+                Collection<ChangeLog> changeLogs = changeLog(
+                        originalCaseInstance, newCaseInstance);
+                allChangeLogs.addAll(changeLogs);
                 cases.add(newCaseInstance);
             }
+            final Collection<ChangeLog> changeLogsForSave = allChangeLogs;
             if (cases.size() > 0) {
                 this.baseService.batchUpdate(cases);
+                taskExecutor.execute(new Runnable() {
+                    public void run() {
+                        batchInserChangeLogs(changeLogsForSave);
+                    }
+                });
             }
         }
         return SUCCESS;
@@ -167,14 +337,16 @@ public class EditCaseAction extends BaseEditAction implements Preparable {
     /**
      * Saves entity field
      * 
+     * @return original caseInstance record
      * @throws Exception
      */
-    private void saveEntity() throws Exception {
+    private CaseInstance saveEntity() throws Exception {
+        CaseInstance originalCase = null;
         if (caseInstance.getId() == null) {
             UserUtil.permissionCheck("create_case");
         } else {
             UserUtil.permissionCheck("update_case");
-            CaseInstance originalCase = baseService.getEntityById(CaseInstance.class,
+            originalCase = baseService.getEntityById(CaseInstance.class,
                     caseInstance.getId());
             caseInstance.setContacts(originalCase.getContacts());
             caseInstance.setDocuments(originalCase.getDocuments());
@@ -246,6 +418,7 @@ public class EditCaseAction extends BaseEditAction implements Preparable {
             contacts.add(contact);
         }
         super.updateBaseInfo(caseInstance);
+        return originalCase;
     }
 
     /**
@@ -615,6 +788,22 @@ public class EditCaseAction extends BaseEditAction implements Preparable {
     public void setCaseReasonService(
             IOptionService<CaseReason> caseReasonService) {
         this.caseReasonService = caseReasonService;
+    }
+
+    public IBaseService<ChangeLog> getChangeLogService() {
+        return changeLogService;
+    }
+
+    public void setChangeLogService(IBaseService<ChangeLog> changeLogService) {
+        this.changeLogService = changeLogService;
+    }
+
+    public TaskExecutor getTaskExecutor() {
+        return taskExecutor;
+    }
+
+    public void setTaskExecutor(TaskExecutor taskExecutor) {
+        this.taskExecutor = taskExecutor;
     }
 
 }

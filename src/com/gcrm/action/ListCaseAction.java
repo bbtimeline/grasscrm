@@ -87,8 +87,8 @@ public class ListCaseAction extends BaseListAction {
     public String list() throws Exception {
 
         SearchCondition searchCondition = getSearchCondition();
-        SearchResult<CaseInstance> result = baseService.getPaginationObjects(CLAZZ,
-                searchCondition);
+        SearchResult<CaseInstance> result = baseService.getPaginationObjects(
+                CLAZZ, searchCondition);
         Iterator<CaseInstance> cases = result.getResult().iterator();
         long totalRecords = result.getTotalRecords();
 
@@ -110,8 +110,8 @@ public class ListCaseAction extends BaseListAction {
         User loginUser = UserUtil.getLoginUser();
         SearchCondition searchCondition = getSearchCondition(fieldTypeMap,
                 loginUser.getScope_case(), loginUser);
-        SearchResult<CaseInstance> result = baseService.getPaginationObjects(CLAZZ,
-                searchCondition);
+        SearchResult<CaseInstance> result = baseService.getPaginationObjects(
+                CLAZZ, searchCondition);
         Iterator<CaseInstance> cases = result.getResult().iterator();
         long totalRecords = result.getTotalRecords();
 
@@ -124,8 +124,9 @@ public class ListCaseAction extends BaseListAction {
      * 
      * @return list JSON data
      */
-    public static void getListJson(Iterator<CaseInstance> cases, long totalRecords,
-            SearchCondition searchCondition, boolean isList) throws Exception {
+    public static void getListJson(Iterator<CaseInstance> cases,
+            long totalRecords, SearchCondition searchCondition, boolean isList)
+            throws Exception {
 
         StringBuilder jsonBuilder = new StringBuilder("");
         jsonBuilder
@@ -363,8 +364,8 @@ public class ListCaseAction extends BaseListAction {
             String[] ids = seleteIDs.split(",");
             for (int i = 0; i < ids.length; i++) {
                 String copyid = ids[i];
-                CaseInstance oriRecord = baseService.getEntityById(CaseInstance.class,
-                        Integer.valueOf(copyid));
+                CaseInstance oriRecord = baseService.getEntityById(
+                        CaseInstance.class, Integer.valueOf(copyid));
                 CaseInstance targetRecord = oriRecord.clone();
                 targetRecord.setId(null);
                 this.getbaseService().makePersistent(targetRecord);
@@ -393,7 +394,7 @@ public class ListCaseAction extends BaseListAction {
 
     private InputStream getDownloadContent(boolean isTemplate) throws Exception {
         UserUtil.permissionCheck("view_case");
-        String fileName = getText("entity.case.label") + ".csv";
+        String fileName = getText("entity.caseInstance.label") + ".csv";
         fileName = new String(fileName.getBytes(), "ISO8859-1");
         File file = new File(fileName);
         ICsvMapWriter writer = new CsvMapWriter(new FileWriter(file),
@@ -421,8 +422,8 @@ public class ListCaseAction extends BaseListAction {
                 String[] ids = seleteIDs.split(",");
                 for (int i = 0; i < ids.length; i++) {
                     String id = ids[i];
-                    CaseInstance caseInstance = baseService.getEntityById(CaseInstance.class,
-                            Integer.parseInt(id));
+                    CaseInstance caseInstance = baseService.getEntityById(
+                            CaseInstance.class, Integer.parseInt(id));
                     final HashMap<String, ? super Object> data1 = new HashMap<String, Object>();
                     data1.put(header[0], caseInstance.getId());
                     CasePriority casePriority = caseInstance.getPriority();

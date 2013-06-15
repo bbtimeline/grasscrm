@@ -203,7 +203,9 @@
         <property name="userService" ref="baseService" /> 
         <property name="campaignService" ref="baseService" />
         <property name="targetListService" ref="baseService" /> 
-        <property name="documentService" ref="baseService" />  
+        <property name="documentService" ref="baseService" /> 
+        <property name="changeLogService" ref="baseService" /> 
+        <property name="taskExecutor" ref="taskExecutor"/> 
     </bean> 
             
     <bean id="listCampaignAction" class="com.gcrm.action.ListCampaignAction" scope="prototype">   
@@ -222,6 +224,8 @@
         <property name="userService" ref="baseService" /> 
         <property name="mailService" ref="mailService" />
         <property name="emailTemplateService" ref="baseService" />
+        <property name="changeLogService" ref="baseService" /> 
+        <property name="taskExecutor" ref="taskExecutor"/> 
     </bean>         
 
     <bean id="listCallAction" class="com.gcrm.action.ListCallAction" scope="prototype">   
@@ -247,6 +251,8 @@
         <property name="taskService" ref="baseService" />
         <property name="mailService" ref="mailService" />
         <property name="emailTemplateService" ref="baseService" />
+        <property name="changeLogService" ref="baseService" /> 
+        <property name="taskExecutor" ref="taskExecutor"/>   
     </bean>  
 
     <bean id="listCaseAction" class="com.gcrm.action.ListCaseAction" scope="prototype">   
@@ -272,9 +278,16 @@
         <property name="accountService" ref="baseService" /> 	
         <property name="userService" ref="baseService" />  
         <property name="documentService" ref="baseService" /> 
-        <property name="contactService" ref="baseService" />         
+        <property name="contactService" ref="baseService" />  
+        <property name="changeLogService" ref="baseService" /> 
+        <property name="taskExecutor" ref="taskExecutor"/>          
     </bean>
 
+    <bean id="listChangeLogAction" class="com.gcrm.action.ListChangeLogAction" scope="prototype">   
+        <property name="baseService" ref="baseService" />
+        <property name="userService" ref="baseService" />      
+    </bean>
+        
     <bean id="listContactAction" class="com.gcrm.action.ListContactAction" scope="prototype">   
         <property name="baseService" ref="baseService" />
         <property name="accountService" ref="baseService" /> 
@@ -302,7 +315,9 @@
         <property name="callService" ref="baseService" />
         <property name="meetingService" ref="baseService" />
         <property name="documentService" ref="baseService" /> 
-        <property name="caseService" ref="baseService" />      	
+        <property name="caseService" ref="baseService" />   
+        <property name="changeLogService" ref="baseService" /> 
+        <property name="taskExecutor" ref="taskExecutor"/>    	
     </bean>
 
     <bean id="listDocumentAction" class="com.gcrm.action.ListDocumentAction" scope="prototype">   
@@ -326,7 +341,9 @@
         <property name="accountService" ref="baseService" /> 
         <property name="contactService" ref="baseService" />  
         <property name="opportunityService" ref="baseService" /> 
-        <property name="caseService" ref="baseService" />          	
+        <property name="caseService" ref="baseService" />  
+        <property name="changeLogService" ref="baseService" /> 
+        <property name="taskExecutor" ref="taskExecutor"/>         	
     </bean>
 
     <bean id="listLeadAction" class="com.gcrm.action.ListLeadAction" scope="prototype">   
@@ -356,7 +373,9 @@
         <property name="targetListService" ref="baseService" />
         <property name="callService" ref="baseService" />  
         <property name="meetingService" ref="baseService" /> 
-        <property name="contactService" ref="baseService" />         
+        <property name="contactService" ref="baseService" />
+        <property name="changeLogService" ref="baseService" /> 
+        <property name="taskExecutor" ref="taskExecutor"/>                  
     </bean>
 
     <bean id="listMeetingAction" class="com.gcrm.action.ListMeetingAction" scope="prototype">   
@@ -380,6 +399,8 @@
         <property name="taskService" ref="baseService" /> 
         <property name="mailService" ref="mailService" /> 
         <property name="emailTemplateService" ref="baseService" />
+        <property name="changeLogService" ref="baseService" /> 
+        <property name="taskExecutor" ref="taskExecutor"/>   
     </bean>
 
     <bean id="listOpportunityAction" class="com.gcrm.action.ListOpportunityAction" scope="prototype">   
@@ -405,7 +426,9 @@
         <property name="campaignService" ref="baseService" />
         <property name="contactService" ref="baseService" /> 	
         <property name="userService" ref="baseService" /> 
-        <property name="documentService" ref="baseService" />  	         	
+        <property name="documentService" ref="baseService" /> 
+        <property name="changeLogService" ref="baseService" /> 
+        <property name="taskExecutor" ref="taskExecutor"/>          	         	
     </bean>
 
     <bean id="listTargetAction" class="com.gcrm.action.ListTargetAction" scope="prototype">   
@@ -422,19 +445,23 @@
         <property name="salutationService" ref="optionService" />	
         <property name="leadService" ref="baseService" />
         <property name="userService" ref="baseService" />
-        <property name="targetListService" ref="baseService" /> 	         	
+        <property name="targetListService" ref="baseService" /> 
+        <property name="changeLogService" ref="baseService" /> 
+        <property name="taskExecutor" ref="taskExecutor"/> 	         	
     </bean>
     
     <bean id="listTargetListAction" class="com.gcrm.action.ListTargetListAction" scope="prototype">   
         <property name="baseService" ref="baseService" />
         <property name="userService" ref="baseService" /> 
-        <property name="campaignService" ref="baseService" />         
+        <property name="campaignService" ref="baseService" />   
     </bean> 
     
     <bean id="editTargetListAction" class="com.gcrm.action.EditTargetListAction" scope="prototype">   
         <property name="baseService" ref="baseService" /> 
         <property name="userService" ref="baseService" />
-        <property name="campaignService" ref="baseService" /> 	
+        <property name="campaignService" ref="baseService" />
+        <property name="changeLogService" ref="baseService" /> 
+        <property name="taskExecutor" ref="taskExecutor"/>               	
     </bean>    
 
     <bean id="listTaskAction" class="com.gcrm.action.ListTaskAction" scope="prototype">   
@@ -456,7 +483,9 @@
         <property name="leadService" ref="baseService" />
         <property name="opportunityService" ref="baseService" />
         <property name="targetService" ref="baseService" />
-        <property name="taskService" ref="baseService" />        
+        <property name="taskService" ref="baseService" />    
+        <property name="changeLogService" ref="baseService" /> 
+        <property name="taskExecutor" ref="taskExecutor"/>             
     </bean>
            
     <bean id="listUserAction" class="com.gcrm.action.ListUserAction" scope="prototype">   

@@ -13,6 +13,14 @@
     	  <result name="success">/jsp/crm/home.jsp</result>
         </action>
         
+      	<action name="listChangeLog" class="listChangeLogAction" method="list">
+    	  <result name="success" type="json"></result>
+        </action>
+              
+    	<action name="showChangeLogPage" class="listChangeLogAction" method="showPage">
+    	  <result>/jsp/crm/showChangeLogs.jsp</result>
+        </action>
+              	
       	<action name="listAccount" class="listAccountAction" method="list">
     	  <result name="success" type="json"></result>
         </action>
@@ -22,7 +30,6 @@
         </action>
         
     	<action name="listAccountPage">
-    	
     	  <result type="redirect">/jsp/crm/listAccount.jsp</result>
         </action>
 

@@ -30,3 +30,9 @@ database is installed in other server, you can change the value of url here.
    
  (7)In eclipse, go to Grass project, execute "ant deploy" to deploy project to jboss server, then start jboss server.
  (8)In browser, input URL:localhost:8080/grass, will open the login page, the default user name is "admin", password is empty, then you can login the Grass CRM system.
+ 
+ 
+ How to deploy grass crm to tomcat:
+ If you want to deploy grass crm to Tomcat, you need add jta.jar to this project, you can download jta.jar from http://www.java2s.com/Code/Jar/j/Downloadjtajar.htm, 
+ if you deploy grass crm to Jboss, needn't this jar.
+ 

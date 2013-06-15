@@ -113,6 +113,7 @@
 		<div id="feature">
 		    <s:include value="../navigation.jsp" />
 			<div id="shortcuts" class="headerList">
+			    <b style="white-space: nowrap; color: #444;"><s:text name="title.action" />:&nbsp;&nbsp;</b> 
 				<span> <span style="white-space: nowrap;"> <a id="save_accept_btn" href="#"
 						class="easyui-linkbutton" iconCls="icon-save-accept" onclick="save()"
 						plain="true"><s:text name="button.save" /></a>
@@ -124,6 +125,18 @@
 						class="easyui-linkbutton" iconCls="icon-cancel" onclick="cancel()"
 						plain="true"><s:text name="button.cancel" /></a>
 				</span>
+				<s:if test="task!=null && task.id!=null">
+				    <span style="white-space: nowrap;"><a
+						href="javascript:void(0)" id="mtmt" class="easyui-menubutton"
+						data-options="menu:'#mtm1',iconCls:'icon-more'"><s:text
+								name='menu.toolbar.more.title' /></a>
+						<div id="mtm1" style="width: 150px;">
+						  <div data-options="iconCls:'icon-import'" onClick="openwindow2('/crm/showChangeLogPage.action?entity=Task&recordID=' + '<s:property value="task.id" />',750,500)">
+							<s:text name='menu.item.changeLog.title' />
+						  </div>
+						</div>
+					  </span>
+				 </s:if> 				
 				</span>
 			</div>
 
@@ -251,7 +264,7 @@
 									<td class="td-value">
 										<select id="relatedObject" name="task.related_object" style="width:150px;">  
 										    <option value="Account"><s:text name="entity.account.label" /></option>  
-										    <option value="Case"><s:text name="entity.case.label" /></option>  
+										    <option value="Case"><s:text name="entity.caseInstance.label" /></option>  
 										    <option value="Contact"><s:text name="entity.contact.label" /></option>
 										    <option value="Lead"><s:text name="entity.lead.label" /></option>
 										    <option value="Opportunity"><s:text name="entity.opportunity.label" /></option>

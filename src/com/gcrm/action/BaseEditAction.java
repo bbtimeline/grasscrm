@@ -26,6 +26,8 @@ import javax.servlet.http.HttpSession;
 import org.apache.struts2.ServletActionContext;
 
 import com.gcrm.domain.BaseEntity;
+import com.gcrm.domain.ChangeLog;
+import com.gcrm.domain.OptionBase;
 import com.gcrm.domain.User;
 import com.gcrm.security.AuthenticationSuccessListener;
 import com.gcrm.util.CommonUtil;
@@ -160,6 +162,28 @@ public class BaseEditAction extends ActionSupport {
         assignedToText = loginUser.getName();
         ownerID = loginUser.getId();
         ownerText = loginUser.getName();
+    }
+
+    protected ChangeLog saveChangeLog(String entityName, Integer recordID,
+            String columnName, String oldValue, String newValue, User loginUser) {
+        ChangeLog changeLog = new ChangeLog();
+        changeLog.setEntityName(entityName);
+        changeLog.setRecordID(recordID);
+        changeLog.setColumnName(columnName);
+        changeLog.setOldValue(oldValue);
+        changeLog.setNewValue(newValue);
+        changeLog.setUpdated_by(loginUser);
+        changeLog.setUpdated_on(new Date());
+        return changeLog;
+    }
+
+    protected String getOptionValue(OptionBase option) {
+        if (option == null) {
+            return "";
+        } else {
+            return option.getValue();
+        }
+
     }
 
     /**

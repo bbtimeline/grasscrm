@@ -19,15 +19,22 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
+import org.springframework.core.task.TaskExecutor;
+
 import com.gcrm.domain.Campaign;
+import com.gcrm.domain.ChangeLog;
 import com.gcrm.domain.TargetList;
 import com.gcrm.domain.User;
+import com.gcrm.security.AuthenticationSuccessListener;
 import com.gcrm.service.IBaseService;
 import com.gcrm.util.BeanUtil;
+import com.gcrm.util.CommonUtil;
 import com.gcrm.util.Constant;
 import com.gcrm.util.security.UserUtil;
+import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.Preparable;
 
 /**
@@ -41,6 +48,8 @@ public class EditTargetListAction extends BaseEditAction implements Preparable {
     private IBaseService<TargetList> baseService;
     private IBaseService<User> userService;
     private IBaseService<Campaign> campaignService;
+    private IBaseService<ChangeLog> changeLogService;
+    private TaskExecutor taskExecutor;
     private TargetList targetList;
 
     /**
@@ -49,7 +58,9 @@ public class EditTargetListAction extends BaseEditAction implements Preparable {
      * @return the SUCCESS result
      */
     public String save() throws Exception {
-        saveEntity();
+        TargetList originalTargetList = saveEntity();
+        final Collection<ChangeLog> changeLogs = changeLog(originalTargetList,
+                targetList);
         if ("Campaign".equals(this.getRelationKey())) {
             Campaign campaign = campaignService.getEntityById(Campaign.class,
                     Integer.valueOf(this.getRelationValue()));
@@ -62,7 +73,81 @@ public class EditTargetListAction extends BaseEditAction implements Preparable {
         targetList = getBaseService().makePersistent(targetList);
         this.setId(targetList.getId());
         this.setSaveFlag("true");
+        if (changeLogs != null) {
+            taskExecutor.execute(new Runnable() {
+                public void run() {
+                    batchInserChangeLogs(changeLogs);
+                }
+            });
+        }
         return SUCCESS;
+    }
+
+    private void batchInserChangeLogs(Collection<ChangeLog> changeLogs) {
+        this.getChangeLogService().batchUpdate(changeLogs);
+    }
+
+    private Collection<ChangeLog> changeLog(TargetList originalTargetList,
+            TargetList targetList) {
+        Collection<ChangeLog> changeLogs = null;
+        if (originalTargetList != null) {
+            ActionContext context = ActionContext.getContext();
+            Map<String, Object> session = context.getSession();
+            String entityName = TargetList.class.getSimpleName();
+            Integer recordID = targetList.getId();
+            User loginUser = (User) session
+                    .get(AuthenticationSuccessListener.LOGIN_USER);
+            changeLogs = new ArrayList<ChangeLog>();
+
+            String oldName = CommonUtil.fromNullToEmpty(originalTargetList
+                    .getName());
+            String newName = CommonUtil.fromNullToEmpty(targetList.getName());
+            if (!oldName.equals(newName)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.name.label", oldName, newName, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldDescription = CommonUtil
+                    .fromNullToEmpty(originalTargetList.getDescription());
+            String newDescription = CommonUtil.fromNullToEmpty(targetList
+                    .getDescription());
+            if (!oldDescription.equals(newDescription)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.description.label", oldDescription,
+                        newDescription, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldNotes = CommonUtil.fromNullToEmpty(originalTargetList
+                    .getNotes());
+            String newNotes = CommonUtil.fromNullToEmpty(targetList.getNotes());
+            if (!oldNotes.equals(newNotes)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.notes.label", oldNotes, newNotes, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldAssignedToName = "";
+            User oldAssignedTo = originalTargetList.getAssigned_to();
+            if (oldAssignedTo != null) {
+                oldAssignedToName = oldAssignedTo.getName();
+            }
+            String newAssignedToName = "";
+            User newAssignedTo = targetList.getAssigned_to();
+            if (newAssignedTo != null) {
+                newAssignedToName = newAssignedTo.getName();
+            }
+            if (oldAssignedToName != newAssignedToName) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.assigned_to.label",
+                        CommonUtil.fromNullToEmpty(oldAssignedToName),
+                        CommonUtil.fromNullToEmpty(newAssignedToName),
+                        loginUser);
+                changeLogs.add(changeLog);
+            }
+        }
+        return changeLogs;
     }
 
     /**
@@ -99,10 +184,12 @@ public class EditTargetListAction extends BaseEditAction implements Preparable {
             User loginUser = this.getLoginUser();
             User user = userService
                     .getEntityById(User.class, loginUser.getId());
+            Collection<ChangeLog> allChangeLogs = new ArrayList<ChangeLog>();
             for (String IDString : selectIDArray) {
                 int id = Integer.parseInt(IDString);
                 TargetList targetListInstance = this.baseService.getEntityById(
                         TargetList.class, id);
+                TargetList originalTargetList = targetListInstance.clone();
                 for (String fieldName : fieldNames) {
                     Object value = BeanUtil
                             .getFieldValue(targetList, fieldName);
@@ -110,10 +197,19 @@ public class EditTargetListAction extends BaseEditAction implements Preparable {
                 }
                 targetListInstance.setUpdated_by(user);
                 targetListInstance.setUpdated_on(new Date());
+                Collection<ChangeLog> changeLogs = changeLog(
+                        originalTargetList, targetListInstance);
+                allChangeLogs.addAll(changeLogs);
                 targetLists.add(targetListInstance);
             }
+            final Collection<ChangeLog> changeLogsForSave = allChangeLogs;
             if (targetLists.size() > 0) {
                 this.baseService.batchUpdate(targetLists);
+                taskExecutor.execute(new Runnable() {
+                    public void run() {
+                        batchInserChangeLogs(changeLogsForSave);
+                    }
+                });
             }
         }
         return SUCCESS;
@@ -122,15 +218,17 @@ public class EditTargetListAction extends BaseEditAction implements Preparable {
     /**
      * Saves entity field
      * 
+     * @return original TargetList record
      * @throws Exception
      */
-    private void saveEntity() throws Exception {
+    private TargetList saveEntity() throws Exception {
+        TargetList originalTargetList = null;
         if (targetList.getId() == null) {
             UserUtil.permissionCheck("create_targetList");
         } else {
             UserUtil.permissionCheck("update_targetList");
-            TargetList originalTargetList = baseService.getEntityById(
-                    TargetList.class, targetList.getId());
+            originalTargetList = baseService.getEntityById(TargetList.class,
+                    targetList.getId());
             targetList.setTargets(originalTargetList.getTargets());
             targetList.setContacts(originalTargetList.getContacts());
             targetList.setLeads(originalTargetList.getLeads());
@@ -152,6 +250,7 @@ public class EditTargetListAction extends BaseEditAction implements Preparable {
         targetList.setOwner(owner);
 
         super.updateBaseInfo(targetList);
+        return originalTargetList;
     }
 
     /**
@@ -219,6 +318,22 @@ public class EditTargetListAction extends BaseEditAction implements Preparable {
      */
     public void setCampaignService(IBaseService<Campaign> campaignService) {
         this.campaignService = campaignService;
+    }
+
+    public IBaseService<ChangeLog> getChangeLogService() {
+        return changeLogService;
+    }
+
+    public void setChangeLogService(IBaseService<ChangeLog> changeLogService) {
+        this.changeLogService = changeLogService;
+    }
+
+    public TaskExecutor getTaskExecutor() {
+        return taskExecutor;
+    }
+
+    public void setTaskExecutor(TaskExecutor taskExecutor) {
+        this.taskExecutor = taskExecutor;
     }
 
 }

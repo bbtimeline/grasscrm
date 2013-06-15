@@ -29,11 +29,13 @@ import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.struts2.ServletActionContext;
+import org.springframework.core.task.TaskExecutor;
 
 import com.gcrm.domain.Account;
 import com.gcrm.domain.Campaign;
 import com.gcrm.domain.CampaignStatus;
 import com.gcrm.domain.CampaignType;
+import com.gcrm.domain.ChangeLog;
 import com.gcrm.domain.Contact;
 import com.gcrm.domain.Currency;
 import com.gcrm.domain.EmailTemplate;
@@ -67,6 +69,8 @@ public class EditCampaignAction extends BaseEditAction implements Preparable {
     private IBaseService<User> userService;
     private MailService mailService;
     private IBaseService<EmailTemplate> emailTemplateService;
+    private IBaseService<ChangeLog> changeLogService;
+    private TaskExecutor taskExecutor;
     private Campaign campaign;
     private List<CampaignType> types;
     private List<CampaignStatus> statuses;
@@ -94,11 +98,232 @@ public class EditCampaignAction extends BaseEditAction implements Preparable {
      * @return the SUCCESS result
      */
     public String save() throws Exception {
-        saveEntity();
+        Campaign originalCampaign = saveEntity();
+        final Collection<ChangeLog> changeLogs = changeLog(originalCampaign,
+                campaign);
         campaign = getbaseService().makePersistent(campaign);
         this.setId(campaign.getId());
         this.setSaveFlag("true");
+        if (changeLogs != null) {
+            taskExecutor.execute(new Runnable() {
+                public void run() {
+                    batchInserChangeLogs(changeLogs);
+                }
+            });
+        }
         return SUCCESS;
+    }
+
+    private void batchInserChangeLogs(Collection<ChangeLog> changeLogs) {
+        this.getChangeLogService().batchUpdate(changeLogs);
+    }
+
+    private Collection<ChangeLog> changeLog(Campaign originalCampaign,
+            Campaign campaign) {
+        Collection<ChangeLog> changeLogs = null;
+        if (originalCampaign != null) {
+            ActionContext context = ActionContext.getContext();
+            Map<String, Object> session = context.getSession();
+            String entityName = Campaign.class.getSimpleName();
+            Integer recordID = campaign.getId();
+            User loginUser = (User) session
+                    .get(AuthenticationSuccessListener.LOGIN_USER);
+            changeLogs = new ArrayList<ChangeLog>();
+
+            String oldName = CommonUtil.fromNullToEmpty(originalCampaign
+                    .getName());
+            String newName = CommonUtil.fromNullToEmpty(campaign.getName());
+            if (!oldName.equals(newName)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.name.label", oldName, newName, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldStatus = getOptionValue(originalCampaign.getStatus());
+            String newStatus = getOptionValue(campaign.getStatus());
+            if (!oldStatus.equals(newStatus)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.status.label", oldStatus, newStatus, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            SimpleDateFormat dateFormat = new SimpleDateFormat(
+                    Constant.DATE_EDIT_FORMAT);
+            String oldStartDateValue = "";
+            Date oldStartDate = originalCampaign.getStart_date();
+            if (oldStartDate != null) {
+                oldStartDateValue = dateFormat.format(oldStartDate);
+            }
+            String newStartDateValue = "";
+            Date newStartDate = campaign.getStart_date();
+            if (newStartDate != null) {
+                newStartDateValue = dateFormat.format(newStartDate);
+            }
+            if (!oldStartDateValue.equals(newStartDateValue)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.start_date.label", oldStartDateValue,
+                        newStartDateValue, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldEndDateValue = "";
+            Date oldEndDate = originalCampaign.getEnd_date();
+            if (oldEndDate != null) {
+                oldEndDateValue = dateFormat.format(oldEndDate);
+            }
+            String newEndDateValue = "";
+            Date newEndDate = campaign.getEnd_date();
+            if (newEndDate != null) {
+                newEndDateValue = dateFormat.format(newEndDate);
+            }
+            if (!oldEndDateValue.equals(newEndDateValue)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.end_date.label", oldEndDateValue,
+                        newEndDateValue, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldCampaignType = getOptionValue(originalCampaign.getType());
+            String newCampaignType = getOptionValue(campaign.getType());
+            if (!oldCampaignType.equals(newCampaignType)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.type.label", oldCampaignType, newCampaignType,
+                        loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldCurrencyName = "";
+            Currency oldCurrency = originalCampaign.getCurrency();
+            if (oldCurrency != null) {
+                oldCurrencyName = CommonUtil.fromNullToEmpty(oldCurrency
+                        .getName());
+            }
+            String newCurrencyName = "";
+            Currency newCurrency = campaign.getCurrency();
+            if (newCurrency != null) {
+                newCurrencyName = CommonUtil.fromNullToEmpty(newCurrency
+                        .getName());
+            }
+            if (oldCurrencyName != newCurrencyName) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.currency.label", oldCurrencyName,
+                        newCurrencyName, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldImpressions = String.valueOf(originalCampaign
+                    .getImpressions());
+            String newImpressions = String.valueOf(campaign.getImpressions());
+            if (!oldImpressions.equals(newImpressions)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "campaign.impressions.label", oldImpressions,
+                        newImpressions, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldBudget = String.valueOf(originalCampaign.getBudget());
+            String newBudget = String.valueOf(campaign.getBudget());
+            if (!oldBudget.equals(newBudget)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "campaign.budget.label", oldBudget, newBudget,
+                        loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldExpectedCost = String.valueOf(originalCampaign
+                    .getExpected_cost());
+            String newExpectedCost = String
+                    .valueOf(campaign.getExpected_cost());
+            if (!oldExpectedCost.equals(newExpectedCost)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "campaign.expected_cost.label", oldExpectedCost,
+                        newExpectedCost, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldActualCost = String.valueOf(originalCampaign
+                    .getActual_cost());
+            String newActualCost = String.valueOf(campaign.getActual_cost());
+            if (!oldActualCost.equals(newActualCost)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "campaign.actual_cost.label", oldActualCost,
+                        newActualCost, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldExpectedRevenue = String.valueOf(originalCampaign
+                    .getExpected_revenue());
+            String newExpectedRevenue = String.valueOf(campaign
+                    .getExpected_revenue());
+            if (!oldExpectedRevenue.equals(newExpectedRevenue)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "campaign.expected_revenue.label", oldExpectedRevenue,
+                        newExpectedRevenue, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldExpectedRespone = String.valueOf(originalCampaign
+                    .getExpected_respone());
+            String newExpectedRespone = String.valueOf(campaign
+                    .getExpected_respone());
+            if (!oldExpectedRespone.equals(newExpectedRespone)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "campaign.expected_respone.label", oldExpectedRespone,
+                        newExpectedRespone, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldObjective = CommonUtil.fromNullToEmpty(originalCampaign
+                    .getObjective());
+            String newObjective = CommonUtil.fromNullToEmpty(campaign
+                    .getObjective());
+            if (!oldObjective.equals(newObjective)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "campaign.objective.label", oldObjective, newObjective,
+                        loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldDescription = CommonUtil.fromNullToEmpty(originalCampaign
+                    .getDescription());
+            String newDescription = CommonUtil.fromNullToEmpty(campaign
+                    .getDescription());
+            if (!oldDescription.equals(newDescription)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.description.label", oldDescription,
+                        newDescription, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldNotes = CommonUtil.fromNullToEmpty(originalCampaign
+                    .getNotes());
+            String newNotes = CommonUtil.fromNullToEmpty(campaign.getNotes());
+            if (!oldNotes.equals(newNotes)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.notes.label", oldNotes, newNotes, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldAssignedToName = "";
+            User oldAssignedTo = originalCampaign.getAssigned_to();
+            if (oldAssignedTo != null) {
+                oldAssignedToName = oldAssignedTo.getName();
+            }
+            String newAssignedToName = "";
+            User newAssignedTo = campaign.getAssigned_to();
+            if (newAssignedTo != null) {
+                newAssignedToName = newAssignedTo.getName();
+            }
+            if (oldAssignedToName != newAssignedToName) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.assigned_to.label",
+                        CommonUtil.fromNullToEmpty(oldAssignedToName),
+                        CommonUtil.fromNullToEmpty(newAssignedToName),
+                        loginUser);
+                changeLogs.add(changeLog);
+            }
+        }
+        return changeLogs;
     }
 
     /**
@@ -364,20 +589,31 @@ public class EditCampaignAction extends BaseEditAction implements Preparable {
             User loginUser = this.getLoginUser();
             User user = userService
                     .getEntityById(User.class, loginUser.getId());
+            Collection<ChangeLog> allChangeLogs = new ArrayList<ChangeLog>();
             for (String IDString : selectIDArray) {
                 int id = Integer.parseInt(IDString);
                 Campaign campaignInstance = this.baseService.getEntityById(
                         Campaign.class, id);
+                Campaign originalCampaign = campaignInstance.clone();
                 for (String fieldName : fieldNames) {
                     Object value = BeanUtil.getFieldValue(campaign, fieldName);
                     BeanUtil.setFieldValue(campaignInstance, fieldName, value);
                 }
                 campaignInstance.setUpdated_by(user);
                 campaignInstance.setUpdated_on(new Date());
+                Collection<ChangeLog> changeLogs = changeLog(originalCampaign,
+                        campaignInstance);
+                allChangeLogs.addAll(changeLogs);
                 campaigns.add(campaignInstance);
             }
+            final Collection<ChangeLog> changeLogsForSave = allChangeLogs;
             if (campaigns.size() > 0) {
                 this.baseService.batchUpdate(campaigns);
+                taskExecutor.execute(new Runnable() {
+                    public void run() {
+                        batchInserChangeLogs(changeLogsForSave);
+                    }
+                });
             }
         }
         return SUCCESS;
@@ -386,13 +622,18 @@ public class EditCampaignAction extends BaseEditAction implements Preparable {
     /**
      * Saves entity field
      * 
+     * @return original campaign record
      * @throws ParseException
      */
-    private void saveEntity() throws Exception {
+    private Campaign saveEntity() throws Exception {
+        Campaign originalCampaign = null;
         if (campaign.getId() == null) {
             UserUtil.permissionCheck("create_campaign");
         } else {
             UserUtil.permissionCheck("update_campaign");
+            originalCampaign = baseService.getEntityById(Campaign.class,
+                    campaign.getId());
+            campaign.setTargetLists(originalCampaign.getTargetLists());
         }
         CampaignStatus status = null;
         if (statusID != null) {
@@ -436,6 +677,7 @@ public class EditCampaignAction extends BaseEditAction implements Preparable {
         }
         campaign.setEnd_date(end_date);
         super.updateBaseInfo(campaign);
+        return originalCampaign;
     }
 
     /**
@@ -849,6 +1091,36 @@ public class EditCampaignAction extends BaseEditAction implements Preparable {
 
     public void setUploadContentType(String[] uploadContentType) {
         this.uploadContentTypes = uploadContentType;
+    }
+
+    /**
+     * @return the changeLogService
+     */
+    public IBaseService<ChangeLog> getChangeLogService() {
+        return changeLogService;
+    }
+
+    /**
+     * @param changeLogService
+     *            the changeLogService to set
+     */
+    public void setChangeLogService(IBaseService<ChangeLog> changeLogService) {
+        this.changeLogService = changeLogService;
+    }
+
+    /**
+     * @return the taskExecutor
+     */
+    public TaskExecutor getTaskExecutor() {
+        return taskExecutor;
+    }
+
+    /**
+     * @param taskExecutor
+     *            the taskExecutor to set
+     */
+    public void setTaskExecutor(TaskExecutor taskExecutor) {
+        this.taskExecutor = taskExecutor;
     }
 
 }

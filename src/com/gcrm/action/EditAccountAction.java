@@ -23,16 +23,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.core.task.TaskExecutor;
+
 import com.gcrm.domain.Account;
 import com.gcrm.domain.AccountType;
 import com.gcrm.domain.Campaign;
+import com.gcrm.domain.ChangeLog;
 import com.gcrm.domain.Document;
 import com.gcrm.domain.Industry;
 import com.gcrm.domain.TargetList;
 import com.gcrm.domain.User;
+import com.gcrm.security.AuthenticationSuccessListener;
 import com.gcrm.service.IBaseService;
 import com.gcrm.service.IOptionService;
 import com.gcrm.util.BeanUtil;
+import com.gcrm.util.CommonUtil;
 import com.gcrm.util.Constant;
 import com.gcrm.util.security.UserUtil;
 import com.opensymphony.xwork2.ActionContext;
@@ -53,6 +58,8 @@ public class EditAccountAction extends BaseEditAction implements Preparable {
     private IBaseService<Campaign> campaignService;
     private IBaseService<TargetList> targetListService;
     private IBaseService<Document> documentService;
+    private IBaseService<ChangeLog> changeLogService;
+    private TaskExecutor taskExecutor;
     private Account account;
     private List<AccountType> types;
     private List<Industry> industries;
@@ -68,7 +75,7 @@ public class EditAccountAction extends BaseEditAction implements Preparable {
      * @return the SUCCESS result
      */
     public String save() throws Exception {
-        saveEntity();
+        Account originalAccount = saveEntity();
 
         if ("TargetList".equals(this.getRelationKey())) {
             TargetList targetList = targetListService.getEntityById(
@@ -87,11 +94,24 @@ public class EditAccountAction extends BaseEditAction implements Preparable {
             }
             documents.add(document);
         }
-
+        final Collection<ChangeLog> changeLogs = changeLog(originalAccount,
+                account);
         account = getBaseService().makePersistent(account);
         this.setId(account.getId());
         this.setSaveFlag("true");
+
+        if (changeLogs != null) {
+            taskExecutor.execute(new Runnable() {
+                public void run() {
+                    batchInserChangeLogs(changeLogs);
+                }
+            });
+        }
         return SUCCESS;
+    }
+
+    private void batchInserChangeLogs(Collection<ChangeLog> changeLogs) {
+        this.getChangeLogService().batchUpdate(changeLogs);
     }
 
     /**
@@ -106,20 +126,31 @@ public class EditAccountAction extends BaseEditAction implements Preparable {
             User loginUser = this.getLoginUser();
             User user = userService
                     .getEntityById(User.class, loginUser.getId());
+            Collection<ChangeLog> allChangeLogs = new ArrayList<ChangeLog>();
             for (String IDString : selectIDArray) {
                 int id = Integer.parseInt(IDString);
                 Account accountInstance = this.baseService.getEntityById(
                         Account.class, id);
+                Account originalAccount = accountInstance.clone();
                 for (String fieldName : fieldNames) {
                     Object value = BeanUtil.getFieldValue(account, fieldName);
                     BeanUtil.setFieldValue(accountInstance, fieldName, value);
                 }
                 accountInstance.setUpdated_by(user);
                 accountInstance.setUpdated_on(new Date());
+                Collection<ChangeLog> changeLogs = changeLog(originalAccount,
+                        accountInstance);
+                allChangeLogs.addAll(changeLogs);
                 accounts.add(accountInstance);
             }
+            final Collection<ChangeLog> changeLogsForSave = allChangeLogs;
             if (accounts.size() > 0) {
                 this.baseService.batchUpdate(accounts);
+                taskExecutor.execute(new Runnable() {
+                    public void run() {
+                        batchInserChangeLogs(changeLogsForSave);
+                    }
+                });
             }
         }
         return SUCCESS;
@@ -128,17 +159,19 @@ public class EditAccountAction extends BaseEditAction implements Preparable {
     /**
      * Saves entity field
      * 
+     * @return original account record
      * @throws Exception
      */
-    private void saveEntity() throws Exception {
+    private Account saveEntity() throws Exception {
+        Account originalAccount = null;
         if (account.getId() == null) {
             UserUtil.permissionCheck("create_account");
         } else {
             UserUtil.permissionCheck("update_account");
-            Account originalAcccount = baseService.getEntityById(Account.class,
+            originalAccount = baseService.getEntityById(Account.class,
                     account.getId());
-            account.setTargetLists(originalAcccount.getTargetLists());
-            account.setDocuments(originalAcccount.getDocuments());
+            account.setTargetLists(originalAccount.getTargetLists());
+            account.setDocuments(originalAccount.getDocuments());
         }
         AccountType type = null;
         if (typeID != null) {
@@ -172,6 +205,311 @@ public class EditAccountAction extends BaseEditAction implements Preparable {
         }
         account.setManager(manager);
         super.updateBaseInfo(account);
+        return originalAccount;
+    }
+
+    private Collection<ChangeLog> changeLog(Account originalAccount,
+            Account account) {
+        Collection<ChangeLog> changeLogs = null;
+        if (originalAccount != null) {
+            ActionContext context = ActionContext.getContext();
+            Map<String, Object> session = context.getSession();
+            String entityName = Account.class.getSimpleName();
+            Integer recordID = account.getId();
+            User loginUser = (User) session
+                    .get(AuthenticationSuccessListener.LOGIN_USER);
+            changeLogs = new ArrayList<ChangeLog>();
+
+            String oldName = CommonUtil.fromNullToEmpty(originalAccount
+                    .getName());
+            String newName = CommonUtil.fromNullToEmpty(account.getName());
+            if (!oldName.equals(newName)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.name.label", oldName, newName, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldOfficePhone = CommonUtil.fromNullToEmpty(originalAccount
+                    .getOffice_phone());
+            String newOfficePhone = CommonUtil.fromNullToEmpty(account
+                    .getOffice_phone());
+            if (!oldOfficePhone.equals(newOfficePhone)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.office_phone.label", oldOfficePhone,
+                        newOfficePhone, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldWebsite = CommonUtil.fromNullToEmpty(originalAccount
+                    .getWebsite());
+            String newWebsite = CommonUtil
+                    .fromNullToEmpty(account.getWebsite());
+            if (!oldWebsite.equals(newWebsite)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.website.label", oldWebsite, newWebsite,
+                        loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldFax = CommonUtil
+                    .fromNullToEmpty(originalAccount.getFax());
+            String newWFax = CommonUtil.fromNullToEmpty(account.getFax());
+            if (!oldFax.equals(newWFax)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.fax.label", oldFax, newWFax, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldBillStreet = CommonUtil.fromNullToEmpty(originalAccount
+                    .getBill_street());
+            String newBillStreet = CommonUtil.fromNullToEmpty(account
+                    .getBill_street());
+            if (!oldBillStreet.equals(newBillStreet)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.billing_street.label", oldBillStreet,
+                        newBillStreet, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldBillState = CommonUtil.fromNullToEmpty(originalAccount
+                    .getBill_state());
+            String newBillState = CommonUtil.fromNullToEmpty(account
+                    .getBill_state());
+            if (!oldBillState.equals(newBillState)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.billing_state.label", oldBillState,
+                        newBillState, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldBillPostalCode = CommonUtil
+                    .fromNullToEmpty(originalAccount.getBill_postal_code());
+            String newBillPostalCode = CommonUtil.fromNullToEmpty(account
+                    .getBill_postal_code());
+            if (!oldBillPostalCode.equals(newBillPostalCode)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.billing_postal_code.label", oldBillPostalCode,
+                        newBillPostalCode, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldBillCountry = CommonUtil.fromNullToEmpty(originalAccount
+                    .getBill_country());
+            String newBillCountry = CommonUtil.fromNullToEmpty(account
+                    .getBill_country());
+            if (!oldBillCountry.equals(newBillCountry)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.billing_country.label", oldBillCountry,
+                        newBillCountry, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldShipStreet = CommonUtil.fromNullToEmpty(originalAccount
+                    .getShip_street());
+            String newShipStreet = CommonUtil.fromNullToEmpty(account
+                    .getShip_street());
+            if (!oldShipStreet.equals(newShipStreet)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.shipping_street.label", oldShipStreet,
+                        newShipStreet, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldShipState = CommonUtil.fromNullToEmpty(originalAccount
+                    .getShip_state());
+            String newShipState = CommonUtil.fromNullToEmpty(account
+                    .getShip_state());
+            if (!oldShipState.equals(newShipState)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.shipping_state.label", oldShipState,
+                        newShipState, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldShipPostalCode = CommonUtil
+                    .fromNullToEmpty(originalAccount.getShip_postal_code());
+            String newShipPostalCode = CommonUtil.fromNullToEmpty(account
+                    .getShip_postal_code());
+            if (!oldShipPostalCode.equals(newShipPostalCode)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.shipping_postal_code.label", oldShipPostalCode,
+                        newShipPostalCode, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldShipCountry = CommonUtil.fromNullToEmpty(originalAccount
+                    .getShip_country());
+            String newShipCountry = CommonUtil.fromNullToEmpty(account
+                    .getShip_country());
+            if (!oldShipCountry.equals(newShipCountry)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.shipping_country.label", oldShipCountry,
+                        newShipCountry, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldEmail = CommonUtil.fromNullToEmpty(originalAccount
+                    .getEmail());
+            String newEmail = CommonUtil.fromNullToEmpty(account.getEmail());
+            if (!oldEmail.equals(newEmail)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.email.label", oldEmail, newEmail, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldDescription = CommonUtil.fromNullToEmpty(originalAccount
+                    .getDescription());
+            String newDescription = CommonUtil.fromNullToEmpty(account
+                    .getDescription());
+            if (!oldDescription.equals(newDescription)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.description.label", oldDescription,
+                        newDescription, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldNotes = CommonUtil.fromNullToEmpty(originalAccount
+                    .getNotes());
+            String newNotes = CommonUtil.fromNullToEmpty(account.getNotes());
+            if (!oldNotes.equals(newNotes)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.notes.label", oldNotes, newNotes, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldAccountType = getOptionValue(originalAccount
+                    .getAccount_type());
+            String newAccountType = getOptionValue(account.getAccount_type());
+            if (!oldAccountType.equals(newAccountType)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.type.label", oldAccountType, newAccountType,
+                        loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldIndustry = getOptionValue(originalAccount.getIndustry());
+            String newIndustry = getOptionValue(account.getIndustry());
+            if (!oldIndustry.equals(newIndustry)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "menu.industry.title", oldIndustry, newIndustry,
+                        loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldAnnualRevenue = CommonUtil
+                    .fromNullToEmpty(originalAccount.getAnnual_revenue());
+            String newAnnualRevenue = CommonUtil.fromNullToEmpty(account
+                    .getAnnual_revenue());
+            if (!oldAnnualRevenue.equals(newAnnualRevenue)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "account.annual_revenue.label", oldAnnualRevenue,
+                        newAnnualRevenue, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldMarketValue = CommonUtil.fromNullToEmpty(originalAccount
+                    .getMarket_value());
+            String newMarketValue = CommonUtil.fromNullToEmpty(account
+                    .getMarket_value());
+            if (!oldMarketValue.equals(newMarketValue)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "account.market_value.label", oldMarketValue,
+                        newMarketValue, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldEmployees = CommonUtil.fromNullToEmpty(originalAccount
+                    .getEmployees());
+            String newEmployees = CommonUtil.fromNullToEmpty(account
+                    .getEmployees());
+            if (!oldMarketValue.equals(newMarketValue)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "account.employees.label", oldEmployees, newEmployees,
+                        loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldSicCode = CommonUtil.fromNullToEmpty(originalAccount
+                    .getSic_code());
+            String newSicCode = CommonUtil.fromNullToEmpty(account
+                    .getSic_code());
+            if (!oldSicCode.equals(newSicCode)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "account.sic_code.label", oldSicCode, newSicCode,
+                        loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldTicketSymbol = CommonUtil.fromNullToEmpty(originalAccount
+                    .getTicket_symbol());
+            String newTicketSymbol = CommonUtil.fromNullToEmpty(account
+                    .getTicket_symbol());
+            if (!oldTicketSymbol.equals(newTicketSymbol)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "account.ticket_symbol.label", oldTicketSymbol,
+                        newTicketSymbol, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldManagerName = "";
+            Account oldManager = originalAccount.getManager();
+            if (oldManager != null) {
+                oldManagerName = CommonUtil.fromNullToEmpty(oldManager
+                        .getName());
+            }
+            String newManagerName = "";
+            Account newManager = account.getManager();
+            if (newManager != null) {
+                newManagerName = CommonUtil.fromNullToEmpty(newManager
+                        .getName());
+            }
+            if (oldManagerName != newManagerName) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "account.manager.label", oldManagerName,
+                        newManagerName, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldOwnship = CommonUtil.fromNullToEmpty(originalAccount
+                    .getOwnship());
+            String newOwnship = CommonUtil
+                    .fromNullToEmpty(account.getOwnship());
+            if (!oldOwnship.equals(newOwnship)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "account.ownship.label", oldOwnship, newOwnship,
+                        loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldRating = CommonUtil.fromNullToEmpty(originalAccount
+                    .getRating());
+            String newRating = CommonUtil.fromNullToEmpty(account.getRating());
+            if (!oldRating.equals(newRating)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "account.rating.label", oldRating, newRating, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldAssignedToName = "";
+            User oldAssignedTo = originalAccount.getAssigned_to();
+            if (oldAssignedTo != null) {
+                oldAssignedToName = oldAssignedTo.getName();
+            }
+            String newAssignedToName = "";
+            User newAssignedTo = account.getAssigned_to();
+            if (newAssignedTo != null) {
+                newAssignedToName = newAssignedTo.getName();
+            }
+            if (oldAssignedToName != newAssignedToName) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.assigned_to.label",
+                        CommonUtil.fromNullToEmpty(oldAssignedToName),
+                        CommonUtil.fromNullToEmpty(newAssignedToName),
+                        loginUser);
+                changeLogs.add(changeLog);
+            }
+        }
+        return changeLogs;
     }
 
     /**
@@ -450,6 +788,36 @@ public class EditAccountAction extends BaseEditAction implements Preparable {
      */
     public void setIndustryService(IOptionService<Industry> industryService) {
         this.industryService = industryService;
+    }
+
+    /**
+     * @return the changeLogService
+     */
+    public IBaseService<ChangeLog> getChangeLogService() {
+        return changeLogService;
+    }
+
+    /**
+     * @param changeLogService
+     *            the changeLogService to set
+     */
+    public void setChangeLogService(IBaseService<ChangeLog> changeLogService) {
+        this.changeLogService = changeLogService;
+    }
+
+    /**
+     * @return the taskExecutor
+     */
+    public TaskExecutor getTaskExecutor() {
+        return taskExecutor;
+    }
+
+    /**
+     * @param taskExecutor
+     *            the taskExecutor to set
+     */
+    public void setTaskExecutor(TaskExecutor taskExecutor) {
+        this.taskExecutor = taskExecutor;
     }
 
 }

@@ -61,4 +61,5 @@ drop table users CASCADE;
 drop table users_role CASCADE;		
 drop table userstatus CASCADE;	
 drop table emailtemplate CASCADE;
+drop table changelog CASCADE;
 drop sequence hibernate_sequence;

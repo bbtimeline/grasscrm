@@ -28,8 +28,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.core.task.TaskExecutor;
+
 import com.gcrm.domain.Account;
 import com.gcrm.domain.CaseInstance;
+import com.gcrm.domain.ChangeLog;
 import com.gcrm.domain.Contact;
 import com.gcrm.domain.Document;
 import com.gcrm.domain.DocumentCategory;
@@ -37,6 +40,7 @@ import com.gcrm.domain.DocumentStatus;
 import com.gcrm.domain.DocumentSubCategory;
 import com.gcrm.domain.Opportunity;
 import com.gcrm.domain.User;
+import com.gcrm.security.AuthenticationSuccessListener;
 import com.gcrm.service.IBaseService;
 import com.gcrm.service.IDocumentService;
 import com.gcrm.service.IOptionService;
@@ -64,6 +68,8 @@ public class EditDocumentAction extends BaseEditAction implements Preparable {
     private IBaseService<Opportunity> opportunityService;
     private IBaseService<CaseInstance> caseService;
     private IBaseService<User> userService;
+    private IBaseService<ChangeLog> changeLogService;
+    private TaskExecutor taskExecutor;
     private Document document;
     private List<DocumentStatus> statuses;
     private List<DocumentCategory> categories;
@@ -86,12 +92,185 @@ public class EditDocumentAction extends BaseEditAction implements Preparable {
      * @return the SUCCESS result
      */
     public String save() throws Exception {
-        saveEntity();
+        Document originalDocument = saveEntity();
+        final Collection<ChangeLog> changeLogs = changeLog(originalDocument,
+                document);
         File file = this.getUpload();
         document = this.baseService.save(document, file);
         this.setId(document.getId());
         this.setSaveFlag("true");
+        if (changeLogs != null) {
+            taskExecutor.execute(new Runnable() {
+                public void run() {
+                    batchInserChangeLogs(changeLogs);
+                }
+            });
+        }
         return SUCCESS;
+    }
+
+    private void batchInserChangeLogs(Collection<ChangeLog> changeLogs) {
+        this.getChangeLogService().batchUpdate(changeLogs);
+    }
+
+    private Collection<ChangeLog> changeLog(Document originalDocument,
+            Document document) {
+        Collection<ChangeLog> changeLogs = null;
+        if (originalDocument != null) {
+            ActionContext context = ActionContext.getContext();
+            Map<String, Object> session = context.getSession();
+            String entityName = Document.class.getSimpleName();
+            Integer recordID = document.getId();
+            User loginUser = (User) session
+                    .get(AuthenticationSuccessListener.LOGIN_USER);
+            changeLogs = new ArrayList<ChangeLog>();
+
+            String oldName = CommonUtil.fromNullToEmpty(originalDocument
+                    .getName());
+            String newName = CommonUtil.fromNullToEmpty(document.getName());
+            if (!oldName.equals(newName)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.name.label", oldName, newName, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldFileName = CommonUtil.fromNullToEmpty(originalDocument
+                    .getFileName());
+            String newFileName = CommonUtil.fromNullToEmpty(document
+                    .getFileName());
+            if (!oldFileName.equals(newFileName)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "document.file.label", oldFileName, newFileName,
+                        loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldRevision = String.valueOf(originalDocument.getRevision());
+            String newRevision = String.valueOf(document.getRevision());
+            if (!oldRevision.equals(newRevision)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "document.revision.label", oldRevision, newRevision,
+                        loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            SimpleDateFormat dateFormat = new SimpleDateFormat(
+                    Constant.DATE_EDIT_FORMAT);
+            String oldPublishDateValue = "";
+            Date oldPublishDate = originalDocument.getPublish_date();
+            if (oldPublishDate != null) {
+                oldPublishDateValue = dateFormat.format(oldPublishDate);
+            }
+            String newPublishDateValue = "";
+            Date newPublishDate = document.getPublish_date();
+            if (newPublishDate != null) {
+                newPublishDateValue = dateFormat.format(newPublishDate);
+            }
+            if (!oldPublishDateValue.equals(newPublishDateValue)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "document.publish_date.label", oldPublishDateValue,
+                        newPublishDateValue, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldExpirationDateValue = "";
+            Date oldExpirationDate = originalDocument.getExpiration_date();
+            if (oldExpirationDate != null) {
+                oldExpirationDateValue = dateFormat.format(oldExpirationDate);
+            }
+            String newExpirationDateValue = "";
+            Date newExpirationDate = document.getExpiration_date();
+            if (newExpirationDate != null) {
+                newExpirationDateValue = dateFormat.format(newExpirationDate);
+            }
+            if (!oldExpirationDateValue.equals(newExpirationDateValue)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "document.expiration_date.label",
+                        oldExpirationDateValue, newExpirationDateValue,
+                        loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldCategory = getOptionValue(originalDocument.getCategory());
+            String newCategory = getOptionValue(document.getCategory());
+            if (!oldCategory.equals(newCategory)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "document.category.label", oldCategory, newCategory,
+                        loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldSubCategory = getOptionValue(originalDocument
+                    .getSub_category());
+            String newSubCategory = getOptionValue(document.getSub_category());
+            if (!oldSubCategory.equals(newSubCategory)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "document.sub_category.label", oldSubCategory,
+                        newSubCategory, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldRelatedDocumentName = "";
+            Document oldRelatedDocument = originalDocument
+                    .getRelated_document();
+            if (oldRelatedDocument != null) {
+                oldRelatedDocumentName = CommonUtil
+                        .fromNullToEmpty(oldRelatedDocument.getName());
+            }
+            String newRelatedDocumentName = "";
+            Document newRelatedDocument = document.getRelated_document();
+            if (newRelatedDocument != null) {
+                newRelatedDocumentName = CommonUtil
+                        .fromNullToEmpty(newRelatedDocument.getName());
+            }
+            if (oldRelatedDocumentName != newRelatedDocumentName) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "document.related_document.label",
+                        oldRelatedDocumentName, newRelatedDocumentName,
+                        loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldDescription = CommonUtil.fromNullToEmpty(originalDocument
+                    .getDescription());
+            String newDescription = CommonUtil.fromNullToEmpty(document
+                    .getDescription());
+            if (!oldDescription.equals(newDescription)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.description.label", oldDescription,
+                        newDescription, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldNotes = CommonUtil.fromNullToEmpty(originalDocument
+                    .getNotes());
+            String newNotes = CommonUtil.fromNullToEmpty(document.getNotes());
+            if (!oldNotes.equals(newNotes)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.notes.label", oldNotes, newNotes, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldAssignedToName = "";
+            User oldAssignedTo = originalDocument.getAssigned_to();
+            if (oldAssignedTo != null) {
+                oldAssignedToName = oldAssignedTo.getName();
+            }
+            String newAssignedToName = "";
+            User newAssignedTo = document.getAssigned_to();
+            if (newAssignedTo != null) {
+                newAssignedToName = newAssignedTo.getName();
+            }
+            if (oldAssignedToName != newAssignedToName) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.assigned_to.label",
+                        CommonUtil.fromNullToEmpty(oldAssignedToName),
+                        CommonUtil.fromNullToEmpty(newAssignedToName),
+                        loginUser);
+                changeLogs.add(changeLog);
+            }
+        }
+        return changeLogs;
     }
 
     /**
@@ -156,20 +335,31 @@ public class EditDocumentAction extends BaseEditAction implements Preparable {
             User loginUser = this.getLoginUser();
             User user = userService
                     .getEntityById(User.class, loginUser.getId());
+            Collection<ChangeLog> allChangeLogs = new ArrayList<ChangeLog>();
             for (String IDString : selectIDArray) {
                 int id = Integer.parseInt(IDString);
                 Document documentInstance = this.baseService.getEntityById(
                         Document.class, id);
+                Document originalDocument = documentInstance.clone();
                 for (String fieldName : fieldNames) {
                     Object value = BeanUtil.getFieldValue(document, fieldName);
                     BeanUtil.setFieldValue(documentInstance, fieldName, value);
                 }
                 documentInstance.setUpdated_by(user);
                 documentInstance.setUpdated_on(new Date());
+                Collection<ChangeLog> changeLogs = changeLog(originalDocument,
+                        documentInstance);
+                allChangeLogs.addAll(changeLogs);
                 documents.add(documentInstance);
             }
+            final Collection<ChangeLog> changeLogsForSave = allChangeLogs;
             if (documents.size() > 0) {
                 this.baseService.batchUpdate(documents);
+                taskExecutor.execute(new Runnable() {
+                    public void run() {
+                        batchInserChangeLogs(changeLogsForSave);
+                    }
+                });
             }
         }
         return SUCCESS;
@@ -178,15 +368,17 @@ public class EditDocumentAction extends BaseEditAction implements Preparable {
     /**
      * Saves entity field
      * 
+     * @return original document record
      * @throws ParseException
      */
-    private void saveEntity() throws Exception {
+    private Document saveEntity() throws Exception {
+        Document originalDocument = null;
         if (document.getId() == null) {
             UserUtil.permissionCheck("create_document");
         } else {
             UserUtil.permissionCheck("update_document");
-            Document originalDocument = baseService.getEntityById(
-                    Document.class, document.getId());
+            originalDocument = baseService.getEntityById(Document.class,
+                    document.getId());
             document.setContacts(originalDocument.getContacts());
             document.setCases(originalDocument.getCases());
             document.setAccounts(originalDocument.getAccounts());
@@ -281,6 +473,7 @@ public class EditDocumentAction extends BaseEditAction implements Preparable {
             cases.add(caseInstance);
         }
         super.updateBaseInfo(document);
+        return originalDocument;
     }
 
     /**
@@ -669,5 +862,21 @@ public class EditDocumentAction extends BaseEditAction implements Preparable {
     public void setDocumentSubCategoryService(
             IOptionService<DocumentSubCategory> documentSubCategoryService) {
         this.documentSubCategoryService = documentSubCategoryService;
+    }
+
+    public IBaseService<ChangeLog> getChangeLogService() {
+        return changeLogService;
+    }
+
+    public void setChangeLogService(IBaseService<ChangeLog> changeLogService) {
+        this.changeLogService = changeLogService;
+    }
+
+    public TaskExecutor getTaskExecutor() {
+        return taskExecutor;
+    }
+
+    public void setTaskExecutor(TaskExecutor taskExecutor) {
+        this.taskExecutor = taskExecutor;
     }
 }

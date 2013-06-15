@@ -80,7 +80,7 @@
 		      var accountOfficePhone = r.office_phone;
 		      if (officePhone != '' || primaryAddress != '' || primaryCity != '' || primaryState != '' || primaryPostalCode != '' || primaryCountry != ''){
 		    	$.messager.confirm('Confirm', 'This record currently contains values in the Office' +
-		    			'Phone And Address And Address fields. To overwrite these values with the' +
+		    			'Phone And Address fields. To overwrite these values with the' +
 		    			' following Office and Address of the Account that you selected, click \"OK\".'+
 		    			'. To keep the current vaues, click \"Cancel\"\n\n' +
 		    			'\nAddress:' + billStreet +
@@ -141,6 +141,7 @@
 		<div id="feature">
 		    <s:include value="../navigation.jsp" />		
 			<div id="shortcuts" class="headerList">
+			    <b style="white-space: nowrap; color: #444;"><s:text name="title.action" />:&nbsp;&nbsp;</b> 			
 				<span> <span style="white-space: nowrap;"> <a id="save_accept_btn" href="#"
 						class="easyui-linkbutton" iconCls="icon-save-accept" onclick="save()"
 						plain="true"><s:text name="button.save" /></a>
@@ -152,6 +153,18 @@
 						class="easyui-linkbutton" iconCls="icon-cancel" onclick="cancel()"
 						plain="true"><s:text name="button.cancel" /></a>
 				</span>
+				<s:if test="contact!=null && contact.id!=null">
+				    <span style="white-space: nowrap;"><a
+						href="javascript:void(0)" id="mtmt" class="easyui-menubutton"
+						data-options="menu:'#mtm1',iconCls:'icon-more'"><s:text
+								name='menu.toolbar.more.title' /></a>
+						<div id="mtm1" style="width: 150px;">
+						  <div data-options="iconCls:'icon-import'" onClick="openwindow2('/crm/showChangeLogPage.action?entity=Contact&recordID=' + '<s:property value="contact.id" />',750,500)">
+							<s:text name='menu.item.changeLog.title' />
+						  </div>
+						</div>
+					  </span>
+				 </s:if> 				
 				</span>
 			</div>
 

@@ -29,9 +29,11 @@ import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.struts2.ServletActionContext;
+import org.springframework.core.task.TaskExecutor;
 
 import com.gcrm.domain.Account;
 import com.gcrm.domain.CaseInstance;
+import com.gcrm.domain.ChangeLog;
 import com.gcrm.domain.Contact;
 import com.gcrm.domain.EmailTemplate;
 import com.gcrm.domain.Lead;
@@ -74,6 +76,8 @@ public class EditMeetingAction extends BaseEditAction implements Preparable {
     private IBaseService<Task> taskService;
     private MailService mailService;
     private IBaseService<EmailTemplate> emailTemplateService;
+    private IBaseService<ChangeLog> changeLogService;
+    private TaskExecutor taskExecutor;
     private Meeting meeting;
     private List<MeetingStatus> statuses;
     private List<ReminderOption> reminderOptions;
@@ -115,7 +119,9 @@ public class EditMeetingAction extends BaseEditAction implements Preparable {
      * @return the SUCCESS result
      */
     public String save() throws Exception {
-        saveEntity();
+        Meeting originalMeeting = saveEntity();
+        final Collection<ChangeLog> changeLogs = changeLog(originalMeeting,
+                meeting);
         // Validate Reminder Email Template
         if (meeting.isReminder_email() && reminderTemplateID == null) {
             String errorMessage = getText("error.reminderEamilTemplate");
@@ -125,7 +131,203 @@ public class EditMeetingAction extends BaseEditAction implements Preparable {
         meeting = getBaseService().makePersistent(meeting);
         this.setId(meeting.getId());
         this.setSaveFlag("true");
+        if (changeLogs != null) {
+            taskExecutor.execute(new Runnable() {
+                public void run() {
+                    batchInserChangeLogs(changeLogs);
+                }
+            });
+        }
         return SUCCESS;
+    }
+
+    private void batchInserChangeLogs(Collection<ChangeLog> changeLogs) {
+        this.getChangeLogService().batchUpdate(changeLogs);
+    }
+
+    private Collection<ChangeLog> changeLog(Meeting originalMeeting,
+            Meeting meeting) {
+        Collection<ChangeLog> changeLogs = null;
+        if (originalMeeting != null) {
+            ActionContext context = ActionContext.getContext();
+            Map<String, Object> session = context.getSession();
+            String entityName = Meeting.class.getSimpleName();
+            Integer recordID = meeting.getId();
+            User loginUser = (User) session
+                    .get(AuthenticationSuccessListener.LOGIN_USER);
+            changeLogs = new ArrayList<ChangeLog>();
+
+            String oldSubject = CommonUtil.fromNullToEmpty(originalMeeting
+                    .getSubject());
+            String newSubject = CommonUtil
+                    .fromNullToEmpty(meeting.getSubject());
+            if (!oldSubject.equals(newSubject)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.subject.label", oldSubject, newSubject,
+                        loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldStatus = getOptionValue(originalMeeting.getStatus());
+            String newStatus = getOptionValue(meeting.getStatus());
+            if (!oldStatus.equals(newStatus)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.status.label", oldStatus, newStatus, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            SimpleDateFormat dateFormat = new SimpleDateFormat(
+                    Constant.DATE_EDIT_FORMAT);
+            String oldStartDateValue = "";
+            Date oldStartDate = originalMeeting.getStart_date();
+            if (oldStartDate != null) {
+                oldStartDateValue = dateFormat.format(oldStartDate);
+            }
+            String newStartDateValue = "";
+            Date newStartDate = meeting.getStart_date();
+            if (newStartDate != null) {
+                newStartDateValue = dateFormat.format(newStartDate);
+            }
+            if (!oldStartDateValue.equals(newStartDateValue)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.start_date.label", oldStartDateValue,
+                        newStartDateValue, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldEndDateValue = "";
+            Date oldEndDate = originalMeeting.getEnd_date();
+            if (oldEndDate != null) {
+                oldEndDateValue = dateFormat.format(oldEndDate);
+            }
+            String newEndDateValue = "";
+            Date newEndDate = meeting.getEnd_date();
+            if (newEndDate != null) {
+                newEndDateValue = dateFormat.format(newEndDate);
+            }
+            if (!oldEndDateValue.equals(newEndDateValue)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.end_date.label", oldEndDateValue,
+                        newEndDateValue, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldRelatedObject = CommonUtil
+                    .fromNullToEmpty(originalMeeting.getRelated_object());
+            String newRelatedObject = CommonUtil.fromNullToEmpty(meeting
+                    .getRelated_object());
+            if (!oldRelatedObject.equals(newRelatedObject)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.related_object.label", oldRelatedObject,
+                        newRelatedObject, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldRelatedRecord = String.valueOf(originalMeeting
+                    .getRelated_record());
+            String newRelatedRecord = String.valueOf(meeting
+                    .getRelated_record());
+            if (!oldRelatedRecord.equals(newRelatedRecord)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.related_record.label", oldRelatedRecord,
+                        newRelatedRecord, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldLocation = CommonUtil.fromNullToEmpty(originalMeeting
+                    .getLocation());
+            String newLocation = CommonUtil.fromNullToEmpty(meeting
+                    .getLocation());
+            if (!oldLocation.equals(newLocation)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "meeting.location.label", oldLocation, newLocation,
+                        loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            boolean oldReminderEmail = originalMeeting.isReminder_email();
+
+            boolean newReminderEmail = meeting.isReminder_email();
+            if (oldReminderEmail != newReminderEmail) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.reminder.label",
+                        String.valueOf(oldReminderEmail),
+                        String.valueOf(newReminderEmail), loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldReminderOption = getOptionValue(originalMeeting
+                    .getReminder_option_email());
+            String newReminderOption = getOptionValue(meeting
+                    .getReminder_option_email());
+            if (!oldReminderOption.equals(newReminderOption)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.reminder_option_email_name.label",
+                        oldReminderOption, newReminderOption, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldReminderTemplateName = "";
+            EmailTemplate oldReminderTemplate = originalMeeting
+                    .getReminder_template();
+            if (oldReminderTemplate != null) {
+                oldReminderTemplateName = CommonUtil
+                        .fromNullToEmpty(oldReminderTemplate.getName());
+            }
+            String newReminderTemplateName = "";
+            EmailTemplate newReminderTemplate = meeting.getReminder_template();
+            if (newReminderTemplate != null) {
+                newReminderTemplateName = CommonUtil
+                        .fromNullToEmpty(newReminderTemplate.getName());
+            }
+            if (oldReminderTemplateName != newReminderTemplateName) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.reminder_template.label",
+                        oldReminderTemplateName, newReminderTemplateName,
+                        loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldDescription = CommonUtil.fromNullToEmpty(originalMeeting
+                    .getDescription());
+            String newDescription = CommonUtil.fromNullToEmpty(meeting
+                    .getDescription());
+            if (!oldDescription.equals(newDescription)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.description.label", oldDescription,
+                        newDescription, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldNotes = CommonUtil.fromNullToEmpty(originalMeeting
+                    .getNotes());
+            String newNotes = CommonUtil.fromNullToEmpty(meeting.getNotes());
+            if (!oldNotes.equals(newNotes)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.notes.label", oldNotes, newNotes, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldAssignedToName = "";
+            User oldAssignedTo = originalMeeting.getAssigned_to();
+            if (oldAssignedTo != null) {
+                oldAssignedToName = oldAssignedTo.getName();
+            }
+            String newAssignedToName = "";
+            User newAssignedTo = meeting.getAssigned_to();
+            if (newAssignedTo != null) {
+                newAssignedToName = newAssignedTo.getName();
+            }
+            if (oldAssignedToName != newAssignedToName) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.assigned_to.label",
+                        CommonUtil.fromNullToEmpty(oldAssignedToName),
+                        CommonUtil.fromNullToEmpty(newAssignedToName),
+                        loginUser);
+                changeLogs.add(changeLog);
+            }
+        }
+        return changeLogs;
     }
 
     /**
@@ -414,20 +616,31 @@ public class EditMeetingAction extends BaseEditAction implements Preparable {
             User loginUser = this.getLoginUser();
             User user = userService
                     .getEntityById(User.class, loginUser.getId());
+            Collection<ChangeLog> allChangeLogs = new ArrayList<ChangeLog>();
             for (String IDString : selectIDArray) {
                 int id = Integer.parseInt(IDString);
                 Meeting meetingInstance = this.baseService.getEntityById(
                         Meeting.class, id);
+                Meeting originalMeeting = meetingInstance.clone();
                 for (String fieldName : fieldNames) {
                     Object value = BeanUtil.getFieldValue(meeting, fieldName);
                     BeanUtil.setFieldValue(meetingInstance, fieldName, value);
                 }
                 meetingInstance.setUpdated_by(user);
                 meetingInstance.setUpdated_on(new Date());
+                Collection<ChangeLog> changeLogs = changeLog(originalMeeting,
+                        meetingInstance);
+                allChangeLogs.addAll(changeLogs);
                 meetings.add(meetingInstance);
             }
+            final Collection<ChangeLog> changeLogsForSave = allChangeLogs;
             if (meetings.size() > 0) {
                 this.baseService.batchUpdate(meetings);
+                taskExecutor.execute(new Runnable() {
+                    public void run() {
+                        batchInserChangeLogs(changeLogsForSave);
+                    }
+                });
             }
         }
         return SUCCESS;
@@ -436,14 +649,16 @@ public class EditMeetingAction extends BaseEditAction implements Preparable {
     /**
      * Saves entity field
      * 
+     * @return original meeting record
      * @throws ParseException
      */
-    private void saveEntity() throws Exception {
+    private Meeting saveEntity() throws Exception {
+        Meeting originalMeeting = null;
         if (meeting.getId() == null) {
             UserUtil.permissionCheck("create_meeting");
         } else {
             UserUtil.permissionCheck("update_meeting");
-            Meeting originalMeeting = baseService.getEntityById(Meeting.class,
+            originalMeeting = baseService.getEntityById(Meeting.class,
                     meeting.getId());
             meeting.setContacts(originalMeeting.getContacts());
             meeting.setLeads(originalMeeting.getLeads());
@@ -509,6 +724,7 @@ public class EditMeetingAction extends BaseEditAction implements Preparable {
             meeting.setRelated_record(relatedTaskID);
         }
         super.updateBaseInfo(meeting);
+        return originalMeeting;
     }
 
     /**
@@ -1214,6 +1430,22 @@ public class EditMeetingAction extends BaseEditAction implements Preparable {
      */
     public void setReminderTemplateID(Integer reminderTemplateID) {
         this.reminderTemplateID = reminderTemplateID;
+    }
+
+    public IBaseService<ChangeLog> getChangeLogService() {
+        return changeLogService;
+    }
+
+    public void setChangeLogService(IBaseService<ChangeLog> changeLogService) {
+        this.changeLogService = changeLogService;
+    }
+
+    public TaskExecutor getTaskExecutor() {
+        return taskExecutor;
+    }
+
+    public void setTaskExecutor(TaskExecutor taskExecutor) {
+        this.taskExecutor = taskExecutor;
     }
 
 }

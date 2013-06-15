@@ -204,7 +204,20 @@
 			<result name="input">/jsp/system/listOption.jsp</result>
 			<result name="success">/jsp/system/listOption.jsp</result>
         </action>
-                
+
+    	<action name="listChangeLogPage">
+    	  <result type="redirect">/jsp/system/listChangeLog.jsp</result>
+        </action>
+                 
+      	<action name="listChangeLogFull" class="listChangeLogAction" method="listFull">
+    	  <result name="success" type="json"></result>
+        </action>
+
+         <action name="deleteChangeLog" class="listChangeLogAction" method="delete">
+        	<result name="input">/jsp/system/listChangeLog.jsp</result>
+			<result type="redirect">/jsp/system/listChangeLog.jsp</result>            	  
+        </action>
+              		
     	<action name="listCurrency" class="currencyAction" method="list">
     	  <result name="success" type="json"></result>
         </action>

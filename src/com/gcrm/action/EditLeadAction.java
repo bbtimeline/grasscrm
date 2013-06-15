@@ -23,9 +23,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.core.task.TaskExecutor;
+
 import com.gcrm.domain.Account;
 import com.gcrm.domain.Call;
 import com.gcrm.domain.Campaign;
+import com.gcrm.domain.ChangeLog;
 import com.gcrm.domain.Contact;
 import com.gcrm.domain.Lead;
 import com.gcrm.domain.LeadSource;
@@ -35,10 +38,12 @@ import com.gcrm.domain.Opportunity;
 import com.gcrm.domain.Salutation;
 import com.gcrm.domain.TargetList;
 import com.gcrm.domain.User;
+import com.gcrm.security.AuthenticationSuccessListener;
 import com.gcrm.service.IBaseService;
 import com.gcrm.service.ILeadService;
 import com.gcrm.service.IOptionService;
 import com.gcrm.util.BeanUtil;
+import com.gcrm.util.CommonUtil;
 import com.gcrm.util.Constant;
 import com.gcrm.util.security.UserUtil;
 import com.opensymphony.xwork2.ActionContext;
@@ -68,6 +73,8 @@ public class EditLeadAction extends BaseEditAction implements Preparable {
     private List<LeadStatus> leadStatuses;
     private List<LeadSource> leadSources;
     private List<Salutation> salutations;
+    private IBaseService<ChangeLog> changeLogService;
+    private TaskExecutor taskExecutor;
     private Integer accountID = null;
     private String accountText = null;
     private Integer leadStatusID = null;
@@ -85,11 +92,23 @@ public class EditLeadAction extends BaseEditAction implements Preparable {
      * @return the SUCCESS result
      */
     public String save() throws Exception {
-        saveEntity();
+        Lead originalLead = saveEntity();
+        final Collection<ChangeLog> changeLogs = changeLog(originalLead, lead);
         lead = this.getBaseService().makePersistent(lead);
         this.setId(lead.getId());
         this.setSaveFlag("true");
+        if (changeLogs != null) {
+            taskExecutor.execute(new Runnable() {
+                public void run() {
+                    batchInserChangeLogs(changeLogs);
+                }
+            });
+        }
         return SUCCESS;
+    }
+
+    private void batchInserChangeLogs(Collection<ChangeLog> changeLogs) {
+        this.getChangeLogService().batchUpdate(changeLogs);
     }
 
     /**
@@ -151,20 +170,31 @@ public class EditLeadAction extends BaseEditAction implements Preparable {
             User loginUser = this.getLoginUser();
             User user = userService
                     .getEntityById(User.class, loginUser.getId());
+            Collection<ChangeLog> allChangeLogs = new ArrayList<ChangeLog>();
             for (String IDString : selectIDArray) {
                 int id = Integer.parseInt(IDString);
                 Lead leadInstance = this.baseService.getEntityById(Lead.class,
                         id);
+                Lead originalLead = leadInstance.clone();
                 for (String fieldName : fieldNames) {
                     Object value = BeanUtil.getFieldValue(lead, fieldName);
                     BeanUtil.setFieldValue(leadInstance, fieldName, value);
                 }
                 leadInstance.setUpdated_by(user);
                 leadInstance.setUpdated_on(new Date());
+                Collection<ChangeLog> changeLogs = changeLog(originalLead,
+                        leadInstance);
+                allChangeLogs.addAll(changeLogs);
                 leads.add(leadInstance);
             }
+            final Collection<ChangeLog> changeLogsForSave = allChangeLogs;
             if (leads.size() > 0) {
                 this.baseService.batchUpdate(leads);
+                taskExecutor.execute(new Runnable() {
+                    public void run() {
+                        batchInserChangeLogs(changeLogsForSave);
+                    }
+                });
             }
         }
         return SUCCESS;
@@ -173,15 +203,16 @@ public class EditLeadAction extends BaseEditAction implements Preparable {
     /**
      * Saves entity field
      * 
+     * @return original lead record
      * @throws Exception
      */
-    private void saveEntity() throws Exception {
+    private Lead saveEntity() throws Exception {
+        Lead originalLead = null;
         if (lead.getId() == null) {
             UserUtil.permissionCheck("create_lead");
         } else {
             UserUtil.permissionCheck("update_lead");
-            Lead originalLead = baseService.getEntityById(Lead.class,
-                    lead.getId());
+            originalLead = baseService.getEntityById(Lead.class, lead.getId());
             lead.setContacts(originalLead.getContacts());
             lead.setOpportunities(originalLead.getOpportunities());
             lead.setTargetLists(originalLead.getTargetLists());
@@ -279,6 +310,315 @@ public class EditLeadAction extends BaseEditAction implements Preparable {
             contacts.add(contact);
         }
         super.updateBaseInfo(lead);
+        return originalLead;
+    }
+
+    private Collection<ChangeLog> changeLog(Lead originalLead, Lead lead) {
+        Collection<ChangeLog> changeLogs = null;
+        if (originalLead != null) {
+            ActionContext context = ActionContext.getContext();
+            Map<String, Object> session = context.getSession();
+            String entityName = Lead.class.getSimpleName();
+            Integer recordID = lead.getId();
+            User loginUser = (User) session
+                    .get(AuthenticationSuccessListener.LOGIN_USER);
+            changeLogs = new ArrayList<ChangeLog>();
+
+            String oldSalutation = getOptionValue(originalLead.getSalutation());
+            String newSalutation = getOptionValue(lead.getSalutation());
+            if (!oldSalutation.equals(newSalutation)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "menu.salutation.title", oldSalutation, newSalutation,
+                        loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldFirstName = CommonUtil.fromNullToEmpty(originalLead
+                    .getFirst_name());
+            String newFirstName = CommonUtil.fromNullToEmpty(lead
+                    .getFirst_name());
+            if (!oldFirstName.equals(newFirstName)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.first_name.label", oldFirstName, newFirstName,
+                        loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldLastName = CommonUtil.fromNullToEmpty(originalLead
+                    .getLast_name());
+            String newLastName = CommonUtil
+                    .fromNullToEmpty(lead.getLast_name());
+            if (!oldLastName.equals(newLastName)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.last_name.label", oldLastName, newLastName,
+                        loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldOfficePhone = CommonUtil.fromNullToEmpty(originalLead
+                    .getOffice_phone());
+            String newOfficePhone = CommonUtil.fromNullToEmpty(lead
+                    .getOffice_phone());
+            if (!oldOfficePhone.equals(newOfficePhone)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.office_phone.label", oldOfficePhone,
+                        newOfficePhone, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldTitle = CommonUtil.fromNullToEmpty(originalLead
+                    .getTitle());
+            String newTitle = CommonUtil.fromNullToEmpty(lead.getTitle());
+            if (!oldTitle.equals(newTitle)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.title.label", oldTitle, newTitle, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldMobile = CommonUtil.fromNullToEmpty(originalLead
+                    .getMobile());
+            String newMobile = CommonUtil.fromNullToEmpty(lead.getMobile());
+            if (!oldMobile.equals(newMobile)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.mobile.label", oldMobile, newMobile, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldDepartment = CommonUtil.fromNullToEmpty(originalLead
+                    .getDepartment());
+            String newDepartment = CommonUtil.fromNullToEmpty(lead
+                    .getDepartment());
+            if (!oldDepartment.equals(newDepartment)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.department.label", oldDepartment,
+                        newDepartment, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldFax = CommonUtil.fromNullToEmpty(originalLead.getFax());
+            String newWFax = CommonUtil.fromNullToEmpty(lead.getFax());
+            if (!oldFax.equals(newWFax)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.fax.label", oldFax, newWFax, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldPrimaryStreet = CommonUtil.fromNullToEmpty(originalLead
+                    .getPrimary_street());
+            String newPrimaryStreet = CommonUtil.fromNullToEmpty(lead
+                    .getPrimary_street());
+            if (!oldPrimaryStreet.equals(newPrimaryStreet)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.primary_street.label", oldPrimaryStreet,
+                        newPrimaryStreet, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldPrimaryState = CommonUtil.fromNullToEmpty(originalLead
+                    .getPrimary_state());
+            String newPrimaryState = CommonUtil.fromNullToEmpty(lead
+                    .getPrimary_state());
+            if (!oldPrimaryState.equals(newPrimaryState)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.primary_state.label", oldPrimaryState,
+                        newPrimaryState, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldPrimaryPostalCode = CommonUtil
+                    .fromNullToEmpty(originalLead.getPrimary_postal_code());
+            String newPrimaryPostalCode = CommonUtil.fromNullToEmpty(lead
+                    .getPrimary_postal_code());
+            if (!oldPrimaryPostalCode.equals(newPrimaryPostalCode)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.primary_postal_code.label",
+                        oldPrimaryPostalCode, newPrimaryPostalCode, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldPrimaryCountry = CommonUtil.fromNullToEmpty(originalLead
+                    .getPrimary_country());
+            String newPrimaryCountry = CommonUtil.fromNullToEmpty(lead
+                    .getPrimary_country());
+            if (!oldPrimaryCountry.equals(newPrimaryCountry)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.primary_country.label", oldPrimaryCountry,
+                        newPrimaryCountry, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldOtherStreet = CommonUtil.fromNullToEmpty(originalLead
+                    .getOther_street());
+            String newOtherStreet = CommonUtil.fromNullToEmpty(lead
+                    .getOther_street());
+            if (!oldOtherStreet.equals(newOtherStreet)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.other_street.label", oldOtherStreet,
+                        newOtherStreet, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldOtherState = CommonUtil.fromNullToEmpty(originalLead
+                    .getOther_state());
+            String newOtherState = CommonUtil.fromNullToEmpty(lead
+                    .getOther_state());
+            if (!oldOtherState.equals(newOtherState)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.other_state.label", oldOtherState,
+                        newOtherState, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldOtherPostalCode = CommonUtil.fromNullToEmpty(originalLead
+                    .getOther_postal_code());
+            String newOtherPostalCode = CommonUtil.fromNullToEmpty(lead
+                    .getOther_postal_code());
+            if (!oldOtherPostalCode.equals(newOtherPostalCode)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.other_postal_code.label", oldOtherPostalCode,
+                        newOtherPostalCode, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldOtherCountry = CommonUtil.fromNullToEmpty(originalLead
+                    .getOther_country());
+            String newOtherCountry = CommonUtil.fromNullToEmpty(lead
+                    .getOther_country());
+            if (!oldOtherCountry.equals(newOtherCountry)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.other_country.label", oldOtherCountry,
+                        newOtherCountry, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldEmail = CommonUtil.fromNullToEmpty(originalLead
+                    .getEmail());
+            String newEmail = CommonUtil.fromNullToEmpty(lead.getEmail());
+            if (!oldEmail.equals(newEmail)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.email.label", oldEmail, newEmail, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldDescription = CommonUtil.fromNullToEmpty(originalLead
+                    .getDescription());
+            String newDescription = CommonUtil.fromNullToEmpty(lead
+                    .getDescription());
+            if (!oldDescription.equals(newDescription)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.description.label", oldDescription,
+                        newDescription, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldNotes = CommonUtil.fromNullToEmpty(originalLead
+                    .getNotes());
+            String newNotes = CommonUtil.fromNullToEmpty(lead.getNotes());
+            if (!oldNotes.equals(newNotes)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.notes.label", oldNotes, newNotes, loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldLeadSource = getOptionValue(originalLead.getLead_source());
+            String newLeadSource = getOptionValue(lead.getLead_source());
+            if (!oldLeadSource.equals(newLeadSource)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "menu.leadSource.title", oldLeadSource, newLeadSource,
+                        loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldLeadSourceDescription = CommonUtil
+                    .fromNullToEmpty(originalLead.getLead_source_description());
+            String newLeadSourceDescription = CommonUtil.fromNullToEmpty(lead
+                    .getLead_source_description());
+            if (!oldLeadSourceDescription.equals(newLeadSourceDescription)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "lead.lead_source_description.label",
+                        oldLeadSourceDescription, newLeadSourceDescription,
+                        loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldReferredBy = CommonUtil.fromNullToEmpty(originalLead
+                    .getReferred_by());
+            String newReferredBy = CommonUtil.fromNullToEmpty(lead
+                    .getLead_source_description());
+            if (!oldReferredBy.equals(newReferredBy)) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "lead.referred_by.label", oldReferredBy, newReferredBy,
+                        loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldAccountName = "";
+            Account oldAccount = originalLead.getAccount();
+            if (oldAccount != null) {
+                oldAccountName = CommonUtil.fromNullToEmpty(oldAccount
+                        .getName());
+            }
+            String newAccountName = "";
+            Account newAccount = lead.getAccount();
+            if (newAccount != null) {
+                newAccountName = CommonUtil.fromNullToEmpty(newAccount
+                        .getName());
+            }
+            if (oldAccountName != newAccountName) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.account.label", oldAccountName, newAccountName,
+                        loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            boolean oldNotCall = originalLead.isNot_call();
+
+            boolean newNotCall = lead.isNot_call();
+            if (oldNotCall != newNotCall) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.not_call.label", String.valueOf(oldNotCall),
+                        String.valueOf(newNotCall), loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldCampaignName = "";
+            Campaign oldCampaign = originalLead.getCampaign();
+            if (oldCampaign != null) {
+                oldCampaignName = oldCampaign.getName();
+            }
+            String newCampaignName = "";
+            Campaign newCampaign = lead.getCampaign();
+            if (newCampaign != null) {
+                newCampaignName = newCampaign.getName();
+            }
+            if (oldCampaignName != newCampaignName) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.campaign.label",
+                        CommonUtil.fromNullToEmpty(oldCampaignName),
+                        CommonUtil.fromNullToEmpty(newCampaignName), loginUser);
+                changeLogs.add(changeLog);
+            }
+
+            String oldAssignedToName = "";
+            User oldAssignedTo = originalLead.getAssigned_to();
+            if (oldAssignedTo != null) {
+                oldAssignedToName = oldAssignedTo.getName();
+            }
+            String newAssignedToName = "";
+            User newAssignedTo = lead.getAssigned_to();
+            if (newAssignedTo != null) {
+                newAssignedToName = newAssignedTo.getName();
+            }
+            if (oldAssignedToName != newAssignedToName) {
+                ChangeLog changeLog = saveChangeLog(entityName, recordID,
+                        "entity.assigned_to.label",
+                        CommonUtil.fromNullToEmpty(oldAssignedToName),
+                        CommonUtil.fromNullToEmpty(newAssignedToName),
+                        loginUser);
+                changeLogs.add(changeLog);
+            }
+        }
+        return changeLogs;
     }
 
     /**
@@ -700,6 +1040,36 @@ public class EditLeadAction extends BaseEditAction implements Preparable {
     public void setSalutationService(
             IOptionService<Salutation> salutationService) {
         this.salutationService = salutationService;
+    }
+
+    /**
+     * @return the changeLogService
+     */
+    public IBaseService<ChangeLog> getChangeLogService() {
+        return changeLogService;
+    }
+
+    /**
+     * @param changeLogService
+     *            the changeLogService to set
+     */
+    public void setChangeLogService(IBaseService<ChangeLog> changeLogService) {
+        this.changeLogService = changeLogService;
+    }
+
+    /**
+     * @return the taskExecutor
+     */
+    public TaskExecutor getTaskExecutor() {
+        return taskExecutor;
+    }
+
+    /**
+     * @param taskExecutor
+     *            the taskExecutor to set
+     */
+    public void setTaskExecutor(TaskExecutor taskExecutor) {
+        this.taskExecutor = taskExecutor;
     }
 
 }
