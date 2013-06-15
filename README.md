@@ -4,6 +4,7 @@ grasscrm
 Open Source Java based CRM
 
 How to configure the environment:
+
 (1)Download and install Postgres database, the download URL:http://www.postgresql.org/download/
 
 (2)Download and install Jboss Server Version 6.1.0 Final version, the download URL:http://download.jboss.org/jbossas/6.1/jboss-as-distribution-6.1.0.Final.zip
@@ -33,6 +34,7 @@ database is installed in other server, you can change the value of url here.
  
  
  How to deploy grass crm to tomcat:
+ 
  If you want to deploy grass crm to Tomcat, you need add jta.jar to this project, you can download jta.jar from http://www.java2s.com/Code/Jar/j/Downloadjtajar.htm, 
  if you deploy grass crm to Jboss, needn't this jar.
  
