@@ -30,6 +30,36 @@
 	function cancel() {
 		baseCancel("Lead");
 	}
+
+	function primaryMap() {
+	    address = $("input[name='lead.primary_country']").val() + " "
+				+ $("input[name='lead.primary_state']").val() + " "
+				+ $("input[name='lead.primary_city']").val() + " "
+				+ $("input[name='lead.primary_street']").val();
+	    locale = '<%=(String)session.getAttribute("locale")%>'
+	    if (locale == "zh_CN"){
+		    window.open("http://ditu.google.com/?ie=UTF8&hl=zh-CN&q=" + address,
+				"_blank");
+	    } else {
+			window.open("https://maps.google.com/maps?q=" + address,
+				"_blank");	    	
+	    }
+	}
+
+	function otherMap() {
+	    address = $("input[name='lead.other_country']").val() + " "
+				+ $("input[name='lead.other_state']").val() + " "
+				+ $("input[name='lead.other_city']").val() + " "
+				+ $("input[name='lead.other_street']").val();
+	    locale = '<%=(String)session.getAttribute("locale")%>'
+	    if (locale == "zh_CN"){
+		    window.open("http://ditu.google.com/?ie=UTF8&hl=zh-CN&q=" + address,
+				"_blank");
+	    } else {
+			window.open("https://maps.google.com/maps?q=" + address,
+				"_blank");	    	
+	    }
+	}
 	
 	  function convert(){
 		   var leadID = document.getElementById('id').value;
@@ -283,7 +313,7 @@
 							</table>
 
 							<div class="section-header">
-								<span><s:text name="span.primary_address" /></span>
+								<span><s:text name="span.primary_address" /> (<a href="#" onclick="primaryMap()"><s:text name="link.map" /></a>)</span>
 							</div>
 							<table style="" cellspacing="10" cellpadding="0" width="100%">
 								<tr>
@@ -330,7 +360,7 @@
 							</table>
 
 							<div class="section-header">
-								<span> <s:text name="span.shipping_address" /></span>
+								<span> <s:text name="span.shipping_address" /> (<a href="#" onclick="otherMap()"><s:text name="link.map" /></a>)</span>
 							</div>
 							<table style="" cellspacing="10" cellpadding="0" width="100%">
 								<tr>

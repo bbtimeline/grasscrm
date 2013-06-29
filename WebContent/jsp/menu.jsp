@@ -12,8 +12,9 @@
 		<a href="javascript:void(0)" id="mb3" class="easyui-menubutton" data-options="menu:'#mm3',iconCls:'icon-support'"><s:text name='menu.support.title'/></a>	
 		<a href="javascript:void(0)" id="mb4" class="easyui-menubutton" data-options="menu:'#mm4',iconCls:'icon-activity'"><s:text name='menu.activities.title'/></a>
 		<a href="javascript:void(0)" id="mb5" class="easyui-menubutton" data-options="menu:'#mm5',iconCls:'icon-collaboration'"><s:text name='menu.collaboration.title'/></a>
-		<s:if test="#session.loginUser.view_system == 1"><a href="javascript:void(0)" id="mb6" class="easyui-menubutton" data-options="menu:'#mm6',iconCls:'icon-system'"><s:text name='menu.system.title'/></a></s:if>
-		<a href="javascript:void(0)" id="mb7" class="easyui-menubutton" data-options="menu:'#mm7',iconCls:'icon-help'"><s:text name='menu.help.title'/></a>
+		<a href="javascript:void(0)" id="mb6" class="easyui-menubutton" data-options="menu:'#mm6',iconCls:'icon-collaboration'"><s:text name='menu.report.title'/></a>
+		<s:if test="#session.loginUser.view_system == 1"><a href="javascript:void(0)" id="mb6" class="easyui-menubutton" data-options="menu:'#mm7',iconCls:'icon-system'"><s:text name='menu.system.title'/></a></s:if>
+		<a href="javascript:void(0)" id="mb8" class="easyui-menubutton" data-options="menu:'#mm7',iconCls:'icon-help'"><s:text name='menu.help.title'/></a>
 	</div>
 	<div id="mm1" style="width:150px;display:none">
 		<div onClick="openPage('/crm/homePage.action')"><s:text name='menu.home.title'/></div>
@@ -46,8 +47,12 @@
 		<s:if test="#session.loginUser.view_document == 1"><div onClick="openPage('/crm/listDocumentPage.action')"><s:text name='menu.documents.title'/></div></s:if>
 		<s:if test="#session.loginUser.view_targetList == 1"><div onClick="openPage('/crm/listTargetListPage.action')"><s:text name='menu.targetLists.title'/></div></s:if>
 	</div>
+	<div id="mm6" style="width:200px;display:none">
+		<s:if test="#session.loginUser.view_account == 1"><div onClick="openPage('/crm/accountReportPage.action')"><s:text name='menu.accountReport.title'/></div></s:if>
+		<s:if test="#session.loginUser.view_account == 1"><div onClick="openPage('/crm/accountByIndustryReportPage.action')"><s:text name='menu.accountByIndustryReport.title'/></div></s:if>
+	</div>	
 	<s:if test="#session.loginUser.view_system == 1">
-	<div id="mm6" style="width:150px;display:none">
+	<div id="mm7" style="width:150px;display:none">
 	    <div>
 	      <span><s:text name='menu.dropdown.title'/></span>
 	      <div style="width:170px;">  
@@ -86,7 +91,7 @@
 		<div onClick="openPage('/system/listChangeLogPage.action')"><s:text name='menu.changeLog.title'/></div>
 	</div>
 	</s:if>
-	<div id="mm7" style="width:100px;display:none">
+	<div id="mm8" style="width:100px;display:none">
 		<div onClick="openPage('/help.pdf')"><s:text name='menu.help.title'/></div>
 		<div onClick="openPage('/system/aboutPage.action')"><s:text name='menu.about.title'/></div>
 	</div>					

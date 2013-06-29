@@ -28,7 +28,37 @@
 	function cancel() {
 		baseCancel("Contact");
 	}
-	  
+
+	function primaryMap() {
+	    address = $("input[name='contact.primary_country']").val() + " "
+				+ $("input[name='contact.primary_state']").val() + " "
+				+ $("input[name='contact.primary_city']").val() + " "
+				+ $("input[name='contact.primary_street']").val();
+	    locale = '<%=(String)session.getAttribute("locale")%>'
+	    if (locale == "zh_CN"){
+		    window.open("http://ditu.google.com/?ie=UTF8&hl=zh-CN&q=" + address,
+				"_blank");
+	    } else {
+			window.open("https://maps.google.com/maps?q=" + address,
+				"_blank");	    	
+	    }
+	}
+
+	function otherMap() {
+	    address = $("input[name='contact.other_country']").val() + " "
+				+ $("input[name='contact.other_state']").val() + " "
+				+ $("input[name='contact.other_city']").val() + " "
+				+ $("input[name='contact.other_street']").val();
+	    locale = '<%=(String)session.getAttribute("locale")%>'
+	    if (locale == "zh_CN"){
+		    window.open("http://ditu.google.com/?ie=UTF8&hl=zh-CN&q=" + address,
+				"_blank");
+	    } else {
+			window.open("https://maps.google.com/maps?q=" + address,
+				"_blank");	    	
+	    }
+	}	
+	
 	function copyAddress(){
 		if ($('#copy_checkbox').attr('checked')) { 
 			$("input[name='contact.other_street']").attr("value",$("input[name='contact.primary_street']").val());	
@@ -73,22 +103,25 @@
             	  return;
               }
 		      var billStreet = r.bill_street;
+		      if (typeof(billStreet) == "undefined"){billStreet = '';}		      
 		      var billCity = r.bill_city;
+		      if (typeof(billCity) == "undefined"){billCity = '';}	
 		      var billCountry = r.bill_country;
+		      if (typeof(billCountry) == "undefined"){billCountry = '';}
 		      var billState = r.bill_state;
+		      if (typeof(billState) == "undefined"){billState = '';}
 		      var billPostalCode = r.bill_postal_code;
+		      if (typeof(billPostalCode) == "undefined"){billPostalCode = '';}
 		      var accountOfficePhone = r.office_phone;
+		      if (typeof(accountOfficePhone) == "undefined"){accountOfficePhone = '';}
 		      if (officePhone != '' || primaryAddress != '' || primaryCity != '' || primaryState != '' || primaryPostalCode != '' || primaryCountry != ''){
-		    	$.messager.confirm('Confirm', 'This record currently contains values in the Office' +
-		    			'Phone And Address fields. To overwrite these values with the' +
-		    			' following Office and Address of the Account that you selected, click \"OK\".'+
-		    			'. To keep the current vaues, click \"Cancel\"\n\n' +
-		    			'\nAddress:' + billStreet +
-		    			'\nCity:' + billCity +
-		    			'\nState:' + billState +
-		    			'\nPostal Code:' + billPostalCode +
-		    			'\nCountry:' + billCountry +
-		    			'\nOffice Phone:' + accountOfficePhone +
+		    	$.messager.confirm('Confirm', '<s:text name="message.confirm.contact"/><br/>' +
+		    			'<br/><s:text name="entity.primary_street.label"/>:' + billStreet +
+		    			'<br/><s:text name="entity.primary_city.label"/>:' + billCity +
+		    			'<br/><s:text name="entity.primary_state.label"/>:' + billState +
+		    			'<br/><s:text name="entity.primary_postal_code.label"/>:' + billPostalCode +
+		    			'<br/><s:text name="entity.primary_country.label"/>:' + billCountry +
+		    			'<br/><s:text name="entity.office_phone.label"/>:' + accountOfficePhone +
 		    			"", function(r){
 		    		          if (r){
 		    			        $('#primary_street').val(billStreet);
@@ -359,7 +392,7 @@
 							</table>
 
 							<div class="section-header">
-								<span><s:text name="span.primary_address" /></span>
+								<span><s:text name="span.primary_address" /> (<a href="#" onclick="primaryMap()"><s:text name="link.map" /></a>)</span>
 							</div>
 							<table style="" cellspacing="10" cellpadding="0" width="100%">
 								<tr>
@@ -407,7 +440,7 @@
 							</table>
 
 							<div class="section-header">
-								<span> <s:text name="span.other_address" /></span>
+								<span> <s:text name="span.other_address" /> (<a href="#" onclick="otherMap()"><s:text name="link.map" /></a>)</span>
 							</div>
 							<table style="" cellspacing="10" cellpadding="0" width="100%">
 								<tr>

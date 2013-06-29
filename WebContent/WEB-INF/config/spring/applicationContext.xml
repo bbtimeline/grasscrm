@@ -183,6 +183,15 @@
     <bean id="homeAction" class="com.gcrm.action.HomeAction" scope="prototype">   
     </bean>
    
+    <bean id="accountReportAction" class="com.gcrm.action.AccountReportAction" scope="prototype">   
+        <property name="baseService" ref="baseService" />
+    </bean>
+        
+    <bean id="accountByIndustryReportAction" class="com.gcrm.action.AccountByIndustryReportAction" scope="prototype">   
+        <property name="baseService" ref="baseService" />
+        <property name="industryService" ref="optionService" />
+    </bean>
+        
     <bean id="totalfilterAction" class="com.gcrm.action.TotalFilter" scope="prototype">   
     </bean>
             

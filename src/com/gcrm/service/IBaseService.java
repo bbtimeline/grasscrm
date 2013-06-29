@@ -110,6 +110,8 @@ public interface IBaseService<T extends Serializable> {
      */
     public List<T> findByHQL(String hql);
 
+    public List findVOByHQL(String hql);
+
     /**
      * Gets object count
      * 

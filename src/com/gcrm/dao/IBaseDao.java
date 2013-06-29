@@ -1,4 +1,5 @@
 /**
+
  * Copyright (C) 2012, Grass CRM Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -57,6 +58,8 @@ public interface IBaseDao<T extends Serializable> {
      * @throws Exception
      */
     public List<T> findByHQL(String hql);
+
+    public List findVOByHQL(String hql);
 
     /**
      * Finds records by hql with parameters

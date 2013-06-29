@@ -29,6 +29,36 @@
 		baseCancel("Account");
 	}
 
+	function billMap() {
+	    address = $("input[name='account.bill_country']").val() + " "
+				+ $("input[name='account.bill_state']").val() + " "
+				+ $("input[name='account.bill_city']").val() + " "
+				+ $("input[name='account.bill_street']").val();
+	    locale = '<%=(String)session.getAttribute("locale")%>'
+	    if (locale == "zh_CN"){
+		    window.open("http://ditu.google.com/?ie=UTF8&hl=zh-CN&q=" + address,
+				"_blank");
+	    } else {
+			window.open("https://maps.google.com/maps?q=" + address,
+				"_blank");	    	
+	    }
+	}
+
+	function shipMap() {
+	    address = $("input[name='account.ship_country']").val() + " "
+				+ $("input[name='account.ship_state']").val() + " "
+				+ $("input[name='account.ship_city']").val() + " "
+				+ $("input[name='account.ship_street']").val();
+	    locale = '<%=(String)session.getAttribute("locale")%>'
+	    if (locale == "zh_CN"){
+		    window.open("http://ditu.google.com/?ie=UTF8&hl=zh-CN&q=" + address,
+				"_blank");
+	    } else {
+			window.open("https://maps.google.com/maps?q=" + address,
+				"_blank");	    	
+	    }
+	}
+	
 	function copyAddress() {
 		if ($('#copy_checkbox').attr('checked')) {
 			$("input[name='account.ship_street']").attr("value",
@@ -57,33 +87,41 @@
 		}
 	}
 
-	$(document).ready(function() {
-		$('#assignedToID').combogrid('setValue', '<s:property value="assignedToID"/>');
-		$('#assignedToID').combogrid('setText', '<s:property value="assignedToText"/>');
-		$('#managerID').combogrid('setValue', '<s:property value="managerID"/>');
-		$('#managerID').combogrid('setText', '<s:property value="managerText"/>');
-		$('#ownerID').combogrid('setValue', '<s:property value="ownerID"/>');
-		$('#ownerID').combogrid('setText', '<s:property value="ownerText"/>');		
-		if ($("#seleteIDs").val()!= ""){
-		   $("input:checkbox[name=massUpdate]").css("display",'block');
-		   $('#tt').tabs('close', '<s:text name='tab.relations'/>');
-		}
-		if ($("#id").val() == ""){
-		  $('#tt').tabs('close', '<s:text name='tab.relations'/>');
-		  if ($("#seleteIDs").val() == ""){
-		     $("#addObjectForm").form('validate');
-		  }
-		}
-		if ($("#saveFlag").val() == "true"){
-			$.messager.show({  
-	          title:'<s:text name="message.title" />',  
-	          msg:'<s:text name="message.save" />',  
-	          timeout:5000,  
-	          showType:'slide'  
-	      });  
-			$("#saveFlag").val("");
-	    }		 
-	})
+	$(document).ready(
+			function() {
+				$('#assignedToID').combogrid('setValue',
+						'<s:property value="assignedToID"/>');
+				$('#assignedToID').combogrid('setText',
+						'<s:property value="assignedToText"/>');
+				$('#managerID').combogrid('setValue',
+						'<s:property value="managerID"/>');
+				$('#managerID').combogrid('setText',
+						'<s:property value="managerText"/>');
+				$('#ownerID').combogrid('setValue',
+						'<s:property value="ownerID"/>');
+				$('#ownerID').combogrid('setText',
+						'<s:property value="ownerText"/>');
+				if ($("#seleteIDs").val() != "") {
+					$("input:checkbox[name=massUpdate]")
+							.css("display", 'block');
+					$('#tt').tabs('close', '<s:text name='tab.relations'/>');
+				}
+				if ($("#id").val() == "") {
+					$('#tt').tabs('close', '<s:text name='tab.relations'/>');
+					if ($("#seleteIDs").val() == "") {
+						$("#addObjectForm").form('validate');
+					}
+				}
+				if ($("#saveFlag").val() == "true") {
+					$.messager.show({
+						title : '<s:text name="message.title" />',
+						msg : '<s:text name="message.save" />',
+						timeout : 5000,
+						showType : 'slide'
+					});
+					$("#saveFlag").val("");
+				}
+			})
 </script>
 </head>
 
@@ -246,7 +284,7 @@
 							</table>
 
 							<div class="section-header">
-								<span><s:text name="span.billing_address" /></span>
+								<span><s:text name="span.billing_address" /> (<a href="#" onclick="billMap()"><s:text name="link.map" /></a>)</span>
 							</div>
 							<table style="" cellspacing="10" cellpadding="0" width="100%">
 								<tr>
@@ -291,7 +329,7 @@
 							</table>
 
 							<div class="section-header">
-								<span><s:text name="span.shipping_address" /></span>
+								<span><s:text name="span.shipping_address" /> (<a href="#" onclick="shipMap()"><s:text name="link.map" /></a>)</span>
 							</div>
 							<table style="" cellspacing="10" cellpadding="0" width="100%">
 								<tr>

@@ -1,0 +1,49 @@
+﻿<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+     <package namespace="/jsp/crm" name="report" extends="default,jasperreports-default">
+    	<action name="accountReportPage" class="accountReportAction" method="execute">
+    	  <result name="success">/jsp/crm/accountReport.jsp</result>
+        </action>
+    	
+    	<action name="accountReportPDF" class="com.gcrm.action.AccountReportAction" method="pdf">
+          <result name="success" type="jasper">                    
+            <param name="location">/reports/allAccount.jasper</param>                  
+             <param name="dataSource">list</param>                   
+             <param name="format">PDF</param>                    
+             <param name="reportParameters">map</param>               
+          </result>
+        </action>
+        
+    	<action name="accountReportExcel" class="com.gcrm.action.AccountReportAction" method="excel">
+          <result name="success" type="jasper">                    
+            <param name="location">/reports/allAccount.jasper</param>                  
+             <param name="dataSource">list</param>                   
+             <param name="format">XLS</param> 
+             <param name="documentName">allAccount</param>                    
+             <param name="reportParameters">map</param>               
+          </result>
+        </action>    	
+        
+    	<action name="accountReportCSV" class="com.gcrm.action.AccountReportAction" method="csv">
+          <result name="success" type="jasper">                    
+            <param name="location">/reports/allAccount.jasper</param>                  
+             <param name="dataSource">list</param>                   
+             <param name="format">CSV</param>
+             <param name="documentName">allAccount</param>                    
+             <param name="reportParameters">map</param>               
+          </result>
+        </action>   
+        
+    	<action name="accountByIndustryReportPage" class="accountByIndustryReportAction" method="execute">
+    	  <result name="success">/jsp/crm/accountByIndustryReport.jsp</result>
+        </action>
+         
+    	<action name="accountByIndustryBar" class="accountByIndustryReportAction" method="bar">
+    	  <result name="success">/jsp/crm/accountByIndustryReport.jsp</result>
+        </action>           		    	
+  </package>      
+    
+</struts>

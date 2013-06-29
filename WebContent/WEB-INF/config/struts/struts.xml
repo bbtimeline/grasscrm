@@ -9,6 +9,7 @@
 	<constant name="struts.devMode" value="true" />
 	<constant name="struts.il8n.reload" value="true"/>
 	<constant name="struts.ui.theme" value="simple"/>
+	<constant name="struts.action.extension" value="action" />
     <include file="../config/struts/struts-account.xml"/>
     <include file="../config/struts/struts-call.xml"/>
     <include file="../config/struts/struts-campaign.xml"/>
@@ -23,6 +24,7 @@
     <include file="../config/struts/struts-target.xml"/>
     <include file="../config/struts/struts-targetList.xml"/>
     <include file="../config/struts/struts-task.xml"/>
+    <include file="../config/struts/struts-report.xml"/>
 
     <package name="default" extends="struts-default,json-default">
         <interceptors>
@@ -47,5 +49,11 @@
         </global-results> 
                              
     </package>
+    
+   <package name="px" namespace="/images" extends="struts-default"> 
+       <action name="px"> 
+           <result>/images/px.gif</result> 
+       </action> 
+   </package>     
           
 </struts>

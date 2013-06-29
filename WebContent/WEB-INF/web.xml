@@ -17,6 +17,17 @@
         <param-value>/WEB-INF/classes/log4j.properties</param-value>
     </context-param>
     
+	<servlet>  
+	    <servlet-name>JasperReportImageServlet</servlet-name>  
+	    <servlet-class>  
+	        net.sf.jasperreports.j2ee.servlets.ImageServlet   
+	    </servlet-class>  
+	</servlet>  
+	<servlet-mapping>  
+	    <servlet-name>JasperReportImageServlet</servlet-name>  
+	    <url-pattern>/servlets/image</url-pattern> 
+	</servlet-mapping> 
+ 	
 	<jsp-config>
 	    <taglib>
 	     <taglib-uri>http://java.sun.com/jsp/jstl/core</taglib-uri>

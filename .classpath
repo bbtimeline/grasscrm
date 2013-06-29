@@ -124,5 +124,13 @@
 	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/log4j-1.2.14.jar"/>
 	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/slf4j-log4j12-1.5.6.jar"/>
 	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/slf4j-api-1.5.6.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/itext-2.1.7.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/iTextAsian.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/iTextAsianCmaps.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/jasperreports-5.1.2.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/groovy-all-2.0.1.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/org-netbeans-core.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/jfreechart-1.0.12.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/jcommon-1.0.15.jar"/>
 	<classpathentry kind="output" path="WebContent/WEB-INF/classes"/>
 </classpath>
