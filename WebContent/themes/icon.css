@@ -109,3 +109,9 @@
 .icon-disable{
 	background:url('icons/disable.png') no-repeat 3px 2px;
 }
+.icon-pie{
+	background:url('icons/pie.png') no-repeat 3px 2px;
+}
+.icon-bar{
+	background:url('icons/bar.png') no-repeat 3px 2px;
+}

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012, Grass CRM Inc
+ * Copyright (C) 2012 - 2013, Grass CRM Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.web.FilterInvocation;
 
 /**
  * Url access decision manager
@@ -32,13 +31,8 @@ public class UrlAccessDecisionManager implements AccessDecisionManager {
     public void decide(Authentication authentication, Object securityObject,
             Collection<ConfigAttribute> configAttributes)
             throws AccessDeniedException, InsufficientAuthenticationException {
-        String url = null;
 
         try {
-            if (securityObject instanceof FilterInvocation) {
-                FilterInvocation filter = (FilterInvocation) securityObject;
-                url = filter.getRequestUrl();
-            }
             if (authentication.getPrincipal() instanceof String
                     && "anonymousUser".equals(authentication.getPrincipal())) {
                 throw new AccessDeniedException(" no permission access！");

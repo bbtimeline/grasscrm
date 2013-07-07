@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012, Grass CRM Inc
+ * Copyright (C) 2012 - 2013, Grass CRM Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,19 +106,30 @@ public class BaseService<T extends Serializable> implements IBaseService<T> {
      * 
      * @see com.gcrm.dao.IBaseDao#findByName(java.lang.String, java.lang.String)
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     public T findByName(String clazz, String name) {
         return baseDao.findByName(clazz, name);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.gcrm.service.IBaseService#findByParam(java.lang.String,
+     * java.lang.Object)
+     */
     public List<T> findByParam(String hql, Object paramValue) {
         return baseDao.findByParam(hql, paramValue);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.gcrm.service.IBaseService#findByHQL(java.lang.String)
+     */
     public List<T> findByHQL(String hql) {
         return baseDao.findByHQL(hql);
     }
 
+    @SuppressWarnings("rawtypes")
     public List findVOByHQL(String hql) {
         return baseDao.findVOByHQL(hql);
     }

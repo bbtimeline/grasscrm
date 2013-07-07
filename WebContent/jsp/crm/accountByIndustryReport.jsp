@@ -39,15 +39,24 @@
 			<b style="white-space: nowrap; color: #444;"><s:text name="title.action" />:&nbsp;&nbsp;</b> 
 			<span> 
 				<span style="white-space: nowrap;"> 
-				   <a href="accountByIndustryReportPage.action" class="easyui-linkbutton" iconCls="icon-export" plain="true"><s:text name="action.report.pie" /></a>
+				   <a href="accountByIndustryReportPage.action" class="easyui-linkbutton" iconCls="icon-pie" plain="true"><s:text name="action.report.pie" /></a>
 				</span> 
 				<span style="white-space: nowrap;"> 
-				   <a href="accountByIndustryBar.action" class="easyui-linkbutton" iconCls="icon-export" plain="true"><s:text name="action.report.bar" /></a>
+				   <a href="accountByIndustryBar.action" class="easyui-linkbutton" iconCls="icon-bar" plain="true"><s:text name="action.report.bar" /></a>
 				</span> 								
 			</span>
 		   </div>
 			<div id="feature-title">
-
+				<s:if test="reportType!=null && reportType='pie'">
+					<h2>
+						<s:text name="report.accountByIndustryPie.title" />
+					</h2>
+				</s:if>
+				<s:else>
+					<h2>
+						<s:text name="report.accountByIndustryBar.title" />
+					</h2>
+				</s:else>
 			</div>
 			<div id="feature-content">
 			  <table style="" cellspacing="10" cellpadding="0" width="100%">

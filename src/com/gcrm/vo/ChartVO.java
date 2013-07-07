@@ -2,11 +2,14 @@ package com.gcrm.vo;
 
 import java.io.Serializable;
 
-public class AccountByIndustryVO implements Serializable {
+public class ChartVO implements Serializable {
 
     private static final long serialVersionUID = 8250950813769457555L;
 
-    private String industryLabel;
+    public static final String CHART_PIE = "pie";
+    public static final String CHART_BAR = "bar";
+
+    private String label;
     private int number;
 
     /**
@@ -25,18 +28,18 @@ public class AccountByIndustryVO implements Serializable {
     }
 
     /**
-     * @return the industryLabel
+     * @return the label
      */
-    public String getIndustryLabel() {
-        return industryLabel;
+    public String getLabel() {
+        return label;
     }
 
     /**
-     * @param industryLabel
-     *            the industryLabel to set
+     * @param label
+     *            the label to set
      */
-    public void setIndustryLabel(String industryLabel) {
-        this.industryLabel = industryLabel;
+    public void setLabel(String label) {
+        this.label = label;
     }
 
 }

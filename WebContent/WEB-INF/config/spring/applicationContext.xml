@@ -189,7 +189,26 @@
         
     <bean id="accountByIndustryReportAction" class="com.gcrm.action.AccountByIndustryReportAction" scope="prototype">   
         <property name="baseService" ref="baseService" />
-        <property name="industryService" ref="optionService" />
+    </bean>
+        
+    <bean id="contactAddressReportAction" class="com.gcrm.action.ContactAddressReportAction" scope="prototype">   
+        <property name="baseService" ref="baseService" />
+    </bean>
+
+    <bean id="opportunityByStageReportAction" class="com.gcrm.action.OpportunityByStageReportAction" scope="prototype">   
+        <property name="baseService" ref="baseService" />
+    </bean>
+
+    <bean id="opportunityByLeadReportAction" class="com.gcrm.action.OpportunityByLeadReportAction" scope="prototype">   
+        <property name="baseService" ref="baseService" />
+    </bean>
+    
+    <bean id="leadByStatusReportAction" class="com.gcrm.action.LeadByStatusReportAction" scope="prototype">   
+        <property name="baseService" ref="baseService" />
+    </bean>    
+        
+    <bean id="leadBySourceReportAction" class="com.gcrm.action.LeadBySourceReportAction" scope="prototype">   
+        <property name="baseService" ref="baseService" />
     </bean>
         
     <bean id="totalfilterAction" class="com.gcrm.action.TotalFilter" scope="prototype">   

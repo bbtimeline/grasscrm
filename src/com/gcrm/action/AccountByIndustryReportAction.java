@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012, Grass CRM Inc
+ * Copyright (C) 2012 - 2013, Grass CRM Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,42 +43,49 @@ import com.gcrm.domain.Industry;
 import com.gcrm.domain.Role;
 import com.gcrm.domain.User;
 import com.gcrm.service.IBaseService;
-import com.gcrm.service.IOptionService;
 import com.gcrm.util.Constant;
 import com.gcrm.util.security.UserUtil;
-import com.gcrm.vo.AccountByIndustryVO;
+import com.gcrm.vo.ChartVO;
 import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.ActionSupport;
 
 /**
- * Manages the Account Report
+ * Manages the Account By Industry Report
  * 
  */
 public class AccountByIndustryReportAction extends ActionSupport {
 
     private static final long serialVersionUID = -2404576552417042445L;
     private IBaseService<Account> baseService;
-    private IOptionService<Industry> industryService;
-    private List<AccountByIndustryVO> list;
+    private List<ChartVO> list;
     private Map<String, Object> map;
     private String report;
+    private String reportType;
 
+    /**
+     * Pie chart
+     */
     @Override
     public String execute() throws Exception {
         UserUtil.permissionCheck("view_account");
         setList();
-        HttpServletRequest request = ServletActionContext.getRequest();
-        String reportPath = "/reports/accountByIndustryPie.jasper";
+        String reportPath = "/reports/pie.jasper";
         setExporter(reportPath);
+        reportType = ChartVO.CHART_PIE;
         return SUCCESS;
     }
 
+    /**
+     * Bar chart
+     */
+    @SuppressWarnings("unused")
     public String bar() throws Exception {
         UserUtil.permissionCheck("view_account");
         setList();
         HttpServletRequest request = ServletActionContext.getRequest();
-        String reportPath = "/reports/accountByIndustryBar.jasper";
+        String reportPath = "/reports/bar.jasper";
         setExporter(reportPath);
+        reportType = ChartVO.CHART_BAR;
         return SUCCESS;
     }
 
@@ -88,8 +95,7 @@ public class AccountByIndustryReportAction extends ActionSupport {
                 .getRealPath(reportPath);
         File reportFile = new File(path);
         if (!reportFile.exists()) {
-            throw new JRRuntimeException(
-                    "File accountByIndustry.jasper is not found");
+            throw new JRRuntimeException("Jasper report file is not found");
         }
         JasperReport jasperReport = (JasperReport) JRLoader
                 .loadObjectFromFile(reportFile.getPath());
@@ -120,7 +126,7 @@ public class AccountByIndustryReportAction extends ActionSupport {
                 jasperPrint);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "rawtypes" })
     private void setList() {
         User loginUser = UserUtil.getLoginUser();
         int scope = loginUser.getScope_account();
@@ -135,8 +141,8 @@ public class AccountByIndustryReportAction extends ActionSupport {
         ActionContext context = ActionContext.getContext();
         Map<String, Object> session = context.getSession();
         String local = (String) session.get("locale");
-        list = new ArrayList<AccountByIndustryVO>();
-        AccountByIndustryVO accountByIndustryVO = null;
+        list = new ArrayList<ChartVO>();
+        ChartVO chartVO = null;
         Industry indusrty = null;
         while (it.hasNext()) {
             Object[] row = (Object[]) it.next();
@@ -151,10 +157,10 @@ public class AccountByIndustryReportAction extends ActionSupport {
                 }
             }
             Long number = (Long) row[1];
-            accountByIndustryVO = new AccountByIndustryVO();
-            accountByIndustryVO.setIndustryLabel(IndustryLabel);
-            accountByIndustryVO.setNumber(number.intValue());
-            list.add(accountByIndustryVO);
+            chartVO = new ChartVO();
+            chartVO.setLabel(IndustryLabel);
+            chartVO.setNumber(number.intValue());
+            list.add(chartVO);
         }
         map = new HashMap<String, Object>();
     }
@@ -207,7 +213,7 @@ public class AccountByIndustryReportAction extends ActionSupport {
     /**
      * @return the list
      */
-    public List<AccountByIndustryVO> getList() {
+    public List<ChartVO> getList() {
         return list;
     }
 
@@ -215,23 +221,23 @@ public class AccountByIndustryReportAction extends ActionSupport {
      * @param list
      *            the list to set
      */
-    public void setList(List<AccountByIndustryVO> list) {
+    public void setList(List<ChartVO> list) {
         this.list = list;
     }
 
     /**
-     * @return the industryService
+     * @return the reportType
      */
-    public IOptionService<Industry> getIndustryService() {
-        return industryService;
+    public String getReportType() {
+        return reportType;
     }
 
     /**
-     * @param industryService
-     *            the industryService to set
+     * @param reportType
+     *            the reportType to set
      */
-    public void setIndustryService(IOptionService<Industry> industryService) {
-        this.industryService = industryService;
+    public void setReportType(String reportType) {
+        this.reportType = reportType;
     }
 
 }

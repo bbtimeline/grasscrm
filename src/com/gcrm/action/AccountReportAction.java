@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012, Grass CRM Inc
+ * Copyright (C) 2012-2013, Grass CRM Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package com.gcrm.action;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -57,6 +58,10 @@ public class AccountReportAction extends ActionSupport {
     private Map<String, Object> map;
     private String report;
 
+    /**
+     * Generates html report
+     * 
+     */
     @Override
     public String execute() throws Exception {
         UserUtil.permissionCheck("view_account");
@@ -86,62 +91,85 @@ public class AccountReportAction extends ActionSupport {
         exporter.setParameter(JRHtmlExporterParameter.HTML_HEADER, "");
         exporter.setParameter(JRHtmlExporterParameter.SIZE_UNIT,
                 JRHtmlExporterParameter.SIZE_UNIT_POINT);
-        exporter.setParameter(JRHtmlExporterParameter.SIZE_UNIT,
-                JRHtmlExporterParameter.SIZE_UNIT_PIXEL);
         exporter.setParameter(JRHtmlExporterParameter.ZOOM_RATIO, 1.0f);
         exporter.setParameter(JRHtmlExporterParameter.BETWEEN_PAGES_HTML, "");
         exporter.setParameter(JRHtmlExporterParameter.HTML_FOOTER, "");
         exporter.exportReport();
         report = buffer.toString();
+        report = report.replaceAll(
+                "<p style=\"overflow: hidden; text-indent: 0px; \">", "");
+        report = report.replaceAll("</span></p></td>", "</span></td>");
         return SUCCESS;
     }
 
+    /**
+     * PDF report
+     */
     public String pdf() throws Exception {
         UserUtil.permissionCheck("view_account");
         setList();
         return SUCCESS;
     }
 
+    /**
+     * Excel report
+     */
     public String excel() throws Exception {
         UserUtil.permissionCheck("view_account");
         setList();
         return SUCCESS;
     }
 
+    /**
+     * CSV report
+     */
     public String csv() throws Exception {
         UserUtil.permissionCheck("view_account");
         setList();
         return SUCCESS;
     }
 
+    @SuppressWarnings("rawtypes")
     private void setList() {
         User loginUser = UserUtil.getLoginUser();
         int scope = loginUser.getScope_account();
-        StringBuilder hqlBuilder = new StringBuilder("from Account");
-
+        StringBuilder hqlBuilder = new StringBuilder(
+                "select account.name, account.office_phone, account.email, account.bill_street, account.bill_city, account.bill_state, account.assigned_to from Account account");
         if (scope == Role.OWNER_OR_DISABLED) {
-            hqlBuilder.append(" where owner = ").append(loginUser.getId());
+            hqlBuilder.append(" where account.owner = ").append(
+                    loginUser.getId());
         }
-        hqlBuilder.append(" order by created_on desc");
-        List<Account> result = baseService.findByHQL(hqlBuilder.toString());
+        hqlBuilder.append(" order by account.created_on desc");
+        List result = baseService.findVOByHQL(hqlBuilder.toString());
+        Iterator it = result.iterator();
 
         list = new ArrayList<AccountVO>();
 
+        String name = null;
+        String officePhone = null;
+        String email = null;
+        String billStreet = null;
+        String billCity = null;
+        String billState = null;
         String assignToName = "";
-        for (Account account : result) {
+        User assignedTo = null;
+        while (it.hasNext()) {
+            Object[] row = (Object[]) it.next();
             AccountVO accountVO = new AccountVO();
-            accountVO.setName(CommonUtil.fromNullToEmpty(account.getName()));
-            accountVO.setOffice_phone(CommonUtil.fromNullToEmpty(account
-                    .getOffice_phone()));
-            accountVO.setEmail(CommonUtil.fromNullToEmpty(account.getEmail()));
-            accountVO.setBill_street(CommonUtil.fromNullToEmpty(account
-                    .getBill_street()));
-            accountVO.setBill_city(CommonUtil.fromNullToEmpty(account
-                    .getBill_city()));
-            accountVO.setBill_state(CommonUtil.fromNullToEmpty(account
-                    .getBill_state()));
+            name = (String) row[0];
+            officePhone = (String) row[1];
+            email = (String) row[2];
+            billStreet = (String) row[3];
+            billCity = (String) row[4];
+            billState = (String) row[5];
+            assignedTo = (User) row[6];
+            accountVO.setName(CommonUtil.fromNullToEmpty(name));
+            accountVO.setOffice_phone(CommonUtil.fromNullToEmpty(officePhone));
+            accountVO.setEmail(CommonUtil.fromNullToEmpty(email));
+            accountVO.setBill_street(CommonUtil.fromNullToEmpty(billStreet));
+            accountVO.setBill_city(CommonUtil.fromNullToEmpty(billCity));
+            accountVO.setBill_state(CommonUtil.fromNullToEmpty(billState));
             assignToName = "";
-            User assignedTo = account.getAssigned_to();
             if (assignedTo != null) {
                 assignToName = CommonUtil.fromNullToEmpty(assignedTo.getName());
             }

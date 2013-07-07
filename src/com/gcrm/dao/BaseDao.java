@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012, Grass CRM Inc
+ * Copyright (C) 2012 - 2013, Grass CRM Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,6 +80,11 @@ public class BaseDao<T extends Serializable> extends HibernateDaoSupport
         return objects;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.gcrm.dao.IBaseDao#findByHQL(java.lang.String)
+     */
     @SuppressWarnings("unchecked")
     public List<T> findByHQL(String hql) {
 
@@ -89,7 +94,12 @@ public class BaseDao<T extends Serializable> extends HibernateDaoSupport
         return objects;
     }
 
-    @SuppressWarnings("unchecked")
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.gcrm.dao.IBaseDao#findVOByHQL(java.lang.String)
+     */
+    @SuppressWarnings({ "rawtypes" })
     public List findVOByHQL(String hql) {
 
         List objects = null;

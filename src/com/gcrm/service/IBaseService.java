@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012, Grass CRM Inc
+ * Copyright (C) 2012 - 2013, Grass CRM Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,6 +110,15 @@ public interface IBaseService<T extends Serializable> {
      */
     public List<T> findByHQL(String hql);
 
+    /**
+     * Finds record detail by hql
+     * 
+     * @param hql
+     *            hql with parameters
+     * @return result list
+     * @throws Exception
+     */
+    @SuppressWarnings("rawtypes")
     public List findVOByHQL(String hql);
 
     /**

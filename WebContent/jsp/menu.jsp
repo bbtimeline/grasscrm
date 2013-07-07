@@ -50,6 +50,14 @@
 	<div id="mm6" style="width:200px;display:none">
 		<s:if test="#session.loginUser.view_account == 1"><div onClick="openPage('/crm/accountReportPage.action')"><s:text name='menu.accountReport.title'/></div></s:if>
 		<s:if test="#session.loginUser.view_account == 1"><div onClick="openPage('/crm/accountByIndustryReportPage.action')"><s:text name='menu.accountByIndustryReport.title'/></div></s:if>
+		<div class="menu-sep"></div>
+		<s:if test="#session.loginUser.view_contact == 1"><div onClick="openPage('/crm/contactAddressReportPage.action')"><s:text name='menu.contactAddress.title'/></div></s:if>
+		<div class="menu-sep"></div>
+		<s:if test="#session.loginUser.view_opportunity == 1"><div onClick="openPage('/crm/opportunityByStageReportPage.action')"><s:text name='menu.opportunityByStageReport.title'/></div></s:if>
+		<s:if test="#session.loginUser.view_opportunity == 1"><div onClick="openPage('/crm/opportunityByLeadReportPage.action')"><s:text name='menu.opportunityByLeadReport.title'/></div></s:if>
+		<div class="menu-sep"></div>
+		<s:if test="#session.loginUser.view_lead == 1"><div onClick="openPage('/crm/leadByStatusReportPage.action')"><s:text name='menu.leadByStatusReport.title'/></div></s:if>
+		<s:if test="#session.loginUser.view_lead == 1"><div onClick="openPage('/crm/leadBySourceReportPage.action')"><s:text name='menu.leadBySourceReport.title'/></div></s:if>
 	</div>	
 	<s:if test="#session.loginUser.view_system == 1">
 	<div id="mm7" style="width:150px;display:none">

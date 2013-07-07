@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report name" pageWidth="900" pageHeight="842" columnWidth="860" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" resourceBundle="MessageResources" uuid="4a14ee68-e07d-4d94-9829-128d7f8693cb">
 	<property name="ireport.zoom" value="1.0"/>
-	<property name="ireport.x" value="0"/>
+	<property name="ireport.x" value="8"/>
 	<property name="ireport.y" value="0"/>
-	<style name="color_style">
+	<style name="color_style" hAlign="Center" vAlign="Middle">
 		<conditionalStyle>
 			<conditionExpression><![CDATA[new Boolean($V{REPORT_COUNT}.intValue()%2==0)]]></conditionExpression>
 			<style mode="Transparent" forecolor="#000000" backcolor="#E3E9F7"/>
@@ -170,7 +170,7 @@
 					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#CCCCCC"/>
 					<rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#CCCCCC"/>
 				</box>
-				<textElement textAlignment="Center">
+				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Arial"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{office_phone}]]></textFieldExpression>
@@ -184,7 +184,7 @@
 					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#CCCCCC"/>
 					<rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#CCCCCC"/>
 				</box>
-				<textElement textAlignment="Center">
+				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Arial"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{email}]]></textFieldExpression>
@@ -198,7 +198,7 @@
 					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#CCCCCC"/>
 					<rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#CCCCCC"/>
 				</box>
-				<textElement textAlignment="Center">
+				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Arial"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{bill_street}]]></textFieldExpression>
@@ -212,7 +212,7 @@
 					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#CCCCCC"/>
 					<rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#CCCCCC"/>
 				</box>
-				<textElement textAlignment="Center">
+				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Arial"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{bill_city}]]></textFieldExpression>
@@ -226,7 +226,7 @@
 					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#CCCCCC"/>
 					<rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#CCCCCC"/>
 				</box>
-				<textElement textAlignment="Center">
+				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Arial"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{bill_state}]]></textFieldExpression>
@@ -240,7 +240,7 @@
 					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#CCCCCC"/>
 					<rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#CCCCCC"/>
 				</box>
-				<textElement textAlignment="Center">
+				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Arial"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
@@ -254,7 +254,7 @@
 					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#CCCCCC"/>
 					<rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#CCCCCC"/>
 				</box>
-				<textElement textAlignment="Center">
+				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Arial"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{assigned_to}]]></textFieldExpression>

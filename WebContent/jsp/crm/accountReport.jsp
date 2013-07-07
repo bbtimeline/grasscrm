@@ -59,8 +59,10 @@
 					 <td align="left" colspan="4"><font color="red"><s:actionerror /></font></td>
 				   </tr>	
 				</s:if>   
-			  </table>			
-			  <s:property value="report" escape="false"/>
+			  </table>	
+			  <div style="text-align: center;vertical-align:middle;">
+                <s:property value="report" escape="false"/>
+              </div>		
 		    </div>
      	  </div>
      	  <s:include value="../footer.jsp" />

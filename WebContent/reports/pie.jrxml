@@ -6,8 +6,8 @@
 	<queryString>
 		<![CDATA[]]>
 	</queryString>
-	<field name="industryLabel" class="java.lang.String">
-		<fieldDescription><![CDATA[industryLabel]]></fieldDescription>
+	<field name="label" class="java.lang.String">
+		<fieldDescription><![CDATA[label]]></fieldDescription>
 	</field>
 	<field name="number" class="java.lang.Integer">
 		<fieldDescription><![CDATA[number]]></fieldDescription>
@@ -16,15 +16,7 @@
 		<band splitType="Stretch"/>
 	</background>
 	<title>
-		<band height="42" splitType="Stretch">
-			<textField>
-				<reportElement uuid="b054c3de-2c3f-4252-9c55-58916aee8d07" x="201" y="22" width="267" height="20"/>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="Arial" size="14" isBold="true"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$R{report.accountByIndustryPie.title}]]></textFieldExpression>
-			</textField>
-		</band>
+		<band splitType="Stretch"/>
 	</title>
 	<pageHeader>
 		<band splitType="Stretch"/>
@@ -45,13 +37,13 @@
 		<band height="345" splitType="Stretch">
 			<pie3DChart>
 				<chart>
-					<reportElement uuid="1ec429b2-52ce-41fe-aa94-7a3e87c03c4f" x="75" y="20" width="496" height="304"/>
+					<reportElement uuid="1ec429b2-52ce-41fe-aa94-7a3e87c03c4f" x="0" y="0" width="571" height="345"/>
 					<chartTitle/>
 					<chartSubtitle/>
 					<chartLegend/>
 				</chart>
 				<pieDataset>
-					<keyExpression><![CDATA[$F{industryLabel}]]></keyExpression>
+					<keyExpression><![CDATA[$F{label}]]></keyExpression>
 					<valueExpression><![CDATA[$F{number}]]></valueExpression>
 					<labelExpression><![CDATA[$F{number}.toString()]]></labelExpression>
 				</pieDataset>
