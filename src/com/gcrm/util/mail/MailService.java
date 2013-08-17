@@ -59,6 +59,22 @@ public class MailService {
         }
     }
 
+    public void sendSystemSimpleMail(SimpleMailMessage msg) {
+        List<EmailSetting> emailSettings = baseService
+                .getAllObjects(EmailSetting.class.getSimpleName());
+        EmailSetting emailSetting = null;
+        if (emailSettings != null && emailSettings.size() > 0) {
+            emailSetting = emailSettings.get(0);
+        } else {
+            return;
+        }
+        msg.setFrom(emailSetting.getFrom_address());
+        JavaMailSenderImpl sender = this.prepareSender(emailSetting);
+        if (sender != null) {
+            sender.send(msg);
+        }
+    }
+
     public void asynSendHtmlMail(final String from, final String[] to,
             final String subject, final String text, final String[] fileNames,
             final File[] files) {

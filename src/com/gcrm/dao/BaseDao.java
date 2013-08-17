@@ -83,6 +83,21 @@ public class BaseDao<T extends Serializable> extends HibernateDaoSupport
     /*
      * (non-Javadoc)
      * 
+     * @see com.gcrm.dao.IBaseDao#findByParams(java.lang.String,
+     * java.lang.Object[])
+     */
+    @SuppressWarnings("unchecked")
+    public List<T> findByParams(String hql, Object[] paramValues) {
+
+        List<T> objects = null;
+
+        objects = getHibernateTemplate().find(hql, paramValues);
+        return objects;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.gcrm.dao.IBaseDao#findByHQL(java.lang.String)
      */
     @SuppressWarnings("unchecked")

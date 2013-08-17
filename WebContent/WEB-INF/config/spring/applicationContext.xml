@@ -175,7 +175,8 @@
         
     <bean id="userService" class="com.gcrm.service.UserService">
     	<property name="baseDao" ref="baseDao" /> 
-    	<property name="userDao" ref="userDao" />          	
+    	<property name="userDao" ref="userDao" />
+    	<property name="mailService" ref="mailService" />          	
     </bean>   
 
         
@@ -655,5 +656,13 @@
 
     <bean id="userStatusAction" class="com.gcrm.action.UserStatusAction" scope="prototype">   
         <property name="baseService" ref="baseService" /> 	
-    </bean>                          
+    </bean> 
+    
+    <bean id="forgetPasswordAction" class="com.gcrm.action.ForgetPasswordAction" scope="prototype">   
+        <property name="baseService" ref="userService" /> 	
+    </bean>    
+    
+    <bean id="changePasswordAction" class="com.gcrm.action.ChangePasswordAction" scope="prototype">   
+        <property name="baseService" ref="userService" /> 	
+    </bean>       
 </beans>

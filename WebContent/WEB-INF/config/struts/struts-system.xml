@@ -573,7 +573,23 @@
 			<interceptor-ref name="prepareInterceptor" /> 
             <result name="input">/jsp/system/editEmailTemplate.jsp</result>          
     	    <result type="redirect">/jsp/system/listEmailTemplate.jsp</result>
-        </action>        
+        </action>  
+        
+        <action name="forgetPassword" class="forgetPasswordAction" method="execute">
+			<interceptor-ref name="prepareInterceptor" /> 
+            <result name="input">/jsp/forgetPassword.jsp</result>          
+    	    <result>/jsp/forgetPassword.jsp</result>
+        </action>
+        
+    	<action name="changePasswordPage">
+    	  <result type="redirect">/jsp/system/changePassword.jsp</result>
+        </action>
+                
+        <action name="changePassword" class="changePasswordAction" method="execute">
+			<interceptor-ref name="prepareInterceptor" /> 
+            <result name="input">/jsp/system/changePassword.jsp</result>          
+    	    <result>/jsp/system/changePassword.jsp</result>
+        </action>                   
     </package>   
     
 </struts>

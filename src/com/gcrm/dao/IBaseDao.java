@@ -71,7 +71,7 @@ public interface IBaseDao<T extends Serializable> {
     public List findVOByHQL(String hql);
 
     /**
-     * Finds records by hql with parameters
+     * Finds records by hql with one parameter
      * 
      * @param hql
      *            hql with parameters
@@ -81,6 +81,18 @@ public interface IBaseDao<T extends Serializable> {
      * @throws Exception
      */
     public List<T> findByParam(String hql, Object paramValue);
+
+    /**
+     * Finds records by hql with parameters
+     * 
+     * @param hql
+     *            hql with parameters
+     * @param paramValues
+     *            parameter value array
+     * @return result list
+     * @throws Exception
+     */
+    public List<T> findByParams(String hql, Object[] paramValues);
 
     /**
      * Persists entity

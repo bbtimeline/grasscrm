@@ -13,8 +13,8 @@
 		<a href="javascript:void(0)" id="mb4" class="easyui-menubutton" data-options="menu:'#mm4',iconCls:'icon-activity'"><s:text name='menu.activities.title'/></a>
 		<a href="javascript:void(0)" id="mb5" class="easyui-menubutton" data-options="menu:'#mm5',iconCls:'icon-collaboration'"><s:text name='menu.collaboration.title'/></a>
 		<a href="javascript:void(0)" id="mb6" class="easyui-menubutton" data-options="menu:'#mm6',iconCls:'icon-collaboration'"><s:text name='menu.report.title'/></a>
-		<s:if test="#session.loginUser.view_system == 1"><a href="javascript:void(0)" id="mb6" class="easyui-menubutton" data-options="menu:'#mm7',iconCls:'icon-system'"><s:text name='menu.system.title'/></a></s:if>
-		<a href="javascript:void(0)" id="mb8" class="easyui-menubutton" data-options="menu:'#mm7',iconCls:'icon-help'"><s:text name='menu.help.title'/></a>
+		<a href="javascript:void(0)" id="mb7" class="easyui-menubutton" data-options="menu:'#mm7',iconCls:'icon-system'"><s:text name='menu.system.title'/></a>
+		<a href="javascript:void(0)" id="mb8" class="easyui-menubutton" data-options="menu:'#mm8',iconCls:'icon-help'"><s:text name='menu.help.title'/></a>
 	</div>
 	<div id="mm1" style="width:150px;display:none">
 		<div onClick="openPage('/crm/homePage.action')"><s:text name='menu.home.title'/></div>
@@ -59,8 +59,8 @@
 		<s:if test="#session.loginUser.view_lead == 1"><div onClick="openPage('/crm/leadByStatusReportPage.action')"><s:text name='menu.leadByStatusReport.title'/></div></s:if>
 		<s:if test="#session.loginUser.view_lead == 1"><div onClick="openPage('/crm/leadBySourceReportPage.action')"><s:text name='menu.leadBySourceReport.title'/></div></s:if>
 	</div>	
-	<s:if test="#session.loginUser.view_system == 1">
 	<div id="mm7" style="width:150px;display:none">
+	  <s:if test="#session.loginUser.view_system == 1">
 	    <div>
 	      <span><s:text name='menu.dropdown.title'/></span>
 	      <div style="width:170px;">  
@@ -97,8 +97,10 @@
 		<div onClick="openPage('/system/editEmailSetting.action')"><s:text name='menu.emailSetting.title'/></div>
 		<div onClick="openPage('/system/listEmailTemplatePage.action')"><s:text name='menu.emailTemplate.title'/></div>
 		<div onClick="openPage('/system/listChangeLogPage.action')"><s:text name='menu.changeLog.title'/></div>
+	  </s:if>
+	  <div onClick="openPage('/system/changePasswordPage.action')"><s:text name='menu.changePassword.title'/></div>
 	</div>
-	</s:if>
+	
 	<div id="mm8" style="width:100px;display:none">
 		<div onClick="openPage('/help.pdf')"><s:text name='menu.help.title'/></div>
 		<div onClick="openPage('/system/aboutPage.action')"><s:text name='menu.about.title'/></div>

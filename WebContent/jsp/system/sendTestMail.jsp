@@ -38,7 +38,7 @@
 		</div>
 
 		<div id="feature-content">
-			<s:form id="sentTestMailForm" action="sendEmail" method="POST">
+			<s:form id="sentTestMailForm" action="sendEmail" method="POST" namespace="/jsp/system">
 				<table style="width: 100%;" border="0">
 					<tr>
 						<td><br></td>

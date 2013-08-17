@@ -61,7 +61,10 @@
 					</button>
 				</fieldset>
 			</form>
-		</div>
+			<div style="cursor: hand;text-align: right;">
+			  <a href="<s:url value="/jsp/forgetPassword.jsp"/>"><s:text name='login.forgetPassword.label'/></a>&nbsp;
+			</div>
+		</div>		
 	</div>
 	<div id="wrapperbottom_branding">
 		<div id="wrapperbottom_branding_text">

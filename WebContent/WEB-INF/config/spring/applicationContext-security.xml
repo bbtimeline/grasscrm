@@ -13,6 +13,8 @@
     <security:http pattern="/themes/**" security="none"/>
     <security:http pattern="/css/**" security="none"/>
     <security:http pattern="/jsp/login.jsp" security="none"/>
+    <security:http pattern="/jsp/forgetPassword.jsp" security="none"/>
+    <security:http pattern="/jsp/system/forgetPassword.action" security="none"/>
     <security:http pattern="/jsp/combobox_filter_op.json" security="none"/>
 
 	<security:http auto-config="true"

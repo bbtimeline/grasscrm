@@ -35,13 +35,13 @@ import com.gcrm.util.security.UserUtil;
 public class UserDetailsServiceImpl implements UserDetailsService {
     private IUserService userService;
 
-    public UserDetails loadUserByUsername(String userName) {
+    public UserDetails loadUserByUsername(String username) {
 
         UserDetailsImpl userDetails = new UserDetailsImpl();
 
         User user = null;
         try {
-            user = userService.findByName(userName);
+            user = userService.findByName(username);
         } catch (Exception e) {
             throw new UsernameNotFoundException("Error found in getting user。");
         }
