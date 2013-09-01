@@ -115,42 +115,42 @@
 	</bean>	
 	
 	<!-- Dao Config -->    
-	<bean id="baseDao" class="com.gcrm.dao.BaseDao">
+	<bean id="baseDao" class="com.gcrm.dao.impl.BaseDao">
          <property name="sessionFactory" ref="sessionFactory"></property>
     </bean>	
 
-	<bean id="callDao" class="com.gcrm.dao.CallDao">
+	<bean id="callDao" class="com.gcrm.dao.impl.CallDao">
 	     <property name="sessionFactory" ref="sessionFactory"></property>
     </bean>	
     
-	<bean id="documentDao" class="com.gcrm.dao.DocumentDao">
+	<bean id="documentDao" class="com.gcrm.dao.impl.DocumentDao">
 	     <property name="sessionFactory" ref="sessionFactory"></property>
     </bean>	
 
-	<bean id="meetingDao" class="com.gcrm.dao.MeetingDao">
+	<bean id="meetingDao" class="com.gcrm.dao.impl.MeetingDao">
 	     <property name="sessionFactory" ref="sessionFactory"></property>
     </bean>	
 
-	<bean id="userDao" class="com.gcrm.dao.UserDao">
+	<bean id="userDao" class="com.gcrm.dao.impl.UserDao">
 	     <property name="sessionFactory" ref="sessionFactory"></property>
     </bean>	
     	    
     <!-- Services -->
-    <bean id="baseService" class="com.gcrm.service.BaseService">
+    <bean id="baseService" class="com.gcrm.service.impl.BaseService">
     	<property name="baseDao" ref="baseDao" />
     </bean>
 
-    <bean id="callService" class="com.gcrm.service.CallService">
+    <bean id="callService" class="com.gcrm.service.impl.CallService">
     	<property name="baseDao" ref="callDao" />
     	<property name="callDao" ref="callDao" />
     </bean>
     
-    <bean id="documentService" class="com.gcrm.service.DocumentService">
+    <bean id="documentService" class="com.gcrm.service.impl.DocumentService">
     	<property name="baseDao" ref="documentDao" />
     	<property name="documentDao" ref="documentDao" />
     </bean>
         
-    <bean id="leadService" class="com.gcrm.service.LeadService">
+    <bean id="leadService" class="com.gcrm.service.impl.LeadService">
     	<property name="baseDao" ref="baseDao" />
     	<property name="accountService" ref="baseService" /> 
         <property name="contactService" ref="baseService" />
@@ -158,22 +158,22 @@
         <property name="leadStatusService" ref="optionService" />            	
     </bean>    
 
-    <bean id="meetingService" class="com.gcrm.service.MeetingService">
+    <bean id="meetingService" class="com.gcrm.service.impl.MeetingService">
     	<property name="baseDao" ref="meetingDao" />
     	<property name="meetingDao" ref="meetingDao" />
     </bean>
     
-    <bean id="optionService" class="com.gcrm.service.OptionService">
+    <bean id="optionService" class="com.gcrm.service.impl.OptionService">
     	<property name="baseDao" ref="baseDao" />
     </bean> 
     
-    <bean id="targetService" class="com.gcrm.service.TargetService">
+    <bean id="targetService" class="com.gcrm.service.impl.TargetService">
     	<property name="baseDao" ref="baseDao" />
     	<property name="leadService" ref="baseService" /> 
         <property name="leadStatusService" ref="baseService" />
     </bean>  
         
-    <bean id="userService" class="com.gcrm.service.UserService">
+    <bean id="userService" class="com.gcrm.service.impl.UserService">
     	<property name="baseDao" ref="baseDao" /> 
     	<property name="userDao" ref="userDao" />
     	<property name="mailService" ref="mailService" />          	
@@ -664,5 +664,11 @@
     
     <bean id="changePasswordAction" class="com.gcrm.action.ChangePasswordAction" scope="prototype">   
         <property name="baseService" ref="userService" /> 	
-    </bean>       
+    </bean>
+    
+    <bean id="calendarAction" class="com.gcrm.action.CalendarAction" scope="prototype"> 
+        <property name="callService" ref="baseService" />
+        <property name="meetingService" ref="baseService" />
+        <property name="taskService" ref="baseService" />
+    </bean>      
 </beans>

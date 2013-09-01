@@ -107,7 +107,11 @@
 			<interceptor-ref name="prepareInterceptor" /> 
             <result name="input">/jsp/crm/editDocument.jsp</result>          
     	   <result type="redirect">/jsp/crm/listDocument.jsp</result>
-        </action>                    
+        </action>     
+        
+      	<action name="getDocumentRelationCounts" class="editDocumentAction" method="getDocumentRelationCounts">
+    	  <result name="success" type="json"></result>
+        </action>          
   </package>      
     
 </struts>

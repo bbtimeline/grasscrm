@@ -107,7 +107,11 @@
 			<interceptor-ref name="prepareInterceptor" /> 
             <result name="input">/jsp/crm/editLead.jsp</result>          
     	    <result type="redirect">/jsp/crm/listLead.jsp</result>
-        </action>               
+        </action> 
+        
+      	<action name="getLeadRelationCounts" class="editLeadAction" method="getLeadRelationCounts">
+    	  <result name="success" type="json"></result>
+        </action>          
   </package>      
     
 </struts>

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012 - 2013, Grass CRM Inc
+ * Copyright (C) 2012 - 2013, Grass CRM Studio
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.struts2.ServletActionContext;
@@ -143,10 +145,25 @@ public class EditCallAction extends BaseEditAction implements Preparable {
         return SUCCESS;
     }
 
+    /**
+     * Batch update change log
+     * 
+     * @param changeLogs
+     *            change log collection
+     */
     private void batchInserChangeLogs(Collection<ChangeLog> changeLogs) {
         this.getChangeLogService().batchUpdate(changeLogs);
     }
 
+    /**
+     * Creates change log
+     * 
+     * @param originalCall
+     *            original call record
+     * @param call
+     *            current call record
+     * @return change log collections
+     */
     private Collection<ChangeLog> changeLog(Call originalCall, Call call) {
         Collection<ChangeLog> changeLogs = null;
         if (originalCall != null) {
@@ -709,6 +726,37 @@ public class EditCallAction extends BaseEditAction implements Preparable {
         }
         super.updateBaseInfo(call);
         return originalCall;
+    }
+
+    /**
+     * Gets Contact Relation Counts
+     * 
+     * @return null
+     */
+    public String getCallRelationCounts() throws Exception {
+        long contactNumber = this.baseService
+                .countsByParams(
+                        "select count(*) from Call call join call.contacts where call.id = ?",
+                        new Integer[] { this.getId() });
+        long leadNumber = this.baseService
+                .countsByParams(
+                        "select count(*) from Call call join call.leads where call.id = ?",
+                        new Integer[] { this.getId() });
+        long userNumber = this.baseService
+                .countsByParams(
+                        "select count(*) from Call call join call.users where call.id = ?",
+                        new Integer[] { this.getId() });
+
+        StringBuilder jsonBuilder = new StringBuilder("");
+        jsonBuilder.append("{\"contactNumber\":\"").append(contactNumber)
+                .append("\",\"leadNumber\":\"").append(leadNumber)
+                .append("\",\"userNumber\":\"").append(userNumber)
+                .append("\"}");
+        // Returns JSON data back to page
+        HttpServletResponse response = ServletActionContext.getResponse();
+        response.setContentType("text/html;charset=UTF-8");
+        response.getWriter().write(jsonBuilder.toString());
+        return null;
     }
 
     /**

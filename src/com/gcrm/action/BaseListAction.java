@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012 - 2013, Grass CRM Inc
+ * Copyright (C) 2012 - 2013, Grass CRM Studio
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,14 +46,16 @@ public abstract class BaseListAction extends ActionSupport {
 
     private static final long serialVersionUID = 5258442946380687955L;
 
-    // How many rows we want to have into the grid - rowNum attribute in the
-    // grid
+    /**
+     * How many rows we want to have into the grid - rowNum attribute in the
+     * grid
+     */
     private Integer rows = 0;
-    // The requested page. By default grid sets this to 1.
+    /** The requested page. By default grid sets this to 1. */
     private Integer page = 0;
-    // Sorting order - asc or desc
+    /** Sorting order - asc or desc. */
     private String order = "asc";
-    // Sort order - i.e. user click to sort.
+    /** Sort order - i.e. user click to sort. */
     private String sort;
     private String sidx;
     private String sord;
@@ -87,16 +89,16 @@ public abstract class BaseListAction extends ActionSupport {
             add("sidx");
             add("rows");
             add("nd");
+            add("filters");
         }
     };
 
     /**
-     * Gets the search condition for datagrid
+     * Gets the search condition for EasyUI datagrid
      * 
      * @return search condition
      */
     protected SearchCondition getSearchCondition() throws Exception {
-
         StringBuffer condition = new StringBuffer("");
 
         if (!CommonUtil.isNullOrEmpty(q)) {
@@ -107,7 +109,6 @@ public abstract class BaseListAction extends ActionSupport {
         }
 
         if (Constant.BOOLEAN_TRUE.equals(_search)) {
-
             String op = filter_op;
             String data = filter_value;
 
@@ -118,7 +119,6 @@ public abstract class BaseListAction extends ActionSupport {
             } else {
                 condition.append(" ").append(data);
             }
-
         }
 
         int pageNo = page;
@@ -134,11 +134,22 @@ public abstract class BaseListAction extends ActionSupport {
         return searchCondition;
     }
 
+    /**
+     * Gets the search condition for Jquery UI datagrid
+     * 
+     * @param fieldTypeMap
+     *            field type map
+     * @param scope
+     *            the flag to indicate to get all records or just the records of
+     *            owner
+     * @param loginUser
+     *            login user
+     * @return search condition
+     */
     @SuppressWarnings("rawtypes")
     protected SearchCondition getSearchCondition(
             Map<String, String> fieldTypeMap, int scope, User loginUser)
             throws Exception {
-
         HttpServletRequest request = ServletActionContext.getRequest();
 
         StringBuilder condition = new StringBuilder("");
@@ -290,6 +301,11 @@ public abstract class BaseListAction extends ActionSupport {
 
     protected abstract String getEntityName();
 
+    /**
+     * Gets Json header of list data
+     * 
+     * @return Json header
+     */
     protected static String getJsonHeader(long totalRecords,
             SearchCondition searchCondition, boolean isList) {
         StringBuilder jsonBuilder = new StringBuilder("");

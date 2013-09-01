@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012 - 2013, Grass CRM Inc
+ * Copyright (C) 2012 - 2013, Grass CRM Studio
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.struts2.ServletActionContext;
 import org.springframework.core.task.TaskExecutor;
 
 import com.gcrm.domain.Account;
@@ -102,10 +105,25 @@ public class EditCaseAction extends BaseEditAction implements Preparable {
         return SUCCESS;
     }
 
+    /**
+     * Batch update change log
+     * 
+     * @param changeLogs
+     *            change log collection
+     */
     private void batchInserChangeLogs(Collection<ChangeLog> changeLogs) {
         this.getChangeLogService().batchUpdate(changeLogs);
     }
 
+    /**
+     * Creates change log
+     * 
+     * @param originalCaseInstance
+     *            original caseInstance record
+     * @param caseInstance
+     *            current caseInstance record
+     * @return change log collections
+     */
     private Collection<ChangeLog> changeLog(CaseInstance originalCaseInstance,
             CaseInstance caseInstance) {
         Collection<ChangeLog> changeLogs = null;
@@ -419,6 +437,37 @@ public class EditCaseAction extends BaseEditAction implements Preparable {
         }
         super.updateBaseInfo(caseInstance);
         return originalCase;
+    }
+
+    /**
+     * Gets Case Relation Counts
+     * 
+     * @return null
+     */
+    public String getCaseRelationCounts() throws Exception {
+        long contactNumber = this.baseService
+                .countsByParams(
+                        "select count(*) from CaseInstance caseInstance join caseInstance.contacts where caseInstance.id = ?",
+                        new Integer[] { this.getId() });
+        long documentNumber = this.baseService
+                .countsByParams(
+                        "select count(*) from CaseInstance caseInstance join caseInstance.documents where caseInstance.id = ?",
+                        new Integer[] { this.getId() });
+        long taskNumber = this.baseService
+                .countsByParams(
+                        "select count(task.id) from Task task where related_object='Case' and related_record = ?",
+                        new Integer[] { this.getId() });
+
+        StringBuilder jsonBuilder = new StringBuilder("");
+        jsonBuilder.append("{\"contactNumber\":\"").append(contactNumber)
+                .append("\",\"documentNumber\":\"").append(documentNumber)
+                .append("\",\"taskNumber\":\"").append(taskNumber)
+                .append("\"}");
+        // Returns JSON data back to page
+        HttpServletResponse response = ServletActionContext.getResponse();
+        response.setContentType("text/html;charset=UTF-8");
+        response.getWriter().write(jsonBuilder.toString());
+        return null;
     }
 
     /**

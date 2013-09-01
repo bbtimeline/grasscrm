@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012 - 2013, Grass CRM Inc
+ * Copyright (C) 2012 - 2013, Grass CRM Studio
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.gcrm.service;
+package com.gcrm.service.impl;
 
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
-import java.util.ResourceBundle;
 
-import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.gcrm.dao.IBaseDao;
 import com.gcrm.exception.ServiceException;
-import com.gcrm.util.CommonUtil;
+import com.gcrm.service.IBaseService;
 import com.gcrm.vo.SearchCondition;
 import com.gcrm.vo.SearchResult;
 
@@ -42,6 +41,7 @@ public class BaseService<T extends Serializable> implements IBaseService<T> {
      * 
      * @see com.gcrm.service.IBaseService#getAllObjects(java.lang.String)
      */
+    @Transactional(propagation = Propagation.NOT_SUPPORTED, readOnly = true)
     public List<T> getAllObjects(String clazz) {
         return baseDao.getAllObjects(clazz);
     }
@@ -77,16 +77,7 @@ public class BaseService<T extends Serializable> implements IBaseService<T> {
             String[] ids = seleteIDs.split(",");
             for (int i = 0; i < ids.length; i++) {
                 String deleteid = ids[i];
-                try {
-                    baseDao.deleteEntity(entityClass, Integer.valueOf(deleteid));
-                } catch (DataIntegrityViolationException e) {
-                    ResourceBundle rb = CommonUtil.getResourceBundle();
-                    String errorMessage = rb.getString("error.message.head")
-                            + ":"
-                            + rb.getString("error.message.violationException")
-                            + rb.getString("error.record") + " ID:" + deleteid;
-                    throw new ServiceException(errorMessage, e);
-                }
+                baseDao.deleteEntity(entityClass, Integer.valueOf(deleteid));
             }
         }
     }
@@ -97,6 +88,7 @@ public class BaseService<T extends Serializable> implements IBaseService<T> {
      * @see com.gcrm.service.IBaseService#getEntityById(java.lang.Class,
      * java.lang.Integer)
      */
+    @Transactional(propagation = Propagation.NOT_SUPPORTED, readOnly = true)
     public T getEntityById(Class<T> entityClass, Integer id) {
         return baseDao.getEntityById(entityClass, id);
     }
@@ -106,6 +98,7 @@ public class BaseService<T extends Serializable> implements IBaseService<T> {
      * 
      * @see com.gcrm.dao.IBaseDao#findByName(java.lang.String, java.lang.String)
      */
+    @Transactional(propagation = Propagation.NOT_SUPPORTED, readOnly = true)
     public T findByName(String clazz, String name) {
         return baseDao.findByName(clazz, name);
     }
@@ -116,6 +109,7 @@ public class BaseService<T extends Serializable> implements IBaseService<T> {
      * @see com.gcrm.service.IBaseService#findByParam(java.lang.String,
      * java.lang.Object)
      */
+    @Transactional(propagation = Propagation.NOT_SUPPORTED, readOnly = true)
     public List<T> findByParam(String hql, Object paramValue) {
         return baseDao.findByParam(hql, paramValue);
     }
@@ -123,13 +117,31 @@ public class BaseService<T extends Serializable> implements IBaseService<T> {
     /*
      * (non-Javadoc)
      * 
+     * @see com.gcrm.service.IBaseService#countsByParams(java.lang.String,
+     * java.lang.Object[])
+     */
+    @Transactional(propagation = Propagation.NOT_SUPPORTED, readOnly = true)
+    public long countsByParams(String hql, Object[] paramValues) {
+        return baseDao.countsByParams(hql, paramValues);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.gcrm.service.IBaseService#findByHQL(java.lang.String)
      */
+    @Transactional(propagation = Propagation.NOT_SUPPORTED, readOnly = true)
     public List<T> findByHQL(String hql) {
         return baseDao.findByHQL(hql);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.gcrm.service.IBaseService#findVOByHQL(java.lang.String)
+     */
     @SuppressWarnings("rawtypes")
+    @Transactional(propagation = Propagation.NOT_SUPPORTED, readOnly = true)
     public List findVOByHQL(String hql) {
         return baseDao.findVOByHQL(hql);
     }
@@ -137,8 +149,21 @@ public class BaseService<T extends Serializable> implements IBaseService<T> {
     /*
      * (non-Javadoc)
      * 
+     * @see com.gcrm.service.IBaseService#findVOByParams(java.lang.String,
+     * java.lang.Object[])
+     */
+    @SuppressWarnings({ "rawtypes" })
+    public List findVOByParams(String hql, Object[] paramValues) {
+
+        return baseDao.findVOByParams(hql, paramValues);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.gcrm.service.IBaseService#getObjectsCount(java.lang.String)
      */
+    @Transactional(propagation = Propagation.NOT_SUPPORTED, readOnly = true)
     public long getObjectsCount(String clazz) {
         return baseDao.getObjectsCount(clazz);
     }
@@ -149,12 +174,20 @@ public class BaseService<T extends Serializable> implements IBaseService<T> {
      * @see com.gcrm.service.IBaseService#getPaginationObjects(java.lang.String,
      * com.gcrm.vo.SearchCondition)
      */
+    @Transactional(propagation = Propagation.NOT_SUPPORTED, readOnly = true)
     public SearchResult<T> getPaginationObjects(String clazz,
             final SearchCondition searchCondition) {
 
         return baseDao.getPaginationObjects(clazz, searchCondition);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.gcrm.service.IBaseService#getObjects(java.lang.String,
+     * java.lang.String)
+     */
+    @Transactional(propagation = Propagation.NOT_SUPPORTED, readOnly = true)
     public List<T> getObjects(final String clazz, final String condition) {
         return baseDao.getObjects(clazz, condition);
     }
@@ -167,6 +200,11 @@ public class BaseService<T extends Serializable> implements IBaseService<T> {
         this.baseDao = baseDao;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.gcrm.service.IBaseService#batchUpdate(java.util.Collection)
+     */
     @Override
     public void batchUpdate(Collection<T> entities) {
         baseDao.batchUpdate(entities);

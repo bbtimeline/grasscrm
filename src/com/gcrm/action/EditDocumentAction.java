@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012 - 2013, Grass CRM Inc
+ * Copyright (C) 2012 - 2013, Grass CRM Studio
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.struts2.ServletActionContext;
 import org.springframework.core.task.TaskExecutor;
 
 import com.gcrm.domain.Account;
@@ -109,10 +112,25 @@ public class EditDocumentAction extends BaseEditAction implements Preparable {
         return SUCCESS;
     }
 
+    /**
+     * Batch update change log
+     * 
+     * @param changeLogs
+     *            change log collection
+     */
     private void batchInserChangeLogs(Collection<ChangeLog> changeLogs) {
         this.getChangeLogService().batchUpdate(changeLogs);
     }
 
+    /**
+     * Creates change log
+     * 
+     * @param originalDocument
+     *            original document record
+     * @param document
+     *            current document record
+     * @return change log collections
+     */
     private Collection<ChangeLog> changeLog(Document originalDocument,
             Document document) {
         Collection<ChangeLog> changeLogs = null;
@@ -474,6 +492,42 @@ public class EditDocumentAction extends BaseEditAction implements Preparable {
         }
         super.updateBaseInfo(document);
         return originalDocument;
+    }
+
+    /**
+     * Gets Document Relation Counts
+     * 
+     * @return null
+     */
+    public String getDocumentRelationCounts() throws Exception {
+        long accountNumber = this.baseService
+                .countsByParams(
+                        "select count(*) from Document document join document.accounts where document.id = ?",
+                        new Integer[] { this.getId() });
+        long contactNumber = this.baseService
+                .countsByParams(
+                        "select count(*) from Document document join document.contacts where document.id = ?",
+                        new Integer[] { this.getId() });
+        long opportunitiyNumber = this.baseService
+                .countsByParams(
+                        "select count(*) from Document document join document.opportunities where document.id = ?",
+                        new Integer[] { this.getId() });
+        long caseNumber = this.baseService
+                .countsByParams(
+                        "select count(*) from Document document join document.cases where document.id = ?",
+                        new Integer[] { this.getId() });
+
+        StringBuilder jsonBuilder = new StringBuilder("");
+        jsonBuilder.append("{\"accountNumber\":\"").append(accountNumber)
+                .append("\",\"contactNumber\":\"").append(contactNumber)
+                .append("\",\"opportunitiyNumber\":\"")
+                .append(opportunitiyNumber).append("\",\"caseNumber\":\"")
+                .append(caseNumber).append("\"}");
+        // Returns JSON data back to page
+        HttpServletResponse response = ServletActionContext.getResponse();
+        response.setContentType("text/html;charset=UTF-8");
+        response.getWriter().write(jsonBuilder.toString());
+        return null;
     }
 
     /**

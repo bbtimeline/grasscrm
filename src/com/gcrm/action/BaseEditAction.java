@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012 - 2013, Grass CRM Inc
+ * Copyright (C) 2012 - 2013, Grass CRM Studio
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,8 @@ import com.opensymphony.xwork2.ActionSupport;
  */
 public class BaseEditAction extends ActionSupport {
 
+    private static final long serialVersionUID = -2404576552417042445L;
+
     private String createdBy = "";
     private String createdOn = "";
     private String updatedBy = "";
@@ -54,8 +56,6 @@ public class BaseEditAction extends ActionSupport {
     protected String seleteIDs = null;
     protected String[] massUpdate = null;
     private String saveFlag = null;
-
-    private static final long serialVersionUID = -2404576552417042445L;
 
     /**
      * Updates the base information for entity.
@@ -164,6 +164,23 @@ public class BaseEditAction extends ActionSupport {
         ownerText = loginUser.getName();
     }
 
+    /**
+     * Saves the change log.
+     * 
+     * @param entityName
+     *            entity name
+     * @param recordID
+     *            record ID
+     * @param columnName
+     *            column name
+     * @param oldValue
+     *            old value
+     * @param newValue
+     *            new value
+     * @param loginUser
+     *            login user
+     * 
+     */
     protected ChangeLog saveChangeLog(String entityName, Integer recordID,
             String columnName, String oldValue, String newValue, User loginUser) {
         ChangeLog changeLog = new ChangeLog();
@@ -177,6 +194,13 @@ public class BaseEditAction extends ActionSupport {
         return changeLog;
     }
 
+    /**
+     * Gets option value.
+     * 
+     * @param option
+     *            option
+     * 
+     */
     protected String getOptionValue(OptionBase option) {
         if (option == null) {
             return "";

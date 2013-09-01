@@ -1,36 +1,38 @@
 <%@ taglib prefix="s" uri="/struts-tags"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
-	pageEncoding="UTF-8"%>
-<%@ page language="java"  import="com.gcrm.domain.User"%> 
+  pageEncoding="UTF-8"%>
+<%@ page language="java" import="com.gcrm.domain.User"%>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf8" />
 <link rel="stylesheet" type="text/css"
-	href="../../themes/default/easyui.css" />
+  href="../../themes/default/easyui.css" />
 <link rel="stylesheet" type="text/css" href="../../themes/icon.css" />
 <link rel="stylesheet" type="text/css" href="../../css/global.css" />
 <link rel="stylesheet" type="text/css" href="../../css/portal.css" />
 <style type="text/css">
-	.title{
-		font-size:16px;
-		font-weight:bold;
-		padding:20px 10px;
-		background:#eee;
-		overflow:hidden;
-		border-bottom:1px solid #ccc;
-	}
-	.t-list{
-		padding:5px;
-	}
+.title {
+	font-size: 16px;
+	font-weight: bold;
+	padding: 20px 10px;
+	background: #eee;
+	overflow: hidden;
+	border-bottom: 1px solid #ccc;
+}
+
+.t-list {
+	padding: 5px;
+}
 </style>
 <script type="text/javascript" src="../../js/jquery-1.8.3.min.js"></script>
 <script type="text/javascript" src="../../js/jquery.easyui.min.js"></script>
-<script type="text/javascript" src="../../js/locale/easyui-lang-<%=(String)session.getAttribute("locale")%>.js"></script>
+<script type="text/javascript"
+  src="../../js/locale/easyui-lang-<%=(String)session.getAttribute("locale")%>.js"></script>
 <script type="text/javascript" src="../../js/global.js"></script>
 <script type="text/javascript" src="../../js/jquery.portal.js"></script>
-	<script>
+<script>
 		$(function(){
 			$('#pp').portal({
 				border:false,
@@ -214,55 +216,67 @@
 </head>
 
 <body>
-	<div id="page-wrap">
-		<s:include value="../header.jsp" />
-		<s:include value="../menu.jsp" />
-		<div id="feature">
-		    <s:include value="../navigation.jsp" />
-			<div id="feature-content">
-			    <br></br>
-				<div region="center" border="false">
-					<div id="pp" style="position:relative">
-						<div style="width:50%;">
-						  <s:if test="#session.loginUser.view_task == 1">
-						    <div title="<s:text name='title.grid.myTasks'/>" collapsible="true" closable="true" style="height:385px;padding:5px;">
-                              <table id="myTaskGrid"></table>	
-                            </div>
-                          </s:if>
-						  <s:if test="#session.loginUser.view_lead == 1">
-						    <div title="<s:text name='title.grid.myLeads'/>" collapsible="true" closable="true" style="height:385px;padding:5px;">
-                              <table id="myLeadGrid"></table>	
-                            </div>  
-                          </s:if> 
-						  <s:if test="#session.loginUser.view_meeting == 1"> 
-						    <div title="<s:text name='title.grid.myMeetings'/>" collapsible="true" closable="true" style="height:385px;padding:5px;">
-                               <table id="myMeetingGrid"></table>	
-                            </div>
-                          </s:if>                                                    
-						</div>
-						<div style="width:50%;">
-						  <s:if test="#session.loginUser.view_account == 1">
-						   <div title="<s:text name='title.grid.myAccounts'/>" collapsible="true" closable="true" style="height:385px;padding:5px;">
-                              <table id="myAccountGrid"></table>	
-                           </div>
-                          </s:if> 
-                          <s:if test="#session.loginUser.view_opportunity == 1">
-						   <div title="<s:text name='title.grid.myOpportunities'/>" collapsible="true" closable="true" style="height:385px;padding:5px;">
-                              <table id="myOpportunityGrid"></table>	
-                           </div>
-                          </s:if> 
-                          <s:if test="#session.loginUser.view_call == 1">
-						   <div title="<s:text name='title.grid.myCalls'/>" collapsible="true" closable="true" style="height:385px;padding:5px;">
-                              <table id="myCallGrid"></table>	
-                           </div>                                                        
-                          </s:if> 
-						</div>
-					</div>
-				</div>			
-			</div>
-		</div>
-		<s:include value="../footer.jsp" />
+  <div id="page-wrap">
+    <s:include value="../header.jsp" />
+    <s:include value="../menu.jsp" />
+    <div id="feature">
+      <s:include value="../navigation.jsp" />
+      <div id="feature-content">
+        <br></br>
+        <div region="center" border="false">
+          <div id="pp" style="position: relative">
+            <div style="width: 50%;">
+              <s:if test="#session.loginUser.view_task == 1">
+                <div title="<s:text name='title.grid.myTasks'/>"
+                  collapsible="true" closable="true"
+                  style="height: 385px; padding: 5px;">
+                  <table id="myTaskGrid"></table>
+                </div>
+              </s:if>
+              <s:if test="#session.loginUser.view_lead == 1">
+                <div title="<s:text name='title.grid.myLeads'/>"
+                  collapsible="true" closable="true"
+                  style="height: 385px; padding: 5px;">
+                  <table id="myLeadGrid"></table>
+                </div>
+              </s:if>
+              <s:if test="#session.loginUser.view_meeting == 1">
+                <div title="<s:text name='title.grid.myMeetings'/>"
+                  collapsible="true" closable="true"
+                  style="height: 385px; padding: 5px;">
+                  <table id="myMeetingGrid"></table>
+                </div>
+              </s:if>
+            </div>
+            <div style="width: 50%;">
+              <s:if test="#session.loginUser.view_account == 1">
+                <div title="<s:text name='title.grid.myAccounts'/>"
+                  collapsible="true" closable="true"
+                  style="height: 385px; padding: 5px;">
+                  <table id="myAccountGrid"></table>
+                </div>
+              </s:if>
+              <s:if test="#session.loginUser.view_opportunity == 1">
+                <div title="<s:text name='title.grid.myOpportunities'/>"
+                  collapsible="true" closable="true"
+                  style="height: 385px; padding: 5px;">
+                  <table id="myOpportunityGrid"></table>
+                </div>
+              </s:if>
+              <s:if test="#session.loginUser.view_call == 1">
+                <div title="<s:text name='title.grid.myCalls'/>"
+                  collapsible="true" closable="true"
+                  style="height: 385px; padding: 5px;">
+                  <table id="myCallGrid"></table>
+                </div>
+              </s:if>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <s:include value="../footer.jsp" />
 
-	</div>
+  </div>
 </body>
 </html>

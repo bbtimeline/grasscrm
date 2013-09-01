@@ -128,7 +128,11 @@
 			<interceptor-ref name="prepareInterceptor" /> 
             <result name="input">/jsp/crm/editAccount.jsp</result>          
     	    <result>/jsp/crm/editAccount.jsp</result>
-        </action>                
+        </action>   
+        
+      	<action name="getAccountRelationCounts" class="editAccountAction" method="getAccountRelationCounts">
+    	  <result name="success" type="json"></result>
+        </action>        
   </package>      
     
 </struts>

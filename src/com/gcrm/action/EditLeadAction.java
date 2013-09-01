@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012 - 2013, Grass CRM Inc
+ * Copyright (C) 2012 - 2013, Grass CRM Studio
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.struts2.ServletActionContext;
 import org.springframework.core.task.TaskExecutor;
 
 import com.gcrm.domain.Account;
@@ -107,6 +110,12 @@ public class EditLeadAction extends BaseEditAction implements Preparable {
         return SUCCESS;
     }
 
+    /**
+     * Batch update change log
+     * 
+     * @param changeLogs
+     *            change log collection
+     */
     private void batchInserChangeLogs(Collection<ChangeLog> changeLogs) {
         this.getChangeLogService().batchUpdate(changeLogs);
     }
@@ -313,6 +322,15 @@ public class EditLeadAction extends BaseEditAction implements Preparable {
         return originalLead;
     }
 
+    /**
+     * Creates change log
+     * 
+     * @param originalLead
+     *            original lead record
+     * @param lead
+     *            current lead record
+     * @return change log collections
+     */
     private Collection<ChangeLog> changeLog(Lead originalLead, Lead lead) {
         Collection<ChangeLog> changeLogs = null;
         if (originalLead != null) {
@@ -619,6 +637,27 @@ public class EditLeadAction extends BaseEditAction implements Preparable {
             }
         }
         return changeLogs;
+    }
+
+    /**
+     * Gets Lead Relation Counts
+     * 
+     * @return null
+     */
+    public String getLeadRelationCounts() throws Exception {
+        long taskNumber = this.baseService
+                .countsByParams(
+                        "select count(task.id) from Task task where related_object='Lead' and related_record = ?",
+                        new Integer[] { this.getId() });
+
+        StringBuilder jsonBuilder = new StringBuilder("");
+        jsonBuilder.append("{\"taskNumber\":\"").append(taskNumber)
+                .append("\"}");
+        // Returns JSON data back to page
+        HttpServletResponse response = ServletActionContext.getResponse();
+        response.setContentType("text/html;charset=UTF-8");
+        response.getWriter().write(jsonBuilder.toString());
+        return null;
     }
 
     /**

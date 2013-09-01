@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012 - 2013, Grass CRM Inc
+ * Copyright (C) 2012 - 2013, Grass CRM Studio
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.struts2.ServletActionContext;
 import org.springframework.core.task.TaskExecutor;
 
 import com.gcrm.domain.Account;
@@ -152,6 +155,12 @@ public class EditContactAction extends BaseEditAction implements Preparable {
         return SUCCESS;
     }
 
+    /**
+     * Batch update change log
+     * 
+     * @param changeLogs
+     *            change log collection
+     */
     private void batchInserChangeLogs(Collection<ChangeLog> changeLogs) {
         this.getChangeLogService().batchUpdate(changeLogs);
     }
@@ -322,6 +331,15 @@ public class EditContactAction extends BaseEditAction implements Preparable {
         return originalContact;
     }
 
+    /**
+     * Creates change log
+     * 
+     * @param originalContact
+     *            original contact record
+     * @param contact
+     *            current contact record
+     * @return change log collections
+     */
     private Collection<ChangeLog> changeLog(Contact originalContact,
             Contact contact) {
         Collection<ChangeLog> changeLogs = null;
@@ -650,6 +668,47 @@ public class EditContactAction extends BaseEditAction implements Preparable {
             }
         }
         return changeLogs;
+    }
+
+    /**
+     * Gets Contact Relation Counts
+     * 
+     * @return null
+     */
+    public String getContactRelationCounts() throws Exception {
+        long opportunityNumber = this.baseService
+                .countsByParams(
+                        "select count(*) from Contact contact join contact.opportunities where contact.id = ?",
+                        new Integer[] { this.getId() });
+        long leadNumber = this.baseService
+                .countsByParams(
+                        "select count(*) from Contact contact join contact.leads where contact.id = ?",
+                        new Integer[] { this.getId() });
+        long documentNumber = this.baseService
+                .countsByParams(
+                        "select count(*) from Contact contact join contact.documents where contact.id = ?",
+                        new Integer[] { this.getId() });
+        long taskNumber = this.baseService
+                .countsByParams(
+                        "select count(task.id) from Task task where related_object='Contact' and related_record = ?",
+                        new Integer[] { this.getId() });
+        long caseNumber = this.baseService
+                .countsByParams(
+                        "select count(*) from Contact contact join contact.cases where contact.id = ?",
+                        new Integer[] { this.getId() });
+
+        StringBuilder jsonBuilder = new StringBuilder("");
+        jsonBuilder.append("{\"opportunityNumber\":\"")
+                .append(opportunityNumber).append("\",\"leadNumber\":\"")
+                .append(leadNumber).append("\",\"documentNumber\":\"")
+                .append(documentNumber).append("\",\"taskNumber\":\"")
+                .append(taskNumber).append("\",\"caseNumber\":\"")
+                .append(caseNumber).append("\"}");
+        // Returns JSON data back to page
+        HttpServletResponse response = ServletActionContext.getResponse();
+        response.setContentType("text/html;charset=UTF-8");
+        response.getWriter().write(jsonBuilder.toString());
+        return null;
     }
 
     /**

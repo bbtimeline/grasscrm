@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012 - 2013, Grass CRM Inc
+ * Copyright (C) 2012 - 2013, Grass CRM Studio
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,13 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.gcrm.service;
+package com.gcrm.service.impl;
 
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.gcrm.dao.IMeetingDao;
 import com.gcrm.domain.Meeting;
+import com.gcrm.service.IMeetingService;
 
 /**
  * Meeting service
@@ -29,7 +33,14 @@ public class MeetingService extends BaseService<Meeting> implements
 
     private IMeetingDao meetingDao;
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.gcrm.service.IMeetingService#findScheduleMeetings(java.util.Date)
+     */
     @Override
+    @Transactional(propagation = Propagation.NOT_SUPPORTED, readOnly = true)
     public List<Meeting> findScheduleMeetings(Date startDate) throws Exception {
         return meetingDao.findScheduleMeetings(startDate);
     }

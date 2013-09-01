@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012 - 2013, Grass CRM Inc
+ * Copyright (C) 2012 - 2013, Grass CRM Studio
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.struts2.ServletActionContext;
 import org.springframework.core.task.TaskExecutor;
 
 import com.gcrm.domain.Account;
@@ -110,6 +113,12 @@ public class EditAccountAction extends BaseEditAction implements Preparable {
         return SUCCESS;
     }
 
+    /**
+     * Batch update change log
+     * 
+     * @param changeLogs
+     *            change log collection
+     */
     private void batchInserChangeLogs(Collection<ChangeLog> changeLogs) {
         this.getChangeLogService().batchUpdate(changeLogs);
     }
@@ -208,6 +217,15 @@ public class EditAccountAction extends BaseEditAction implements Preparable {
         return originalAccount;
     }
 
+    /**
+     * Creates change log
+     * 
+     * @param originalAccount
+     *            original account record
+     * @param account
+     *            current account record
+     * @return change log collections
+     */
     private Collection<ChangeLog> changeLog(Account originalAccount,
             Account account) {
         Collection<ChangeLog> changeLogs = null;
@@ -544,10 +562,61 @@ public class EditAccountAction extends BaseEditAction implements Preparable {
             }
             this.getBaseInfo(account, Account.class.getSimpleName(),
                     Constant.CRM_NAMESPACE);
+
         } else {
             this.initBaseInfo();
         }
         return SUCCESS;
+    }
+
+    /**
+     * Gets Account Relation Counts
+     * 
+     * @return null
+     */
+    public String getAccountRelationCounts() throws Exception {
+        long contactNumber = this.baseService
+                .countsByParams(
+                        "select count(contact.id) from Contact contact where account.id = ?",
+                        new Integer[] { this.getId() });
+        long opportunityNumber = this.baseService
+                .countsByParams(
+                        "select count(opportunity.id) from Opportunity opportunity where account.id = ?",
+                        new Integer[] { this.getId() });
+        long leadNumber = this.baseService.countsByParams(
+                "select count(lead.id) from Lead lead where account.id = ?",
+                new Integer[] { this.getId() });
+        long accountNumber = this.baseService
+                .countsByParams(
+                        "select count(account.id) from Account account where manager.id = ?",
+                        new Integer[] { this.getId() });
+        long documentNumber = this.baseService
+                .countsByParams(
+                        "select count(*) from Account account join account.documents where account.id = ?",
+                        new Integer[] { this.getId() });
+        long caseNumber = this.baseService
+                .countsByParams(
+                        "select count(caseInstance.id) from CaseInstance caseInstance where account.id = ?",
+                        new Integer[] { this.getId() });
+        long taskNumber = this.baseService
+                .countsByParams(
+                        "select count(task.id) from Task task where related_object='Account' and related_record = ?",
+                        new Integer[] { this.getId() });
+
+        StringBuilder jsonBuilder = new StringBuilder("");
+        jsonBuilder.append("{\"contactNumber\":\"").append(contactNumber)
+                .append("\",\"opportunityNumber\":\"")
+                .append(opportunityNumber).append("\",\"leadNumber\":\"")
+                .append(leadNumber).append("\",\"accountNumber\":\"")
+                .append(accountNumber).append("\",\"documentNumber\":\"")
+                .append(documentNumber).append("\",\"caseNumber\":\"")
+                .append(caseNumber).append("\",\"taskNumber\":\"")
+                .append(taskNumber).append("\"}");
+        // Returns JSON data back to page
+        HttpServletResponse response = ServletActionContext.getResponse();
+        response.setContentType("text/html;charset=UTF-8");
+        response.getWriter().write(jsonBuilder.toString());
+        return null;
     }
 
     /**
@@ -819,5 +888,4 @@ public class EditAccountAction extends BaseEditAction implements Preparable {
     public void setTaskExecutor(TaskExecutor taskExecutor) {
         this.taskExecutor = taskExecutor;
     }
-
 }

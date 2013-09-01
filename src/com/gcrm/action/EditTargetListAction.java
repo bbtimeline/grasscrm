@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012 - 2013, Grass CRM Inc
+ * Copyright (C) 2012 - 2013, Grass CRM Studio
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.struts2.ServletActionContext;
 import org.springframework.core.task.TaskExecutor;
 
 import com.gcrm.domain.Campaign;
@@ -83,10 +86,25 @@ public class EditTargetListAction extends BaseEditAction implements Preparable {
         return SUCCESS;
     }
 
+    /**
+     * Batch update change log
+     * 
+     * @param changeLogs
+     *            change log collection
+     */
     private void batchInserChangeLogs(Collection<ChangeLog> changeLogs) {
         this.getChangeLogService().batchUpdate(changeLogs);
     }
 
+    /**
+     * Creates change log
+     * 
+     * @param originalTargetList
+     *            original targetList record
+     * @param targetList
+     *            current targetList record
+     * @return change log collections
+     */
     private Collection<ChangeLog> changeLog(TargetList originalTargetList,
             TargetList targetList) {
         Collection<ChangeLog> changeLogs = null;
@@ -251,6 +269,47 @@ public class EditTargetListAction extends BaseEditAction implements Preparable {
 
         super.updateBaseInfo(targetList);
         return originalTargetList;
+    }
+
+    /**
+     * Gets TargetList Relation Counts
+     * 
+     * @return null
+     */
+    public String getTargetListRelationCounts() throws Exception {
+        long accountNumber = this.baseService
+                .countsByParams(
+                        "select count(*) from TargetList targetList join targetList.accounts where targetList.id = ?",
+                        new Integer[] { this.getId() });
+        long contactNumber = this.baseService
+                .countsByParams(
+                        "select count(*) from TargetList targetList join targetList.contacts where targetList.id = ?",
+                        new Integer[] { this.getId() });
+        long leadNumber = this.baseService
+                .countsByParams(
+                        "select count(*) from TargetList targetList join targetList.leads where targetList.id = ?",
+                        new Integer[] { this.getId() });
+        long targetNumber = this.baseService
+                .countsByParams(
+                        "select count(*) from TargetList targetList join targetList.targets where targetList.id = ?",
+                        new Integer[] { this.getId() });
+        long userNumber = this.baseService
+                .countsByParams(
+                        "select count(*) from TargetList targetList join targetList.users where targetList.id = ?",
+                        new Integer[] { this.getId() });
+
+        StringBuilder jsonBuilder = new StringBuilder("");
+        jsonBuilder.append("{\"accountNumber\":\"").append(accountNumber)
+                .append("\",\"contactNumber\":\"").append(contactNumber)
+                .append("\",\"leadNumber\":\"").append(leadNumber)
+                .append("\",\"targetNumber\":\"").append(targetNumber)
+                .append("\",\"userNumber\":\"").append(userNumber)
+                .append("\"}");
+        // Returns JSON data back to page
+        HttpServletResponse response = ServletActionContext.getResponse();
+        response.setContentType("text/html;charset=UTF-8");
+        response.getWriter().write(jsonBuilder.toString());
+        return null;
     }
 
     /**

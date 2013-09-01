@@ -120,7 +120,11 @@
 			<interceptor-ref name="prepareInterceptor" /> 
             <result name="input">/jsp/crm/editCall.jsp</result>          
     	  <result type="redirect">/jsp/crm/listCall.jsp</result>
-        </action>                
+        </action>    
+        
+      	<action name="getCallRelationCounts" class="editCallAction" method="getCallRelationCounts">
+    	  <result name="success" type="json"></result>
+        </action>           
   </package>      
     
 </struts>

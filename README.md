@@ -7,7 +7,11 @@ How to configure the environment:
 
 (1)Download and install Postgres database, the download URL:http://www.postgresql.org/download/
 
-(2)Download and install Jboss Server Version 6.1.0 Final version, the download URL:http://download.jboss.org/jbossas/6.1/jboss-as-distribution-6.1.0.Final.zip
+(2)Download and install Jboss Server Version 6.1.0 Final version, the download URL:http://download.jboss.org/jbossas/6.1/jboss-as-distribution-6.1.0.Final.zip, after installed
+Jboss, need change the configuration, open file /jboss/bin/run.conf.bat,in line 43, change
+set "JAVA_OPTS=-Xms128M -Xmx512M -XX:MaxPermSize=256M"
+into :
+set "JAVA_OPTS=-Xms1024m -Xmx1024m -XX:PermSize=128M -XX:MaxNewSize=256m -XX:MaxPermSize=512m
 
 (3)Download and install Eclipse, then import the Grass CRM project
 

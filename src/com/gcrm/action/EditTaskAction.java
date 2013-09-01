@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012 - 2013, Grass CRM Inc
+ * Copyright (C) 2012 - 2013, Grass CRM Studio
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,10 +112,25 @@ public class EditTaskAction extends BaseEditAction implements Preparable {
         return SUCCESS;
     }
 
+    /**
+     * Batch update change log
+     * 
+     * @param changeLogs
+     *            change log collection
+     */
     private void batchInserChangeLogs(Collection<ChangeLog> changeLogs) {
         this.getChangeLogService().batchUpdate(changeLogs);
     }
 
+    /**
+     * Creates change log
+     * 
+     * @param originalTask
+     *            original task record
+     * @param task
+     *            current task record
+     * @return change log collections
+     */
     private Collection<ChangeLog> changeLog(Task originalTask, Task task) {
         Collection<ChangeLog> changeLogs = null;
         if (originalTask != null) {

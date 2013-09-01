@@ -135,6 +135,10 @@
             <result name="input">/jsp/crm/editContact.jsp</result>          
     	  <result type="redirect">/jsp/crm/listContact.jsp</result>
         </action> 
+        
+      	<action name="getContactRelationCounts" class="editContactAction" method="getContactRelationCounts">
+    	  <result name="success" type="json"></result>
+        </action>           
   </package>      
     
 </struts>

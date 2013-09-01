@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012 - 2013, Grass CRM Inc
+ * Copyright (C) 2012 - 2013, Grass CRM Studio
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,13 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.gcrm.service;
+package com.gcrm.service.impl;
 
 import com.gcrm.domain.Account;
 import com.gcrm.domain.Contact;
 import com.gcrm.domain.Lead;
 import com.gcrm.domain.LeadStatus;
 import com.gcrm.domain.Opportunity;
+import com.gcrm.service.IBaseService;
+import com.gcrm.service.ILeadService;
+import com.gcrm.service.IOptionService;
 import com.gcrm.util.CommonUtil;
 
 /**

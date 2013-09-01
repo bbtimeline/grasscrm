@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012 - 2013, Grass CRM Inc
+ * Copyright (C) 2012 - 2013, Grass CRM Studio
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,6 +89,12 @@ public class AccountByIndustryReportAction extends ActionSupport {
         return SUCCESS;
     }
 
+    /**
+     * Sets the exporter
+     * 
+     * @param reportPath
+     *            jasper report path
+     */
     private void setExporter(String reportPath) throws JRException {
         HttpServletRequest request = ServletActionContext.getRequest();
         String path = request.getSession().getServletContext()
@@ -126,6 +132,10 @@ public class AccountByIndustryReportAction extends ActionSupport {
                 jasperPrint);
     }
 
+    /**
+     * Sets report content
+     * 
+     */
     @SuppressWarnings({ "rawtypes" })
     private void setList() {
         User loginUser = UserUtil.getLoginUser();

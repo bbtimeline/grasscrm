@@ -71,7 +71,6 @@
 	<target name="deploy" depends="war">
 		<delete file="${jboos.deploy}/grass.war" />
 		<copy todir="${jboos.deploy}" file="${war.dir}/grass.war" />
-
 		<delete dir="${war.dir}" />
 	</target>
 		

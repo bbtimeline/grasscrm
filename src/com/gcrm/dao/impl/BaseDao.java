@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012 - 2013, Grass CRM Inc
+ * Copyright (C) 2012 - 2013, Grass CRM Studio
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.gcrm.dao;
+package com.gcrm.dao.impl;
 
 import java.io.Serializable;
 import java.sql.SQLException;
@@ -26,6 +26,7 @@ import org.hibernate.Session;
 import org.springframework.orm.hibernate3.HibernateCallback;
 import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
 
+import com.gcrm.dao.IBaseDao;
 import com.gcrm.vo.SearchCondition;
 import com.gcrm.vo.SearchResult;
 
@@ -98,6 +99,18 @@ public class BaseDao<T extends Serializable> extends HibernateDaoSupport
     /*
      * (non-Javadoc)
      * 
+     * @see com.gcrm.dao.IBaseDao#countsByParams(java.lang.String,
+     * java.lang.Object[])
+     */
+    public long countsByParams(String hql, Object[] paramValues) {
+        long count = 0;
+        count = (Long) getHibernateTemplate().find(hql, paramValues).get(0);
+        return count;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.gcrm.dao.IBaseDao#findByHQL(java.lang.String)
      */
     @SuppressWarnings("unchecked")
@@ -120,6 +133,21 @@ public class BaseDao<T extends Serializable> extends HibernateDaoSupport
         List objects = null;
 
         objects = getHibernateTemplate().find(hql);
+        return objects;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.gcrm.dao.IBaseDao#findVOByParams(java.lang.String,
+     * java.lang.Object[])
+     */
+    @SuppressWarnings({ "rawtypes" })
+    public List findVOByParams(String hql, Object[] paramValues) {
+
+        List objects = null;
+
+        objects = getHibernateTemplate().find(hql, paramValues);
         return objects;
     }
 

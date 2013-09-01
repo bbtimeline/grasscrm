@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012 - 2013, Grass CRM Inc
+ * Copyright (C) 2012 - 2013, Grass CRM Studio
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.struts2.ServletActionContext;
 import org.springframework.core.task.TaskExecutor;
 
 import com.gcrm.domain.Account;
@@ -105,10 +108,25 @@ public class EditOpportunityAction extends BaseEditAction implements Preparable 
         return SUCCESS;
     }
 
+    /**
+     * Batch update change log
+     * 
+     * @param changeLogs
+     *            change log collection
+     */
     private void batchInserChangeLogs(Collection<ChangeLog> changeLogs) {
         this.getChangeLogService().batchUpdate(changeLogs);
     }
 
+    /**
+     * Creates change log
+     * 
+     * @param originalOpportunity
+     *            original opportunity record
+     * @param opportunity
+     *            current opportunity record
+     * @return change log collections
+     */
     private Collection<ChangeLog> changeLog(Opportunity originalOpportunity,
             Opportunity opportunity) {
         Collection<ChangeLog> changeLogs = null;
@@ -516,6 +534,42 @@ public class EditOpportunityAction extends BaseEditAction implements Preparable 
         }
         super.updateBaseInfo(opportunity);
         return originalOpportunity;
+    }
+
+    /**
+     * Gets Opportunity Relation Counts
+     * 
+     * @return null
+     */
+    public String getOpportunityRelationCounts() throws Exception {
+        long contactNumber = this.baseService
+                .countsByParams(
+                        "select count(*) from Opportunity opportunity join opportunity.contacts where opportunity.id = ?",
+                        new Integer[] { this.getId() });
+        long leadNumber = this.baseService
+                .countsByParams(
+                        "select count(*) from Opportunity opportunity join opportunity.leads where opportunity.id = ?",
+                        new Integer[] { this.getId() });
+        long documentNumber = this.baseService
+                .countsByParams(
+                        "select count(*) from Opportunity opportunity join opportunity.documents where opportunity.id = ?",
+                        new Integer[] { this.getId() });
+        long taskNumber = this.baseService
+                .countsByParams(
+                        "select count(task.id) from Task task where related_object='Opportunity' and related_record = ?",
+                        new Integer[] { this.getId() });
+
+        StringBuilder jsonBuilder = new StringBuilder("");
+        jsonBuilder.append("{\"contactNumber\":\"").append(contactNumber)
+                .append("\",\"leadNumber\":\"").append(leadNumber)
+                .append("\",\"documentNumber\":\"").append(documentNumber)
+                .append("\",\"taskNumber\":\"").append(taskNumber)
+                .append("\"}");
+        // Returns JSON data back to page
+        HttpServletResponse response = ServletActionContext.getResponse();
+        response.setContentType("text/html;charset=UTF-8");
+        response.getWriter().write(jsonBuilder.toString());
+        return null;
     }
 
     /**

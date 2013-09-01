@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012 - 2013, Grass CRM Inc
+ * Copyright (C) 2012 - 2013, Grass CRM Studio
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,6 +68,11 @@ public class EmailSettingAction extends BaseEditAction implements Preparable {
         return SUCCESS;
     }
 
+    /**
+     * Sends test email
+     * 
+     * @return the SUCCESS result
+     */
     public String sendEmail() throws Exception {
         List<EmailSetting> emailSettings = baseService
                 .getAllObjects(EmailSetting.class.getSimpleName());

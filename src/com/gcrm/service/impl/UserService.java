@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012 - 2013, Grass CRM Inc
+ * Copyright (C) 2012 - 2013, Grass CRM Studio
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,18 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.gcrm.service;
+package com.gcrm.service.impl;
 
 import java.util.List;
 
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.security.authentication.encoding.Md5PasswordEncoder;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.gcrm.dao.IUserDao;
 import com.gcrm.domain.User;
 import com.gcrm.exception.DaoException;
 import com.gcrm.exception.ServiceException;
 import com.gcrm.security.AuthenticationFilter;
+import com.gcrm.service.IUserService;
 import com.gcrm.util.CommonUtil;
 import com.gcrm.util.mail.MailService;
 
@@ -41,6 +44,7 @@ public class UserService extends BaseService<User> implements IUserService {
      * 
      * @see com.gcrm.service.IUserService#findByName(java.lang.String)
      */
+    @Transactional(propagation = Propagation.NOT_SUPPORTED, readOnly = true)
     public User findByName(String username) throws ServiceException {
         User user;
         try {

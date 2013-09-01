@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012 - 2013, Grass CRM Inc
+ * Copyright (C) 2012 - 2013, Grass CRM Studio
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,38 +13,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.gcrm.service;
+package com.gcrm.dao.impl;
 
 import java.util.Date;
 import java.util.List;
+
+import org.hibernate.Hibernate;
 
 import com.gcrm.dao.ICallDao;
 import com.gcrm.domain.Call;
 
 /**
- * Call service
+ * Call DAO
  */
-public class CallService extends BaseService<Call> implements ICallService {
+public class CallDao extends BaseDao<Call> implements ICallDao {
 
-    private ICallDao callDao;
-
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.gcrm.dao.ICallDao#findScheduleCalls(java.util.Date)
+     */
     @Override
     public List<Call> findScheduleCalls(Date startDate) throws Exception {
-        return callDao.findScheduleCalls(startDate);
+        List<Call> calls = this.findByParam(
+                "from Call where reminder_email = true and start_date > ? ",
+                startDate);
+        for (Call call : calls) {
+            Hibernate.initialize(call.getContacts());
+            Hibernate.initialize(call.getLeads());
+            Hibernate.initialize(call.getUsers());
+        }
+
+        return calls;
     }
 
-    /**
-     * @return the callDao
-     */
-    public ICallDao getCallDao() {
-        return callDao;
-    }
-
-    /**
-     * @param callDao
-     *            the callDao to set
-     */
-    public void setCallDao(ICallDao callDao) {
-        this.callDao = callDao;
-    }
 }

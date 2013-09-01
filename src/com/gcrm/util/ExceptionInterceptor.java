@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012 - 2013, Grass CRM Inc
+ * Copyright (C) 2012 - 2013, Grass CRM Studio
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,6 @@ public class ExceptionInterceptor implements Interceptor {
             result = action.invoke();
         } catch (Exception e) {
             result = Action.INPUT;
-            e.printStackTrace();
             logger.error(e.getMessage(), e);
             ActionSupport actionSupport = (ActionSupport) action.getAction();
             String errorMessage = e.getMessage();

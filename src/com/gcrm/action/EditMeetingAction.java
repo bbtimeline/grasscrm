@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012 - 2013, Grass CRM Inc
+ * Copyright (C) 2012 - 2013, Grass CRM Studio
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.struts2.ServletActionContext;
@@ -141,10 +143,25 @@ public class EditMeetingAction extends BaseEditAction implements Preparable {
         return SUCCESS;
     }
 
+    /**
+     * Batch update change log
+     * 
+     * @param changeLogs
+     *            change log collection
+     */
     private void batchInserChangeLogs(Collection<ChangeLog> changeLogs) {
         this.getChangeLogService().batchUpdate(changeLogs);
     }
 
+    /**
+     * Creates change log
+     * 
+     * @param originalMeeting
+     *            original meeting record
+     * @param meeting
+     *            current meeting record
+     * @return change log collections
+     */
     private Collection<ChangeLog> changeLog(Meeting originalMeeting,
             Meeting meeting) {
         Collection<ChangeLog> changeLogs = null;
@@ -725,6 +742,37 @@ public class EditMeetingAction extends BaseEditAction implements Preparable {
         }
         super.updateBaseInfo(meeting);
         return originalMeeting;
+    }
+
+    /**
+     * Gets Meeting Relation Counts
+     * 
+     * @return null
+     */
+    public String getMeetingRelationCounts() throws Exception {
+        long contactNumber = this.baseService
+                .countsByParams(
+                        "select count(*) from Meeting meeting join meeting.contacts where meeting.id = ?",
+                        new Integer[] { this.getId() });
+        long leadNumber = this.baseService
+                .countsByParams(
+                        "select count(*) from Meeting meeting join meeting.leads where meeting.id = ?",
+                        new Integer[] { this.getId() });
+        long userNumber = this.baseService
+                .countsByParams(
+                        "select count(*) from Meeting meeting join meeting.users where meeting.id = ?",
+                        new Integer[] { this.getId() });
+
+        StringBuilder jsonBuilder = new StringBuilder("");
+        jsonBuilder.append("{\"contactNumber\":\"").append(contactNumber)
+                .append("\",\"leadNumber\":\"").append(leadNumber)
+                .append("\",\"userNumber\":\"").append(userNumber)
+                .append("\"}");
+        // Returns JSON data back to page
+        HttpServletResponse response = ServletActionContext.getResponse();
+        response.setContentType("text/html;charset=UTF-8");
+        response.getWriter().write(jsonBuilder.toString());
+        return null;
     }
 
     /**

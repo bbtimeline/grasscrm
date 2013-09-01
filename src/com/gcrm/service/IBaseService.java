@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012 - 2013, Grass CRM Inc
+ * Copyright (C) 2012 - 2013, Grass CRM Studio
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,7 +98,29 @@ public interface IBaseService<T extends Serializable> {
      */
     public T findByName(String clazz, String name);
 
+    /**
+     * Finds records by hql with one parameter
+     * 
+     * @param hql
+     *            hql with parameters
+     * @param paramValue
+     *            parameter value
+     * @return result list
+     * @throws Exception
+     */
     public List<T> findByParam(String hql, Object paramValue);
+
+    /**
+     * Gets record counts by hql with parameters
+     * 
+     * @param hql
+     *            hql with parameters
+     * @param paramValues
+     *            parameter value array
+     * @return result count number
+     * @throws Exception
+     */
+    public long countsByParams(String hql, Object[] paramValues);
 
     /**
      * Finds records by hql
@@ -120,6 +142,18 @@ public interface IBaseService<T extends Serializable> {
      */
     @SuppressWarnings("rawtypes")
     public List findVOByHQL(String hql);
+
+    /**
+     * Finds record detail by hql with params
+     * 
+     * @param hql
+     *            hql with parameters
+     * @param paramValues
+     *            parameter value array
+     * @return result list
+     * @throws Exception
+     */
+    public List findVOByParams(String hql, Object[] paramValues);
 
     /**
      * Gets object count

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012-2013, Grass CRM Inc
+ * Copyright (C) 2012-2013, Grass CRM Studio
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -129,6 +129,10 @@ public class AccountReportAction extends ActionSupport {
         return SUCCESS;
     }
 
+    /**
+     * Sets report content
+     * 
+     */
     @SuppressWarnings("rawtypes")
     private void setList() {
         User loginUser = UserUtil.getLoginUser();

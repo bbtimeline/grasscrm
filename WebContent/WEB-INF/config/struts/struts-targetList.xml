@@ -130,7 +130,11 @@
 			<interceptor-ref name="prepareInterceptor" /> 
             <result name="input">/jsp/crm/editTargetList.jsp</result>          
     	    <result type="redirect">/jsp/crm/listTargetList.jsp</result>
-        </action>              
+        </action>      
+        
+      	<action name="getTargetListRelationCounts" class="editTargetListAction" method="getTargetListRelationCounts">
+    	  <result name="success" type="json"></result>
+        </action>         
   </package>      
     
 </struts>

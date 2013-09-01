@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012 - 2013, Grass CRM Inc
+ * Copyright (C) 2012 - 2013, Grass CRM Studio
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.struts2.ServletActionContext;
@@ -114,10 +116,25 @@ public class EditCampaignAction extends BaseEditAction implements Preparable {
         return SUCCESS;
     }
 
+    /**
+     * Batch update change log
+     * 
+     * @param changeLogs
+     *            change log collection
+     */
     private void batchInserChangeLogs(Collection<ChangeLog> changeLogs) {
         this.getChangeLogService().batchUpdate(changeLogs);
     }
 
+    /**
+     * Creates change log
+     * 
+     * @param originalCampaign
+     *            original campaign record
+     * @param campaign
+     *            current campaign record
+     * @return change log collections
+     */
     private Collection<ChangeLog> changeLog(Campaign originalCampaign,
             Campaign campaign) {
         Collection<ChangeLog> changeLogs = null;
@@ -439,6 +456,11 @@ public class EditCampaignAction extends BaseEditAction implements Preparable {
         return SUCCESS;
     }
 
+    /**
+     * Selects the email template
+     * 
+     * @return the SUCCESS result
+     */
     public String selectTemplate() throws Exception {
         UserUtil.permissionCheck("update_campaign");
         campaign = baseService.getEntityById(Campaign.class, this.getId());
@@ -678,6 +700,27 @@ public class EditCampaignAction extends BaseEditAction implements Preparable {
         campaign.setEnd_date(end_date);
         super.updateBaseInfo(campaign);
         return originalCampaign;
+    }
+
+    /**
+     * Gets Campaign Relation Counts
+     * 
+     * @return null
+     */
+    public String getCampaignRelationCounts() throws Exception {
+        long targetListNumber = this.baseService
+                .countsByParams(
+                        "select count(*) from Campaign campaign join campaign.targetLists where campaign.id = ?",
+                        new Integer[] { this.getId() });
+
+        StringBuilder jsonBuilder = new StringBuilder("");
+        jsonBuilder.append("{\"targetListNumber\":\"").append(targetListNumber)
+                .append("\"}");
+        // Returns JSON data back to page
+        HttpServletResponse response = ServletActionContext.getResponse();
+        response.setContentType("text/html;charset=UTF-8");
+        response.getWriter().write(jsonBuilder.toString());
+        return null;
     }
 
     /**

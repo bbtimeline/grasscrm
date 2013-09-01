@@ -1,20 +1,22 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
-	pageEncoding="UTF-8"%>
+  pageEncoding="UTF-8"%>
 <%@ taglib prefix="s" uri="/struts-tags"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf8" />
 <link rel="stylesheet" type="text/css"
-	href="../../themes/default/easyui.css" />
+  href="../../themes/default/easyui.css" />
 <link rel="stylesheet" type="text/css" href="../../themes/icon.css" />
 <link rel="stylesheet" type="text/css" href="../../css/global.css" />
 
 <script type="text/javascript" src="../../js/jquery-1.8.3.min.js"></script>
 <script type="text/javascript" src="../../js/jquery.easyui.min.js"></script>
-<script type="text/javascript" src="../../js/locale/easyui-lang-<%=(String)session.getAttribute("locale")%>.js"></script>
+<script type="text/javascript"
+  src="../../js/locale/easyui-lang-<%=(String)session.getAttribute("locale")%>.js"></script>
 <script type="text/javascript" src="../../js/global.js"></script>
-<script type="text/javascript" src="../../js/datagrid-<%=(String)session.getAttribute("locale")%>.js"></script> 
+<script type="text/javascript"
+  src="../../js/datagrid-<%=(String)session.getAttribute("locale")%>.js"></script>
 
 <script type="text/javascript">
     $(document).ready(function(){	 
@@ -40,17 +42,19 @@
   </script>
 </head>
 <body>
-	<div id="page-wrap">
-	  <div id="feature">
-		 <div id="feature-title">
-		   <h2>
-			 <s:text name="entity.changeLog.label" />
-		   </h2>
-		 </div>
-		 <div id="feature-content">
-		   <div id="tb" style="padding: 5px; height: auto">
-			 <div>
-			   <input id="filter_key" class="easyui-combobox" name="filter_key" style="width:90px;" data-options="
+  <div id="page-wrap">
+    <div id="feature">
+      <div id="feature-title">
+        <h2>
+          <s:text name="entity.changeLog.label" />
+        </h2>
+      </div>
+      <div id="feature-content">
+        <div id="tb" style="padding: 5px; height: auto">
+          <div>
+            <input id="filter_key" class="easyui-combobox"
+              name="filter_key" style="width: 90px;"
+              data-options="
 				        required:true,valueField:'value',textField:'label',
 						data: [{
 							label: '<s:text name="entity.id.label" />',
@@ -66,11 +70,11 @@
 							value: 'updatedBy'
 						},{label: '<s:text name="entity.updatedOn.label" />',
 							value: 'updatedOn'																					
-						}]" />	
+						}]" />
 
-					<input id="filter_op" class="easyui-combobox" name="filter_op"
-						style="width: 40px;"
-						data-options="valueField:'value',textField:'label',
+            <input id="filter_op" class="easyui-combobox"
+              name="filter_op" style="width: 40px;"
+              data-options="valueField:'value',textField:'label',
 						data: [{
 							label: '<s:text name="filter.oper.equal" />',
 							value: '=',
@@ -87,21 +91,25 @@
 							value: '>='									
 						},{label: '<s:text name="filter.oper.like" />',
 							value: 'like'															
-						}]" />				
-                    <input id="filter_value" style="line-height:20px; border:1px solid #ccc"/>                   
-			        <a href="#" class="easyui-linkbutton" iconCls="icon-search" onclick="doSearch()" plain="true"><s:text name="button.search" /></a>  
-			        <a href="#" class="easyui-linkbutton" iconCls="icon-reload" onclick="reset()" plain="true"><s:text name="button.reset" /></a>  
-			    </div>  
-			</div>  
-			<s:form id="addObjectForm" namespace="/jsp/crm"
-				method="post">
-			  <s:hidden name="entity" id="entity" value="%{entity}" />	
-			  <s:hidden name="recordID" id="recordID" value="%{recordID}" />		   
-			  <table id="tt"></table>	        
-			</s:form>	      
-		  </div>
-		</div>
-	</div>	  
+						}]" />
+            <input id="filter_value"
+              style="line-height: 20px; border: 1px solid #ccc" /> <a
+              href="#" class="easyui-linkbutton" iconCls="icon-search"
+              onclick="doSearch()" plain="true"><s:text
+                name="button.search" /></a> <a href="#"
+              class="easyui-linkbutton" iconCls="icon-reload"
+              onclick="reset()" plain="true"><s:text
+                name="button.reset" /></a>
+          </div>
+        </div>
+        <s:form id="addObjectForm" namespace="/jsp/crm" method="post">
+          <s:hidden name="entity" id="entity" value="%{entity}" />
+          <s:hidden name="recordID" id="recordID" value="%{recordID}" />
+          <table id="tt"></table>
+        </s:form>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
 

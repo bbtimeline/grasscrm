@@ -11,6 +11,7 @@
 	<constant name="struts.ui.theme" value="simple"/>
 	<constant name="struts.action.extension" value="action" />
     <include file="../config/struts/struts-account.xml"/>
+    <include file="../config/struts/struts-calendar.xml"/>
     <include file="../config/struts/struts-call.xml"/>
     <include file="../config/struts/struts-campaign.xml"/>
     <include file="../config/struts/struts-case.xml"/>

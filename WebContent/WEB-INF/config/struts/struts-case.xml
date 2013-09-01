@@ -118,7 +118,11 @@
 			<interceptor-ref name="prepareInterceptor" /> 
             <result name="input">/jsp/crm/editCaseInstance.jsp</result>          
     	  <result type="redirect">/jsp/crm/listCaseInstance.jsp</result>
-        </action>                    
+        </action>  
+        
+      	<action name="getCaseRelationCounts" class="editCaseAction" method="getCaseRelationCounts">
+    	  <result name="success" type="json"></result>
+        </action>           
   </package>      
     
 </struts>
