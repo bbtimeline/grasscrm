@@ -71,7 +71,7 @@
         <action name="saveUser" class="editUserAction" method="save">
 			<interceptor-ref name="prepareInterceptor" /> 
             <result name="input">/jsp/system/editUser.jsp</result>          
-    	    <result>/jsp/system/editUser.jsp</result>
+    	    <result type="redirectAction">editUser.action?id=${id}</result>
         </action>
 
         <action name="saveCloseUser" class="editUserAction" method="save">

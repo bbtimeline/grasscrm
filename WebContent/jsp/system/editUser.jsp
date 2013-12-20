@@ -62,7 +62,7 @@
 			  $('#tab').tabs('close', '<s:text name='tab.role'/>');
 		}	
 		if ($("#id").val() == ""){
-			  $('#tt').tabs('close', '<s:text name='tab.relations'/>');
+			  $('#tab').tabs('close', '<s:text name='tab.role'/>');
 			  if ($("#seleteIDs").val() == ""){
 				     $("#addObjectForm").form('validate');
 			  }			  
@@ -510,7 +510,7 @@
               </table>
             </div>
 
-            <div title="<s:text name='tab.role'/>"
+            <div title="<s:text name='tab.role'/>" id="roles"
               style="padding: 10px;">
               <table class="view-table" cellspacing="0" cellpadding="0"
                 width="100%" border="0">
