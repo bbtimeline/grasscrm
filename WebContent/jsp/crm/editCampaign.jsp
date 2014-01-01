@@ -173,6 +173,10 @@
           <s:hidden name="relationValue" id="relationValue"
             value="%{relationValue}" />
           <s:hidden id="seleteIDs" name="seleteIDs" value="%{seleteIDs}" />
+          <s:hidden id="createdBy" name="createdBy" />
+          <s:hidden id="createdOn" name="createdOn" />
+          <s:hidden id="updatedBy" name="updatedBy" />
+          <s:hidden id="updatedOn" name="updatedOn" />                     
 
           <table style="" cellspacing="10" cellpadding="0" width="100%">
             <s:actionerror />
@@ -389,33 +393,8 @@
                     value="objective" /></td>
                   <td class="td-label"><label class="record-label"><s:text
                         name="campaign.objective.label"></s:text>：</label></td>
-                  <td class="td-value" colspan="3"><s:textarea
-                      name="campaign.objective" rows="20"
-                      cssStyle="width:450px;" cssClass="record-value" /></td>
-                  <td class="td-mass-update"></td>
-                  <td class="td-label"></td>
-                  <td class="td-value"></td>
-                </tr>
-              </table>
-            </div>
-
-            <div title="<s:text name='tab.details'/>"
-              style="padding: 10px;">
-              <div class="section-header">
-                <span><s:text name="span.description" /></span>
-              </div>
-              <table style="" cellspacing="10" cellpadding="0"
-                width="100%">
-                <tr>
-                  <td class="td-mass-update"><input id="massUpdate"
-                    name="massUpdate" type="checkbox" class="massUpdate"
-                    value="description" /></td>
-                  <td class="td-label" valign="top"><label
-                    class="record-label"><s:text
-                        name="entity.description.label"></s:text>：</label></td>
-                  <td class="td-value" valign="top"><s:textarea
-                      name="campaign.description" rows="20"
-                      cssStyle="width:450px;" cssClass="record-value" /></td>
+                  <td class="td-value"><s:textarea
+                      name="campaign.objective" rows="5" cssStyle="width:350px;" cssClass="record-value" /></td>
                   <td class="td-mass-update"><input id="massUpdate"
                     name="massUpdate" type="checkbox" class="massUpdate"
                     value="notes" /></td>
@@ -423,11 +402,13 @@
                     class="record-label"><s:text
                         name="entity.notes.label"></s:text>：</label></td>
                   <td class="td-value" valign="top"><s:textarea
-                      name="campaign.notes" rows="20"
-                      cssStyle="width:450px;" cssClass="record-value" /></td>
+                      name="campaign.notes" rows="5" cssStyle="width:350px;" cssClass="record-value" /></td>
                 </tr>
               </table>
+            </div>
 
+            <div title="<s:text name='tab.details'/>"
+              style="padding: 10px;">
               <div class="section-header">
                 <span><s:text name="span.system_info" /></span>
               </div>

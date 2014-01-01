@@ -38,6 +38,17 @@ public interface IBaseService<T extends Serializable> {
     public List<T> getAllObjects(String clazz);
 
     /**
+     * Gets all entity instances with select columns
+     * 
+     * @param clazz
+     *            class name
+     * @param columns
+     *            column name list
+     * @return result list
+     */
+    public List<T> getAllObjects(String clazz, String columns);
+
+    /**
      * Persists entity
      * 
      * @param entity
@@ -153,6 +164,7 @@ public interface IBaseService<T extends Serializable> {
      * @return result list
      * @throws Exception
      */
+    @SuppressWarnings("rawtypes")
     public List findVOByParams(String hql, Object[] paramValues);
 
     /**
@@ -176,5 +188,41 @@ public interface IBaseService<T extends Serializable> {
     public SearchResult<T> getPaginationObjects(final String clazz,
             final SearchCondition searchCondition);
 
+    /**
+     * Gets pagination objects with selected columns
+     * 
+     * @param clazz
+     *            entity class name
+     * @param columns
+     *            column name list
+     * @param searchCondition
+     *            search condition
+     * @return search result with selected columns
+     */
+    public SearchResult<T> getPaginationObjects(String clazz, String columns,
+            SearchCondition searchCondition);
+
+    /**
+     * Gets all entity instances that meet condition
+     * 
+     * @param clazz
+     *            class name
+     * @param condition
+     *            search condition
+     * @return result list that meet condition
+     */
     public List<T> getObjects(final String clazz, final String condition);
+
+    /**
+     * Gets all entity instances that meet condition with selected columns
+     * 
+     * @param clazz
+     *            class name
+     * @param columns
+     *            column name list
+     * @param condition
+     *            search condition
+     * @return result list that meet condition with selected columns
+     */
+    public List<T> getObjects(String clazz, String columns, String condition);
 }

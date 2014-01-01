@@ -36,32 +36,69 @@ import com.gcrm.vo.SearchResult;
 public class BaseDao<T extends Serializable> extends HibernateDaoSupport
         implements IBaseDao<T> {
 
-    private static String INIT_HQL = "from ";
+    private static String SELECT_HQL = "select ";
+    private static String FROM_HQL = "from ";
 
     /*
      * (non-Javadoc)
      * 
      * @see com.gcrm.dao.IBaseDao#getAllObjects(java.lang.String)
      */
-    @SuppressWarnings("unchecked")
     public List<T> getAllObjects(String clazz) {
+        return getAllObjects(clazz, null);
+    }
 
-        String hql = INIT_HQL + clazz;
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.gcrm.dao.IBaseDao#getAllObjects(java.lang.String,java.lang.String)
+     */
+    @SuppressWarnings("unchecked")
+    public List<T> getAllObjects(String clazz, String columns) {
+        StringBuilder hqlBuilder = new StringBuilder("");
+        if (columns != null) {
+            hqlBuilder.append(SELECT_HQL).append(columns).append(" ");
+        }
+
+        hqlBuilder.append(FROM_HQL).append(clazz);
         List<T> objects = null;
 
-        objects = getHibernateTemplate().find(hql);
+        objects = getHibernateTemplate().find(hqlBuilder.toString());
 
         return objects;
     }
 
-    @SuppressWarnings("unchecked")
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.gcrm.dao.IBaseDao#getAllSortedObjects(java.lang.String,
+     * java.lang.String, java.lang.String)
+     */
     public List<T> getAllSortedObjects(String clazz, String sortColumn,
             String order) {
+        return getAllSortedObjects(clazz, null, sortColumn, order);
+    }
 
-        String hql = INIT_HQL + clazz + " order by " + sortColumn + " " + order;
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.gcrm.dao.IBaseDao#getAllSortedObjects(java.lang.String,
+     * java.lang.String, java.lang.String, java.lang.String)
+     */
+    @SuppressWarnings("unchecked")
+    public List<T> getAllSortedObjects(String clazz, String columns,
+            String sortColumn, String order) {
+        StringBuilder hqlBuilder = new StringBuilder("");
+        if (columns != null) {
+            hqlBuilder.append(SELECT_HQL).append(columns).append(" ");
+        }
+
+        hqlBuilder.append(FROM_HQL).append(clazz).append(" order by ")
+                .append(sortColumn).append(" ").append(order);
         List<T> objects = null;
 
-        objects = getHibernateTemplate().find(hql);
+        objects = getHibernateTemplate().find(hqlBuilder.toString());
 
         return objects;
     }
@@ -158,7 +195,7 @@ public class BaseDao<T extends Serializable> extends HibernateDaoSupport
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public T findByName(String clazz, String name) {
-        String hql = INIT_HQL + clazz + " where name = ?";
+        String hql = FROM_HQL + clazz + " where name = ?";
         T object = null;
         List result = null;
 
@@ -235,9 +272,20 @@ public class BaseDao<T extends Serializable> extends HibernateDaoSupport
      * @see com.gcrm.dao.IBaseDao#getPaginationObjects(java.lang.String,
      * com.gcrm.vo.SearchCondition)
      */
+    public SearchResult<T> getPaginationObjects(String clazz,
+            SearchCondition searchCondition) {
+        return getPaginationObjects(clazz, null, searchCondition);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.gcrm.dao.IBaseDao#getPaginationObjects(java.lang.String,
+     * java.lang.String, com.gcrm.vo.SearchCondition)
+     */
     @SuppressWarnings("unchecked")
     public SearchResult<T> getPaginationObjects(final String clazz,
-            final SearchCondition searchCondition) {
+            final String columns, final SearchCondition searchCondition) {
 
         List<T> objects = null;
 
@@ -248,18 +296,23 @@ public class BaseDao<T extends Serializable> extends HibernateDaoSupport
 
                     public List<T> doInHibernate(Session session)
                             throws HibernateException, SQLException {
-                        String hql = INIT_HQL + clazz;
-                        if (condition != null && condition.length() > 0) {
-                            hql += " where ";
-                            hql += condition;
+                        StringBuilder hqlBuilder = new StringBuilder("");
+                        if (columns != null) {
+                            hqlBuilder.append(SELECT_HQL).append(columns)
+                                    .append(" ");
                         }
-                        hql += " order by " + searchCondition.getSidx() + " "
-
-                        + searchCondition.getSord();
+                        hqlBuilder.append(FROM_HQL).append(clazz);
+                        if (condition != null && condition.length() > 0) {
+                            hqlBuilder.append(" where ");
+                            hqlBuilder.append(condition);
+                        }
+                        hqlBuilder.append(" order by ")
+                                .append(searchCondition.getSidx()).append(" ")
+                                .append(searchCondition.getSord());
                         int pageSize = searchCondition.getPageSize();
                         int pageNo = searchCondition.getPageNo();
 
-                        Query query = session.createQuery(hql);
+                        Query query = session.createQuery(hqlBuilder.toString());
 
                         if (pageNo != 0 && pageSize != 0) {
                             int rowNumber = (pageNo - 1) * pageSize;
@@ -285,8 +338,24 @@ public class BaseDao<T extends Serializable> extends HibernateDaoSupport
         return result;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.gcrm.dao.IBaseDao#getObjects(java.lang.String, java.lang.String)
+     */
+    public List<T> getObjects(String clazz, String condition) {
+        return getObjects(null, clazz, condition);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.gcrm.dao.IBaseDao#getObjects(java.lang.String, java.lang.String,
+     * java.lang.String)
+     */
     @SuppressWarnings("unchecked")
-    public List<T> getObjects(final String clazz, final String condition) {
+    public List<T> getObjects(final String clazz, final String columns,
+            final String condition) {
 
         List<T> objects = null;
 
@@ -295,12 +364,17 @@ public class BaseDao<T extends Serializable> extends HibernateDaoSupport
 
                     public List<T> doInHibernate(Session session)
                             throws HibernateException, SQLException {
-                        String hql = INIT_HQL + clazz;
-                        if (condition != null && condition.length() > 0) {
-                            hql += " where ";
-                            hql += condition;
+                        StringBuilder hqlBuilder = new StringBuilder("");
+                        if (columns != null) {
+                            hqlBuilder.append(SELECT_HQL).append(columns)
+                                    .append(" ");
                         }
-                        Query query = session.createQuery(hql);
+                        hqlBuilder.append(FROM_HQL).append(clazz);
+                        if (condition != null && condition.length() > 0) {
+                            hqlBuilder.append(" where ");
+                            hqlBuilder.append(condition);
+                        }
+                        Query query = session.createQuery(hqlBuilder.toString());
 
                         List<T> list = query.list();
 

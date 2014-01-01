@@ -22,7 +22,6 @@ public class Campaign extends BaseEntity implements Serializable {
     private double expected_revenue;
     private double expected_respone;
     private String objective;
-    private String description;
     private String notes;
     private User assigned_to;
     private Set<TargetList> targetLists = new HashSet<TargetList>(0);
@@ -217,21 +216,6 @@ public class Campaign extends BaseEntity implements Serializable {
      */
     public void setObjective(String objective) {
         this.objective = objective;
-    }
-
-    /**
-     * @return the description
-     */
-    public String getDescription() {
-        return description;
-    }
-
-    /**
-     * @param description
-     *            the description to set
-     */
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     /**

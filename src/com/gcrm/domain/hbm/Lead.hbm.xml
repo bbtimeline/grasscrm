@@ -30,7 +30,6 @@
   <property name="other_postal_code" column="other_postal_code" type="string" />   
   <property name="other_country" column="other_country" type="string" />     
   <property name="email" column="email" type="string" />   
-  <property name="description" column="description" type="string" />
   <property name="notes" column="notes" type="string" />  
    <many-to-one name="status"
 			class="LeadStatus" column="status" cascade="save-update"/>	 

@@ -59,7 +59,6 @@ public class TargetService extends BaseService<Target> implements
         lead.setOther_postal_code(target.getOther_postal_code());
         lead.setOther_state(target.getOther_state());
         lead.setEmail(target.getEmail());
-        lead.setDescription(target.getDescription());
         lead.setNotes(target.getNotes());
         lead.setNot_call(target.isNot_call());
         lead.setAssigned_to(target.getAssigned_to());

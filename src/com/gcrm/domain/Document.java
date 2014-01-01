@@ -9,16 +9,15 @@ public class Document extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 8250950813769457555L;
 
-    private String fileName;
-    private byte[] fileContent;
+    private Attachment attachment;
     private DocumentStatus status;
+    private String fileName;
     private String name;
     private int revision;
     private Date publish_date;
     private Date expiration_date;
     private DocumentCategory category;
     private DocumentSubCategory sub_category;
-    private String description;
     private String notes;
     private Document related_document;
     private User assigned_to;
@@ -56,6 +55,7 @@ public class Document extends BaseEntity implements Serializable {
     /**
      * @return the name
      */
+    @Override
     public String getName() {
         return name;
     }
@@ -144,21 +144,6 @@ public class Document extends BaseEntity implements Serializable {
     }
 
     /**
-     * @return the description
-     */
-    public String getDescription() {
-        return description;
-    }
-
-    /**
-     * @param description
-     *            the description to set
-     */
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    /**
      * @return the related_document
      */
     public Document getRelated_document() {
@@ -193,36 +178,6 @@ public class Document extends BaseEntity implements Serializable {
      */
     public static long getSerialversionuid() {
         return serialVersionUID;
-    }
-
-    /**
-     * @return the fileName
-     */
-    public String getFileName() {
-        return fileName;
-    }
-
-    /**
-     * @param fileName
-     *            the fileName to set
-     */
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-    }
-
-    /**
-     * @return the fileContent
-     */
-    public byte[] getFileContent() {
-        return fileContent;
-    }
-
-    /**
-     * @param fileContent
-     *            the fileContent to set
-     */
-    public void setFileContent(byte[] fileContent) {
-        this.fileContent = fileContent;
     }
 
     /**
@@ -298,6 +253,36 @@ public class Document extends BaseEntity implements Serializable {
      */
     public void setNotes(String notes) {
         this.notes = notes;
+    }
+
+    /**
+     * @return the attachment
+     */
+    public Attachment getAttachment() {
+        return attachment;
+    }
+
+    /**
+     * @param attachment
+     *            the attachment to set
+     */
+    public void setAttachment(Attachment attachment) {
+        this.attachment = attachment;
+    }
+
+    /**
+     * @return the fileName
+     */
+    public String getFileName() {
+        return fileName;
+    }
+
+    /**
+     * @param fileName
+     *            the fileName to set
+     */
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
 }

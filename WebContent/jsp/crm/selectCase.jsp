@@ -36,7 +36,7 @@
 				{field:'ck',checkbox:true},
 				{field:'id',title:'<s:text name="entity.id.label" />',width:80,align:'center',sortable:'true'},            
 				{field:'subject',title:'<s:text name="entity.subject.label" />',width:80,align:'center',sortable:'true',formatter:function(value,row,index){  
-					   new_format_value = "<a href='editCase.action?id=" + row.id + "'>" + value + "</a>";
+					   new_format_value = "<a href='editCaseInstance.action?id=" + row.id + "'>" + value + "</a>";
 					   return new_format_value 
 	             }  
 	            },

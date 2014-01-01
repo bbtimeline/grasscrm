@@ -78,8 +78,8 @@
                         
         <action name="saveLead" class="editLeadAction" method="save">
 			<interceptor-ref name="prepareInterceptor" /> 
-            <result name="input">/jsp/crm/editLead.jsp</result>          
-    	    <result>/jsp/crm/editLead.jsp</result>
+            <result name="input">/jsp/crm/editLead.jsp</result> 
+            <result type="redirectAction">editLead.action?id=${id}</result> 
         </action>
 
         <action name="saveCloseLead" class="editLeadAction" method="save">

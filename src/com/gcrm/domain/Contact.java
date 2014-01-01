@@ -32,7 +32,18 @@ public class Contact extends BaseEntity implements Serializable {
     private String other_postal_code;
     private String other_country;
     private String email;
-    private String description;
+    private Attachment attachment;
+    private String fileName;
+    private String origo;
+    private double height;
+    private double weight;
+    private String relationship;
+    private String character;
+    private String interest;
+    private String taboo;
+    private Religious religious;
+    private String habit;
+    private String diet;
     private String notes;
     private Contact report_to;
     private boolean not_call;
@@ -58,6 +69,7 @@ public class Contact extends BaseEntity implements Serializable {
         return o;
     }
 
+    @Override
     public String getName() {
         StringBuilder nameBuider = new StringBuilder("");
         if (!CommonUtil.isNullOrEmpty(this.first_name)) {
@@ -281,21 +293,6 @@ public class Contact extends BaseEntity implements Serializable {
      */
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    /**
-     * @return the description
-     */
-    public String getDescription() {
-        return description;
-    }
-
-    /**
-     * @param description
-     *            the description to set
-     */
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     /**
@@ -618,6 +615,186 @@ public class Contact extends BaseEntity implements Serializable {
      */
     public void setSkype_id(String skype_id) {
         this.skype_id = skype_id;
+    }
+
+    /**
+     * @return the origo
+     */
+    public String getOrigo() {
+        return origo;
+    }
+
+    /**
+     * @param origo
+     *            the origo to set
+     */
+    public void setOrigo(String origo) {
+        this.origo = origo;
+    }
+
+    /**
+     * @return the height
+     */
+    public double getHeight() {
+        return height;
+    }
+
+    /**
+     * @param height
+     *            the height to set
+     */
+    public void setHeight(double height) {
+        this.height = height;
+    }
+
+    /**
+     * @return the weight
+     */
+    public double getWeight() {
+        return weight;
+    }
+
+    /**
+     * @param weight
+     *            the weight to set
+     */
+    public void setWeight(double weight) {
+        this.weight = weight;
+    }
+
+    /**
+     * @return the relationship
+     */
+    public String getRelationship() {
+        return relationship;
+    }
+
+    /**
+     * @param relationship
+     *            the relationship to set
+     */
+    public void setRelationship(String relationship) {
+        this.relationship = relationship;
+    }
+
+    /**
+     * @return the character
+     */
+    public String getCharacter() {
+        return character;
+    }
+
+    /**
+     * @param character
+     *            the character to set
+     */
+    public void setCharacter(String character) {
+        this.character = character;
+    }
+
+    /**
+     * @return the interest
+     */
+    public String getInterest() {
+        return interest;
+    }
+
+    /**
+     * @param interest
+     *            the interest to set
+     */
+    public void setInterest(String interest) {
+        this.interest = interest;
+    }
+
+    /**
+     * @return the taboo
+     */
+    public String getTaboo() {
+        return taboo;
+    }
+
+    /**
+     * @param taboo
+     *            the taboo to set
+     */
+    public void setTaboo(String taboo) {
+        this.taboo = taboo;
+    }
+
+    /**
+     * @return the religious
+     */
+    public Religious getReligious() {
+        return religious;
+    }
+
+    /**
+     * @param religious
+     *            the religious to set
+     */
+    public void setReligious(Religious religious) {
+        this.religious = religious;
+    }
+
+    /**
+     * @return the habit
+     */
+    public String getHabit() {
+        return habit;
+    }
+
+    /**
+     * @param habit
+     *            the habit to set
+     */
+    public void setHabit(String habit) {
+        this.habit = habit;
+    }
+
+    /**
+     * @return the diet
+     */
+    public String getDiet() {
+        return diet;
+    }
+
+    /**
+     * @param diet
+     *            the diet to set
+     */
+    public void setDiet(String diet) {
+        this.diet = diet;
+    }
+
+    /**
+     * @return the attachment
+     */
+    public Attachment getAttachment() {
+        return attachment;
+    }
+
+    /**
+     * @param attachment
+     *            the attachment to set
+     */
+    public void setAttachment(Attachment attachment) {
+        this.attachment = attachment;
+    }
+
+    /**
+     * @return the fileName
+     */
+    public String getFileName() {
+        return fileName;
+    }
+
+    /**
+     * @param fileName
+     *            the fileName to set
+     */
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
 }

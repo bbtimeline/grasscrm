@@ -210,4 +210,23 @@ public class BaseService<T extends Serializable> implements IBaseService<T> {
         baseDao.batchUpdate(entities);
     }
 
+    @Override
+    @Transactional(propagation = Propagation.NOT_SUPPORTED, readOnly = true)
+    public List<T> getAllObjects(String clazz, String columns) {
+        return baseDao.getAllObjects(clazz, columns);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.NOT_SUPPORTED, readOnly = true)
+    public SearchResult<T> getPaginationObjects(String clazz, String columns,
+            SearchCondition searchCondition) {
+        return baseDao.getPaginationObjects(clazz, columns, searchCondition);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.NOT_SUPPORTED, readOnly = true)
+    public List<T> getObjects(String clazz, String columns, String condition) {
+        return baseDao.getObjects(clazz, columns, condition);
+    }
+
 }

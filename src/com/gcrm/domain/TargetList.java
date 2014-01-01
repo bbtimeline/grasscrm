@@ -9,7 +9,6 @@ public class TargetList extends BaseEntity implements Serializable {
     private static final long serialVersionUID = 8250950813769457555L;
 
     private String name;
-    private String description;
     private String notes;
     private User assigned_to;
     private Set<Target> targets = new HashSet<Target>(0);
@@ -44,21 +43,6 @@ public class TargetList extends BaseEntity implements Serializable {
      */
     public void setName(String name) {
         this.name = name;
-    }
-
-    /**
-     * @return the description
-     */
-    public String getDescription() {
-        return description;
-    }
-
-    /**
-     * @param description
-     *            the description to set
-     */
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     /**

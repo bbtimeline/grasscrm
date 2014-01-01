@@ -8,7 +8,6 @@
    <generator class="native"/>
   </id>
   <property name="name" column="name" type="string" not-null="true"/>  
-  <property name="description" column="description" type="string" />  
   <many-to-one name="assigned_to"
 			class="User" column="assigned_to" cascade="save-update"/>
   <property name="notes" column="notes" type="string" /> 			

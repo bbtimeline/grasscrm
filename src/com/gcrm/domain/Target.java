@@ -32,7 +32,6 @@ public class Target extends BaseEntity implements Serializable {
     private String other_postal_code;
     private String other_country;
     private String email;
-    private String description;
     private String notes;
     private boolean not_call;
     private User assigned_to;
@@ -50,6 +49,7 @@ public class Target extends BaseEntity implements Serializable {
         return o;
     }
 
+    @Override
     public String getName() {
         StringBuilder nameBuider = new StringBuilder("");
         if (!CommonUtil.isNullOrEmpty(this.first_name)) {
@@ -348,21 +348,6 @@ public class Target extends BaseEntity implements Serializable {
      */
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    /**
-     * @return the description
-     */
-    public String getDescription() {
-        return description;
-    }
-
-    /**
-     * @param description
-     *            the description to set
-     */
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     /**

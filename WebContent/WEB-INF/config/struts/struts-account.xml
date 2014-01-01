@@ -68,7 +68,8 @@
                 <param name="inputName">inputStream</param>
                 <param name="contentDisposition">attachment;filename="${fileName}"</param>
                 <param name="bufferSize">4096</param>
-            </result>            	  
+            </result> 
+            <result name="input">/jsp/crm/listAccount.jsp</result>
         </action>  
 
          <action name="exportTemplateAccount" class="listAccountAction">
@@ -109,7 +110,7 @@
         <action name="saveAccount" class="editAccountAction" method="save">
 			<interceptor-ref name="prepareInterceptor" /> 
             <result name="input">/jsp/crm/editAccount.jsp</result>          
-    	    <result>/jsp/crm/editAccount.jsp</result>
+    	    <result type="redirectAction">editAccount.action?id=${id}</result>
         </action>
         
         <action name="saveCloseAccount" class="editAccountAction" method="save">

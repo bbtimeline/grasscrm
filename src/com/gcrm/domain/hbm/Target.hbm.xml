@@ -30,7 +30,6 @@
   <property name="other_postal_code" column="other_postal_code" type="string" />   
   <property name="other_country" column="other_country" type="string" />     
   <property name="email" column="email" type="string" />   
-  <property name="description" column="description" type="string" /> 
   <property name="notes" column="notes" type="string" />  
   <property name="not_call" column="not_call" type="boolean" />   
   <property name="lead_id" column="lead_id" type="java.lang.Integer"/> 

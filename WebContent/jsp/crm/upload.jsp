@@ -24,15 +24,17 @@
 		importObjectForm.action = namespace + 'exportTemplate' + entityName + '.action';
 		importObjectForm.submit();
 	  });	
+	  
+      $("#upload").click(function() {   
+          var entityName = '<%=(String)request.getParameter("entityName")%>';
+          var importObjectForm = document.getElementById('importObjectForm');
+          var namespace = getWebPath() + '/jsp/' + '<%=(String)request.getParameter("namespace")%>' + '/';
+          importObjectForm.action = namespace + 'import' + entityName + '.action';
+          importObjectForm.submit();
+        });	  
+	  
 	})
-	function submit(){
-		var entityName = '<%=(String)request.getAttribute("entityName")%>';
-		var importObjectForm = document.getElementById('importObjectForm');
-		var namespace = getWebPath() + '/jsp/' + '<%=(String)request.getParameter("namespace")%>' + '/';
-		importObjectForm.action = namespace + 'import' + entityName + '.action';
-		importObjectForm.submit();
-	}
-	
+
 	function cancel(){
 		window.close();
 	}
@@ -59,7 +61,7 @@
                 name="info.download.template" /></a></td>
         </tr>
       </table>
-      <s:form id="importObjectForm" action="importAccount" method="POST"
+      <s:form id="importObjectForm" method="POST" namespace="/jsp/crm"
         enctype="multipart/form-data">
         <table style="width: 100%;" border="0">
           <tr>
@@ -83,9 +85,8 @@
           <tr>
             <td></td>
             <td style="text-align: left;"><span
-              style="white-space: nowrap;"> <a href="#"
-                class="easyui-linkbutton" iconCls="icon-ok"
-                onclick="submit()" plain="true"><s:text
+              style="white-space: nowrap;"> <a id="upload" href="#"
+                class="easyui-linkbutton" iconCls="icon-ok" plain="true"><s:text
                     name="button.submit" /></a>
             </span> <span style="white-space: nowrap;"> <a href="#"
                 class="easyui-linkbutton" iconCls="icon-cancel"

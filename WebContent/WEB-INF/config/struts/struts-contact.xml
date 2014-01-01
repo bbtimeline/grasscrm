@@ -105,8 +105,8 @@
                         
         <action name="saveContact" class="editContactAction" method="save">
 			<interceptor-ref name="prepareInterceptor" /> 
-            <result name="input">/jsp/crm/editContact.jsp</result>          
-    	    <result>/jsp/crm/editContact.jsp</result>
+            <result name="input">/jsp/crm/editContact.jsp</result>
+            <result type="redirectAction">editContact.action?id=${id}</result>
         </action>
 
         <action name="saveCloseContact" class="editContactAction" method="save">
@@ -138,6 +138,16 @@
         
       	<action name="getContactRelationCounts" class="editContactAction" method="getContactRelationCounts">
     	  <result name="success" type="json"></result>
+        </action>   
+        
+        <action name="downloadContact" class="editContactAction">
+            <interceptor-ref name="defaultStack"/>
+            <result name="success" type="stream">
+                <param name="contentType">APPLICATION/OCTET-STREAM</param>
+                <param name="inputName">inputStream</param>
+                <param name="contentDisposition">attachment;filename="${fileName}"</param>
+                <param name="bufferSize">4096</param>
+            </result>                 
         </action>           
   </package>      
     

@@ -23,7 +23,6 @@
   <property name="expected_revenue" column="expected_revenue" type="java.lang.Double" />
   <property name="expected_respone" column="expected_respone" type="java.lang.Double" />  	   
   <property name="objective" column="objective" type="string" />     
-  <property name="description" column="description" type="string" />  
   <property name="notes" column="notes" type="string" />     
   <many-to-one name="assigned_to"
 			class="User" column="assigned_to" cascade="save-update"/>

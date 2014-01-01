@@ -62,7 +62,6 @@ public class LeadService extends BaseService<Lead> implements ILeadService {
             account.setShip_postal_code(lead.getOther_postal_code());
             account.setShip_state(lead.getOther_state());
             account.setEmail(lead.getEmail());
-            account.setDescription(lead.getDescription());
             account.setNotes(lead.getNotes());
             account.setAssigned_to(lead.getAssigned_to());
             account.setOwner(lead.getOwner());
@@ -90,7 +89,6 @@ public class LeadService extends BaseService<Lead> implements ILeadService {
             contact.setOther_postal_code(lead.getOther_postal_code());
             contact.setOther_state(lead.getOther_state());
             contact.setEmail(lead.getEmail());
-            contact.setDescription(lead.getDescription());
             contact.setNotes(lead.getNotes());
             contact.setCampaign(lead.getCampaign());
             contact.setNot_call(lead.isNot_call());
@@ -103,7 +101,6 @@ public class LeadService extends BaseService<Lead> implements ILeadService {
             String firstName = CommonUtil.fromNullToEmpty(lead.getFirst_name());
             String lastName = CommonUtil.fromNullToEmpty(lead.getLast_name());
             opportunity.setName(firstName + " " + lastName);
-            opportunity.setDescription(lead.getDescription());
             opportunity.setCampaign(lead.getCampaign());
             opportunity.setAssigned_to(lead.getAssigned_to());
             opportunity.setOwner(lead.getOwner());

@@ -15,7 +15,6 @@ public class CaseInstance extends BaseEntity implements Serializable {
     private CaseOrigin origin;
     private CaseReason reason;
     private String subject;
-    private String description;
     private String notes;
     private String resolution;
     private User assigned_to;
@@ -106,21 +105,6 @@ public class CaseInstance extends BaseEntity implements Serializable {
      */
     public void setSubject(String subject) {
         this.subject = subject;
-    }
-
-    /**
-     * @return the description
-     */
-    public String getDescription() {
-        return description;
-    }
-
-    /**
-     * @param description
-     *            the description to set
-     */
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     /**

@@ -5,6 +5,46 @@
 <struts>
     <package namespace="/jsp/system" name="system" extends="default">
         
+        <action name="listAccountLevel" class="accountLevelAction" method="list">
+          <result name="success" type="json"></result>
+        </action>
+
+        <action name="listAccountLevelPage" class="accountLevelAction" method="init">
+          <interceptor-ref name="prepareInterceptor" /> 
+          <result name="success">/jsp/system/listOption.jsp</result>
+        </action>
+                
+        <action name="saveAccountLevel" class="accountLevelAction" method="save">      
+          <result name="input">/jsp/system/listOption.jsp</result>
+          <result name="success">/jsp/system/listOption.jsp</result>
+        </action>
+        
+        <action name="deleteAccountLevel" class="accountLevelAction" method="delete">
+            <interceptor-ref name="prepareInterceptor" /> 
+            <result name="input">/jsp/system/listOption.jsp</result>
+            <result name="success">/jsp/system/listOption.jsp</result>
+        </action>  
+        
+        <action name="listAccountNature" class="accountNatureAction" method="list">
+          <result name="success" type="json"></result>
+        </action>
+
+        <action name="listAccountNaturePage" class="accountNatureAction" method="init">
+          <interceptor-ref name="prepareInterceptor" /> 
+          <result name="success">/jsp/system/listOption.jsp</result>
+        </action>
+                
+        <action name="saveAccountNature" class="accountNatureAction" method="save">      
+          <result name="input">/jsp/system/listOption.jsp</result>
+          <result name="success">/jsp/system/listOption.jsp</result>
+        </action>
+        
+        <action name="deleteAccountNature" class="accountNatureAction" method="delete">
+            <interceptor-ref name="prepareInterceptor" /> 
+            <result name="input">/jsp/system/listOption.jsp</result>
+            <result name="success">/jsp/system/listOption.jsp</result>
+        </action>         
+                
     	<action name="listAccountType" class="accountTypeAction" method="list">
     	  <result name="success" type="json"></result>
         </action>
@@ -23,7 +63,27 @@
     	    <interceptor-ref name="prepareInterceptor" /> 
             <result name="input">/jsp/system/listOption.jsp</result>
 			<result name="success">/jsp/system/listOption.jsp</result>
-        </action>   
+        </action>  
+        
+        <action name="listAnnualRevenue" class="annualRevenueAction" method="list">
+          <result name="success" type="json"></result>
+        </action>
+
+        <action name="listAnnualRevenuePage" class="annualRevenueAction" method="init">
+          <interceptor-ref name="prepareInterceptor" /> 
+          <result name="success">/jsp/system/listOption.jsp</result>
+        </action>
+                
+        <action name="saveAnnualRevenue" class="annualRevenueAction" method="save">      
+          <result name="input">/jsp/system/listOption.jsp</result>
+          <result name="success">/jsp/system/listOption.jsp</result>
+        </action>
+        
+        <action name="deleteAnnualRevenue" class="annualRevenueAction" method="delete">
+            <interceptor-ref name="prepareInterceptor" /> 
+            <result name="input">/jsp/system/listOption.jsp</result>
+            <result name="success">/jsp/system/listOption.jsp</result>
+        </action>           
 
     	<action name="listCallStatus" class="callStatusAction" method="list">
     	  <result name="success" type="json"></result>
@@ -105,21 +165,41 @@
 			<result name="success">/jsp/system/listOption.jsp</result>
         </action>  
 
-      	<action name="listCaseOrigin" class="caseOriginAction" method="list">
+        <action name="listCaseOrigin" class="caseOriginAction" method="list">
+          <result name="success" type="json"></result>
+        </action>
+
+        <action name="listCaseOriginPage" class="caseOriginAction" method="init">
+          <interceptor-ref name="prepareInterceptor" /> 
+          <result name="success">/jsp/system/listOption.jsp</result>
+        </action>
+                
+        <action name="saveCaseOrigin" class="caseOriginAction" method="save">
+          <result name="input">/jsp/system/listOption.jsp</result>
+          <result name="success">/jsp/system/listOption.jsp</result>
+        </action>
+        
+        <action name="deleteCaseOrigin" class="caseOriginAction" method="delete">
+            <interceptor-ref name="prepareInterceptor" />
+            <result name="input">/jsp/system/listOption.jsp</result>
+            <result name="success">/jsp/system/listOption.jsp</result>
+        </action>
+        
+      	<action name="listCapital" class="capitalAction" method="list">
     	  <result name="success" type="json"></result>
         </action>
 
-    	<action name="listCaseOriginPage" class="caseOriginAction" method="init">
+    	<action name="listCapitalPage" class="capitalAction" method="init">
     	  <interceptor-ref name="prepareInterceptor" /> 
     	  <result name="success">/jsp/system/listOption.jsp</result>
         </action>
                 
-        <action name="saveCaseOrigin" class="caseOriginAction" method="save">
+        <action name="saveCapital" class="capitalAction" method="save">
     	  <result name="input">/jsp/system/listOption.jsp</result>
     	  <result name="success">/jsp/system/listOption.jsp</result>
         </action>
         
-        <action name="deleteCaseOrigin" class="caseOriginAction" method="delete">
+        <action name="deleteCapital" class="capitalAction" method="delete">
 			<interceptor-ref name="prepareInterceptor" />
 			<result name="input">/jsp/system/listOption.jsp</result>
 			<result name="success">/jsp/system/listOption.jsp</result>
@@ -205,6 +285,26 @@
 			<result name="success">/jsp/system/listOption.jsp</result>
         </action>
 
+        <action name="listCompanySize" class="companySizeAction" method="list">
+          <result name="success" type="json"></result>
+        </action>
+
+        <action name="listCompanySizePage" class="companySizeAction" method="init">
+          <interceptor-ref name="prepareInterceptor" /> 
+          <result name="success">/jsp/system/listOption.jsp</result>
+        </action>
+                
+        <action name="saveCompanySize" class="companySizeAction" method="save">
+          <result name="input">/jsp/system/listOption.jsp</result>
+          <result name="success">/jsp/system/listOption.jsp</result>
+        </action>
+        
+        <action name="deleteCompanySize" class="companySizeAction" method="delete">
+            <interceptor-ref name="prepareInterceptor" /> 
+            <result name="input">/jsp/system/listOption.jsp</result>
+            <result name="success">/jsp/system/listOption.jsp</result>
+        </action>
+        
     	<action name="listChangeLogPage">
     	  <result type="redirect">/jsp/system/listChangeLog.jsp</result>
         </action>
@@ -496,6 +596,26 @@
 			<result name="success">/jsp/system/listOption.jsp</result>
         </action> 
         
+        <action name="listReligious" class="religiousAction" method="list">
+          <result name="success" type="json"></result>
+        </action>
+
+        <action name="listReligiousPage" class="religiousAction" method="init">
+          <interceptor-ref name="prepareInterceptor" /> 
+          <result name="success">/jsp/system/listOption.jsp</result>
+        </action>
+                
+        <action name="saveReligious" class="religiousAction" method="save">
+          <result name="input">/jsp/system/listOption.jsp</result>
+          <result name="success">/jsp/system/listOption.jsp</result>
+        </action>          
+        
+        <action name="deleteReligious" class="religiousAction" method="delete">
+            <interceptor-ref name="prepareInterceptor" /> 
+            <result name="input">/jsp/system/listOption.jsp</result>
+            <result name="success">/jsp/system/listOption.jsp</result>
+        </action>  
+                
     	<action name="listReminderOption" class="reminderOptionAction" method="list">
     	  <result name="success" type="json"></result>
         </action>

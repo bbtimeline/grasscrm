@@ -1,6 +1,7 @@
 package com.gcrm.domain;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -9,6 +10,12 @@ public class Account extends BaseEntity implements Serializable {
     private static final long serialVersionUID = 8250950813769457555L;
 
     private String name;
+    private AccountLevel account_level;
+    private Currency currency;
+    private Capital capital;
+    private AnnualRevenue annual_revenue;
+    private CompanySize company_size;
+    private AccountNature account_nature;
     private String office_phone;
     private String website;
     private String fax;
@@ -23,19 +30,22 @@ public class Account extends BaseEntity implements Serializable {
     private String ship_postal_code;
     private String ship_country;
     private String email;
-    private String description;
-    private String notes;
     private AccountType account_type;
     private Industry industry;
-    private String annual_revenue;
-    private String market_value;
-    private String employees;
+    private String legal_representative;
+    private String business_scope;
+    private Date create_date;
+    private String credit;
+    private String reputation;
+    private String market_position;
+    private String development_potential;
+    private String operational_characteristics;
+    private String operational_direction;
     private String sic_code;
     private String ticket_symbol;
     private Account manager;
-    private String ownship;
-    private String rating;
     private User assigned_to;
+    private String notes;
     private Set<TargetList> targetLists = new HashSet<TargetList>(0);
     private Set<Document> documents = new HashSet<Document>(0);
 
@@ -53,6 +63,7 @@ public class Account extends BaseEntity implements Serializable {
     /**
      * @return the name
      */
+    @Override
     public String getName() {
         return name;
     }
@@ -276,21 +287,6 @@ public class Account extends BaseEntity implements Serializable {
     }
 
     /**
-     * @return the description
-     */
-    public String getDescription() {
-        return description;
-    }
-
-    /**
-     * @param description
-     *            the description to set
-     */
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    /**
      * @return the account_type
      */
     public AccountType getAccount_type() {
@@ -318,36 +314,6 @@ public class Account extends BaseEntity implements Serializable {
      */
     public void setIndustry(Industry industry) {
         this.industry = industry;
-    }
-
-    /**
-     * @return the annual_revenue
-     */
-    public String getAnnual_revenue() {
-        return annual_revenue;
-    }
-
-    /**
-     * @param annual_revenue
-     *            the annual_revenue to set
-     */
-    public void setAnnual_revenue(String annual_revenue) {
-        this.annual_revenue = annual_revenue;
-    }
-
-    /**
-     * @return the employees
-     */
-    public String getEmployees() {
-        return employees;
-    }
-
-    /**
-     * @param employees
-     *            the employees to set
-     */
-    public void setEmployees(String employees) {
-        this.employees = employees;
     }
 
     /**
@@ -393,36 +359,6 @@ public class Account extends BaseEntity implements Serializable {
      */
     public void setManager(Account manager) {
         this.manager = manager;
-    }
-
-    /**
-     * @return the ownship
-     */
-    public String getOwnship() {
-        return ownship;
-    }
-
-    /**
-     * @param ownship
-     *            the ownship to set
-     */
-    public void setOwnship(String ownship) {
-        this.ownship = ownship;
-    }
-
-    /**
-     * @return the rating
-     */
-    public String getRating() {
-        return rating;
-    }
-
-    /**
-     * @param rating
-     *            the rating to set
-     */
-    public void setRating(String rating) {
-        this.rating = rating;
     }
 
     /**
@@ -478,21 +414,6 @@ public class Account extends BaseEntity implements Serializable {
     }
 
     /**
-     * @return the market_value
-     */
-    public String getMarket_value() {
-        return market_value;
-    }
-
-    /**
-     * @param market_value
-     *            the market_value to set
-     */
-    public void setMarket_value(String market_value) {
-        this.market_value = market_value;
-    }
-
-    /**
      * @return the notes
      */
     public String getNotes() {
@@ -505,6 +426,232 @@ public class Account extends BaseEntity implements Serializable {
      */
     public void setNotes(String notes) {
         this.notes = notes;
+    }
+
+    /**
+     * @return the account_level
+     */
+    public AccountLevel getAccount_level() {
+        return account_level;
+    }
+
+    /**
+     * @param account_level
+     *            the account_level to set
+     */
+    public void setAccount_level(AccountLevel account_level) {
+        this.account_level = account_level;
+    }
+
+    /**
+     * @return the capital
+     */
+    public Capital getCapital() {
+        return capital;
+    }
+
+    /**
+     * @param capital
+     *            the capital to set
+     */
+    public void setCapital(Capital capital) {
+        this.capital = capital;
+    }
+
+    /**
+     * @return the annual_revenue
+     */
+    public AnnualRevenue getAnnual_revenue() {
+        return annual_revenue;
+    }
+
+    /**
+     * @param annual_revenue
+     *            the annual_revenue to set
+     */
+    public void setAnnual_revenue(AnnualRevenue annual_revenue) {
+        this.annual_revenue = annual_revenue;
+    }
+
+    /**
+     * @return the company_size
+     */
+    public CompanySize getCompany_size() {
+        return company_size;
+    }
+
+    /**
+     * @param company_size
+     *            the company_size to set
+     */
+    public void setCompany_size(CompanySize company_size) {
+        this.company_size = company_size;
+    }
+
+    /**
+     * @return the account_nature
+     */
+    public AccountNature getAccount_nature() {
+        return account_nature;
+    }
+
+    /**
+     * @param account_nature
+     *            the account_nature to set
+     */
+    public void setAccount_nature(AccountNature account_nature) {
+        this.account_nature = account_nature;
+    }
+
+    /**
+     * @return the legal_representative
+     */
+    public String getLegal_representative() {
+        return legal_representative;
+    }
+
+    /**
+     * @param legal_representative
+     *            the legal_representative to set
+     */
+    public void setLegal_representative(String legal_representative) {
+        this.legal_representative = legal_representative;
+    }
+
+    /**
+     * @return the business_scope
+     */
+    public String getBusiness_scope() {
+        return business_scope;
+    }
+
+    /**
+     * @param business_scope
+     *            the business_scope to set
+     */
+    public void setBusiness_scope(String business_scope) {
+        this.business_scope = business_scope;
+    }
+
+    /**
+     * @return the create_date
+     */
+    public Date getCreate_date() {
+        return create_date;
+    }
+
+    /**
+     * @param create_date
+     *            the create_date to set
+     */
+    public void setCreate_date(Date create_date) {
+        this.create_date = create_date;
+    }
+
+    /**
+     * @return the credit
+     */
+    public String getCredit() {
+        return credit;
+    }
+
+    /**
+     * @param credit
+     *            the credit to set
+     */
+    public void setCredit(String credit) {
+        this.credit = credit;
+    }
+
+    /**
+     * @return the reputation
+     */
+    public String getReputation() {
+        return reputation;
+    }
+
+    /**
+     * @param reputation
+     *            the reputation to set
+     */
+    public void setReputation(String reputation) {
+        this.reputation = reputation;
+    }
+
+    /**
+     * @return the market_position
+     */
+    public String getMarket_position() {
+        return market_position;
+    }
+
+    /**
+     * @param market_position
+     *            the market_position to set
+     */
+    public void setMarket_position(String market_position) {
+        this.market_position = market_position;
+    }
+
+    /**
+     * @return the development_potential
+     */
+    public String getDevelopment_potential() {
+        return development_potential;
+    }
+
+    /**
+     * @param development_potential
+     *            the development_potential to set
+     */
+    public void setDevelopment_potential(String development_potential) {
+        this.development_potential = development_potential;
+    }
+
+    /**
+     * @return the operational_characteristics
+     */
+    public String getOperational_characteristics() {
+        return operational_characteristics;
+    }
+
+    /**
+     * @param operational_characteristics
+     *            the operational_characteristics to set
+     */
+    public void setOperational_characteristics(
+            String operational_characteristics) {
+        this.operational_characteristics = operational_characteristics;
+    }
+
+    /**
+     * @return the operational_direction
+     */
+    public String getOperational_direction() {
+        return operational_direction;
+    }
+
+    /**
+     * @param operational_direction
+     *            the operational_direction to set
+     */
+    public void setOperational_direction(String operational_direction) {
+        this.operational_direction = operational_direction;
+    }
+
+    /**
+     * @return the currency
+     */
+    public Currency getCurrency() {
+        return currency;
+    }
+
+    /**
+     * @param currency
+     *            the currency to set
+     */
+    public void setCurrency(Currency currency) {
+        this.currency = currency;
     }
 
 }

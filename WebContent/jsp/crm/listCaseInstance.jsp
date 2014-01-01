@@ -40,7 +40,7 @@
 	  });	
 
 	  $("#massUpdate").click(function() {	
-		  many_massUpdaterow("/crm/editCase.action?seleteIDs=");
+		  many_massUpdaterow("/crm/editCaseInstance.action?seleteIDs=");
 	  });
 	  
 	  $("#export").click(function() {	
@@ -87,7 +87,7 @@
 		{  
 		   var par='<%=((User)session.getAttribute("loginUser")).getUpdate_case()%>';
 		   if (par == 1){
-			   new_format_value = "<a href='editCase.action?id=" + rowObject[0] + "'>" + cellvalue + "</a>";
+			   new_format_value = "<a href='editCaseInstance.action?id=" + rowObject[0] + "'>" + cellvalue + "</a>";
 		   }else {
 			 new_format_value = cellvalue;
 		   }			
@@ -133,7 +133,7 @@
             name="title.action" />:&nbsp;&nbsp;</b> <span> <s:if
             test="#session.loginUser.create_case == 1">
             <span style="white-space: nowrap;"> <a
-              href="editCase.action" class="easyui-linkbutton"
+              href="editCaseInstance.action" class="easyui-linkbutton"
               iconCls="icon-add" plain="true"><s:text
                   name="action.createCase" /></a>
             </span>

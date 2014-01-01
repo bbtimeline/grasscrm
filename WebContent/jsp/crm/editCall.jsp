@@ -215,6 +215,10 @@
           <s:hidden id="id" name="call.id" value="%{call.id}" />
           <s:hidden id="saveFlag" name="saveFlag" />
           <s:hidden id="seleteIDs" name="seleteIDs" value="%{seleteIDs}" />
+          <s:hidden id="createdBy" name="createdBy" />
+          <s:hidden id="createdOn" name="createdOn" />
+          <s:hidden id="updatedBy" name="updatedBy" />
+          <s:hidden id="updatedOn" name="updatedOn" />          
 
           <table style="" cellspacing="10" cellpadding="0" width="100%">
             <font color="red"> <s:actionerror /></font>
@@ -365,11 +369,16 @@
 									    fit: true,
 							            mode:'remote',
 							            columns:[[  
-							                {field:'id',title:'<s:text name="entity.id.label" />',width:60},  
-							                {field:'name',title:'<s:text name="entity.name.label" />',width:100},  
-							                {field:'office_phone',title:'<s:text name="entity.office_phone.label" />',width:120},  
-							                {field:'email',title:'<s:text name="entity.email.label" />',width:100},
-							                {field:'assigned_to.name',title:'<s:text name="entity.assigned_to.label" />',width:100}  
+                                       {field:'id',title:'<s:text name="entity.id.label" />',width:60},  
+                                       {field:'name',title:'<s:text name="entity.name.label" />',width:100},  
+                                       {field:'office_phone',title:'<s:text name="entity.office_phone.label" />',width:120},  
+                                       {field:'email',title:'<s:text name="entity.email.label" />',width:100},
+                                       {field:'bill_street',title:'<s:text name="entity.billing_street.label" />',width:100},
+                                       {field:'bill_city',title:'<s:text name="entity.billing_city.label" />',width:100},
+                                       {field:'bill_state',title:'<s:text name="entity.billing_state.label" />',width:100},
+                                       {field:'bill_country',title:'<s:text name="entity.billing_country.label" />',width:100},
+                                       {field:'bill_postal_code',title:'<s:text name="entity.billing_postal_code.label" />',width:100},
+                                       {field:'assigned_to.name',title:'<s:text name="entity.assigned_to.label" />',width:100} 
 							            ]]  
 							        ">
                     </select>
@@ -592,26 +601,7 @@
 						        ">
                   </select></td>
                 </tr>
-              </table>
-            </div>
-
-            <div title="<s:text name='tab.details'/>"
-              style="padding: 10px;">
-              <div class="section-header">
-                <span><s:text name="span.description" /></span>
-              </div>
-              <table style="" cellspacing="10" cellpadding="0"
-                width="100%">
                 <tr>
-                  <td class="td-mass-update"><input id="massUpdate"
-                    name="massUpdate" type="checkbox" class="massUpdate"
-                    value="description" /></td>
-                  <td class="td-label" valign="top"><label
-                    class="record-label"><s:text
-                        name="entity.description.label"></s:text>：</label></td>
-                  <td class="td-value" valign="top"><s:textarea
-                      name="call.description" rows="20"
-                      cssStyle="width:450px;" cssClass="record-value" /></td>
                   <td class="td-mass-update"><input id="massUpdate"
                     name="massUpdate" type="checkbox" class="massUpdate"
                     value="notes" /></td>
@@ -619,11 +609,16 @@
                     class="record-label"><s:text
                         name="entity.notes.label"></s:text>：</label></td>
                   <td class="td-value" valign="top"><s:textarea
-                      name="call.notes" rows="20"
-                      cssStyle="width:450px;" cssClass="record-value" /></td>
-                </tr>
+                      name="call.notes" rows="5" cssStyle="width:350px;" cssClass="record-value" /></td>
+                  <td class="td-mass-update"></td>
+                  <td class="td-label"></td>
+                  <td class="td-value"></td>                         
+                </tr>                 
               </table>
+            </div>
 
+            <div title="<s:text name='tab.details'/>"
+              style="padding: 10px;">
               <div class="section-header">
                 <span><s:text name="span.system_info" /></span>
               </div>

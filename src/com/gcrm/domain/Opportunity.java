@@ -20,7 +20,6 @@ public class Opportunity extends BaseEntity implements Serializable {
     private double probability;
     private Campaign campaign;
     private String next_step;
-    private String description;
     private String notes;
     private User assigned_to;
     private Set<Contact> contacts = new HashSet<Contact>(0);
@@ -41,6 +40,7 @@ public class Opportunity extends BaseEntity implements Serializable {
     /**
      * @return the name
      */
+    @Override
     public String getName() {
         return name;
     }
@@ -171,21 +171,6 @@ public class Opportunity extends BaseEntity implements Serializable {
      */
     public void setNext_step(String next_step) {
         this.next_step = next_step;
-    }
-
-    /**
-     * @return the description
-     */
-    public String getDescription() {
-        return description;
-    }
-
-    /**
-     * @param description
-     *            the description to set
-     */
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     /**

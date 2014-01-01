@@ -82,15 +82,15 @@
 			<result>/jsp/crm/listCaseInstance.jsp</result>            	  
         </action>
                                 
-        <action name="editCase" class="editCaseAction" method="get">
+        <action name="editCaseInstance" class="editCaseAction" method="get">
 			<interceptor-ref name="prepareInterceptor" /> 
 			<result>/jsp/crm/editCaseInstance.jsp</result>
         </action>
                         
         <action name="saveCase" class="editCaseAction" method="save">
 			<interceptor-ref name="prepareInterceptor" /> 
-            <result name="input">/jsp/crm/editCaseInstance.jsp</result>          
-    	    <result>/jsp/crm/editCaseInstance.jsp</result>
+            <result name="input">/jsp/crm/editCaseInstance.jsp</result> 
+            <result type="redirectAction">editCaseInstance.action?id=${id}</result>
         </action>
 
         <action name="saveCloseCase" class="editCaseAction" method="save">

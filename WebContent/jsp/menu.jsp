@@ -191,15 +191,30 @@
     <div>
       <span><s:text name='menu.dropdown.title' /></span>
       <div style="width: 170px;">
+        <div onClick="openPage('/system/listAccountLevelPage.action')">
+          <s:text name='menu.accountLevel.title' />
+        </div> 
+        <div onClick="openPage('/system/listAccountNaturePage.action')">
+          <s:text name='menu.accountNature.title' />
+        </div>               
         <div onClick="openPage('/system/listAccountTypePage.action')">
           <s:text name='menu.accountType.title' />
         </div>
+        <div onClick="openPage('/system/listAnnualRevenuePage.action')">
+          <s:text name='menu.annualRevenue.title' />
+        </div>         
         <div onClick="openPage('/system/listCallStatusPage.action')">
           <s:text name='menu.callStatus.title' />
         </div>
         <div onClick="openPage('/system/listCallDirectionPage.action')">
           <s:text name='menu.callDirection.title' />
         </div>
+        <div onClick="openPage('/system/listCapitalPage.action')">
+          <s:text name='menu.capital.title' />
+        </div>  
+        <div onClick="openPage('/system/listCompanySizePage.action')">
+          <s:text name='menu.companySize.title' />
+        </div>                       
         <div onClick="openPage('/system/listReminderOptionPage.action')">
           <s:text name='menu.reminderOption.title' />
         </div>
@@ -250,6 +265,9 @@
         <div onClick="openPage('/system/listUserStatusPage.action')">
           <s:text name='menu.userStatus.title' />
         </div>
+        <div onClick="openPage('/system/listReligiousPage.action')">
+          <s:text name='menu.religious.title' />
+        </div>        
         <div onClick="openPage('/system/listSalesStagePage.action')">
           <s:text name='menu.salesStage.title' />
         </div>

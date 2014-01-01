@@ -38,6 +38,17 @@ public interface IBaseDao<T extends Serializable> {
     public List<T> getAllObjects(String clazz);
 
     /**
+     * Gets all entity instances with select columns
+     * 
+     * @param clazz
+     *            class name
+     * @param columns
+     *            column name list
+     * @return result list
+     */
+    public List<T> getAllObjects(String clazz, String columns);
+
+    /**
      * Finds records according to name
      * 
      * @param clazz
@@ -80,6 +91,7 @@ public interface IBaseDao<T extends Serializable> {
      * @return result list
      * @throws Exception
      */
+    @SuppressWarnings("rawtypes")
     public List findVOByParams(String hql, Object[] paramValues);
 
     /**
@@ -176,8 +188,71 @@ public interface IBaseDao<T extends Serializable> {
     public SearchResult<T> getPaginationObjects(final String clazz,
             final SearchCondition searchCondition);
 
+    /**
+     * Gets pagination objects with selected columns
+     * 
+     * @param clazz
+     *            entity class name
+     * @param columns
+     *            column name list
+     * @param searchCondition
+     *            search condition
+     * @return search result with selected columns
+     */
+    public SearchResult<T> getPaginationObjects(String clazz, String columns,
+            SearchCondition searchCondition);
+
+    /**
+     * Gets all sorted entity instances
+     * 
+     * @param clazz
+     *            class name
+     * @param sortColumn
+     *            the column to be sorted
+     * @param order
+     *            sort order
+     * @return result list
+     */
     public List<T> getAllSortedObjects(String clazz, String sortColumn,
             String order);
 
+    /**
+     * Gets all sorted entity instances with selected columns
+     * 
+     * @param clazz
+     *            class name
+     * @param columns
+     *            column name list
+     * @param sortColumn
+     *            the column to be sorted
+     * @param order
+     *            sort order
+     * @return result list
+     */
+    public List<T> getAllSortedObjects(String clazz, String columns,
+            String sortColumn, String order);
+
+    /**
+     * Gets all entity instances that meet condition
+     * 
+     * @param clazz
+     *            class name
+     * @param condition
+     *            search condition
+     * @return result list that meet condition
+     */
     public List<T> getObjects(final String clazz, final String condition);
+
+    /**
+     * Gets all entity instances that meet condition with selected columns
+     * 
+     * @param clazz
+     *            class name
+     * @param columns
+     *            column name list
+     * @param condition
+     *            search condition
+     * @return result list that meet condition with selected columns
+     */
+    public List<T> getObjects(String clazz, String columns, String condition);
 }

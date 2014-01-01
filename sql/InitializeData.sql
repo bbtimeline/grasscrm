@@ -7,6 +7,36 @@ CREATE SEQUENCE hibernate_sequence
 ALTER TABLE hibernate_sequence
   OWNER TO postgres;
 
+CREATE TABLE accountlevel
+(
+  id integer NOT NULL,
+  value character varying(50) NOT NULL,
+  label_en_us character varying(50),
+  label_zh_cn character varying(50),
+  sequence integer,
+  CONSTRAINT accountlevel_pkey PRIMARY KEY (id )
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE accountlevel
+  OWNER TO postgres;
+  
+CREATE TABLE accountnature
+(
+  id integer NOT NULL,
+  value character varying(50) NOT NULL,
+  label_en_us character varying(50),
+  label_zh_cn character varying(50),
+  sequence integer,
+  CONSTRAINT accountnature_pkey PRIMARY KEY (id )
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE accountnature
+  OWNER TO postgres;
+  
 CREATE TABLE accounttype
 (
   id integer NOT NULL,
@@ -21,6 +51,21 @@ WITH (
 );
 ALTER TABLE accounttype
   OWNER TO postgres;
+  
+CREATE TABLE annualrevenue
+(
+  id integer NOT NULL,
+  value character varying(50) NOT NULL,
+  label_en_us character varying(50),
+  label_zh_cn character varying(50),
+  sequence integer,
+  CONSTRAINT annualrevenue_pkey PRIMARY KEY (id )
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE annualrevenue
+  OWNER TO postgres;  
   
 CREATE TABLE calldirection
 (
@@ -81,6 +126,21 @@ WITH (
 );
 ALTER TABLE campaigntype
   OWNER TO postgres;
+  
+CREATE TABLE capital
+(
+  id integer NOT NULL,
+  value character varying(50) NOT NULL,
+  label_en_us character varying(50),
+  label_zh_cn character varying(50),
+  sequence integer,
+  CONSTRAINT capital_pkey PRIMARY KEY (id )
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE capital
+  OWNER TO postgres;  
   
 CREATE TABLE caseorigin
 (
@@ -156,6 +216,21 @@ WITH (
 );
 ALTER TABLE casetype
   OWNER TO postgres;
+  
+CREATE TABLE companysize
+(
+  id integer NOT NULL,
+  value character varying(50) NOT NULL,
+  label_en_us character varying(50),
+  label_zh_cn character varying(50),
+  sequence integer,
+  CONSTRAINT companysize_pkey PRIMARY KEY (id )
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE companysize
+  OWNER TO postgres;  
 
 CREATE TABLE currency
 (
@@ -306,6 +381,21 @@ WITH (
   OIDS=FALSE
 );
 ALTER TABLE opportunitytype
+  OWNER TO postgres;
+
+CREATE TABLE religious
+(
+  id integer NOT NULL,
+  value character varying(50) NOT NULL,
+  label_en_us character varying(50),
+  label_zh_cn character varying(50),
+  sequence integer,
+  CONSTRAINT religious_pkey PRIMARY KEY (id )
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE religious
   OWNER TO postgres;
 
 CREATE TABLE reminderoption
@@ -626,6 +716,21 @@ INSERT INTO role(id, name, sequence,scope_account, view_account, create_account,
 
 INSERT INTO users_role(user_id, role_id) VALUES (currval('hibernate_sequence') - 1 ,currval('hibernate_sequence'));   
   
+  
+INSERT INTO accountlevel(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'--None--','--None--','--空白--',1);
+INSERT INTO accountlevel(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'VIP Account','VIP Account','VIP 客户',2);
+INSERT INTO accountlevel(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'Major Account','Major Account','主要客户',3);
+INSERT INTO accountlevel(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'Common Account','Common Account','普通客户',4);
+INSERT INTO accountlevel(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'Small Account','Small Account','小客户',5);  
+  
+INSERT INTO accountnature(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'--None--','--None--','--空白--',1);
+INSERT INTO accountnature(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'State-Owned','State-Owned','国有',2);
+INSERT INTO accountnature(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'Forgign','Forgign','外资',3);
+INSERT INTO accountnature(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'Joint Venture','Joint Venture','合资',4);
+INSERT INTO accountnature(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'Private','Private','民营',5);
+INSERT INTO accountnature(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'Collectively-Run','Collectively-Run','集体',6);
+INSERT INTO accountnature(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'Other','Other','其它',7);
+          
 INSERT INTO accounttype(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'--None--', '--None--','--空白--',1);
 INSERT INTO accounttype(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'Analyst', 'Analyst','分析者',2);
 INSERT INTO accounttype(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'Competitor', 'Competitor','竞争者',3);
@@ -638,6 +743,17 @@ INSERT INTO accounttype(id, value, label_en_us, label_zh_cn, sequence) VALUES (n
 INSERT INTO accounttype(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'Reseller', 'Reseller','批发商',10);
 INSERT INTO accounttype(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'Other', 'Other','其它',11);
 
+INSERT INTO annualrevenue(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'--None--','--None--','--空白--', 1);
+INSERT INTO annualrevenue(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'10~100 thousand','10~100 thousand','1~10万', 2);
+INSERT INTO annualrevenue(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'100~1000 thousand','100~1000 thousand','10~100万', 3);
+INSERT INTO annualrevenue(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'1~5 million','1~5 million','100~500万', 4);
+INSERT INTO annualrevenue(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'5~10 million','5~10 million','500~1000万', 5);
+INSERT INTO annualrevenue(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'10~50 million','10~50 million','1000~5000万', 6);
+INSERT INTO annualrevenue(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'50~100 million','50~100 million','5000万~1亿', 7);
+INSERT INTO annualrevenue(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'100 million~1 billion','100 million~1 billion','1~10亿', 8);
+INSERT INTO annualrevenue(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'1~10 billion','1~10 billion','10~100亿', 9);
+INSERT INTO annualrevenue(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'>10 billion','>10 billion','100亿以上', 10);
+        
 INSERT INTO calldirection(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'Inbound', 'Inbound', '打入', 1);
 INSERT INTO calldirection(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'Outbound', 'Outbound', '打出', 2);
 
@@ -663,6 +779,17 @@ INSERT INTO campaigntype(id, value, label_en_us, label_zh_cn, sequence) VALUES (
 INSERT INTO campaigntype(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'Television', 'Television', '电视', 8);
 INSERT INTO campaigntype(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'NewsLetter', 'NewsLetter', '简讯', 9);
 
+INSERT INTO capital(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'--None--','--None--','--空白--',1);
+INSERT INTO capital(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'10~100 thousand','10~100 thousand','1~10万',2);
+INSERT INTO capital(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'100~1000 thousand','100~1000 thousand','10~100万',3);
+INSERT INTO capital(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'1~5 million','1~5 million','100~500万',4);
+INSERT INTO capital(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'5~10 million','5~10 million','500~1000万',5);
+INSERT INTO capital(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'10~50 million','10~50 million','1000~5000万',6);
+INSERT INTO capital(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'50~100 million','50~100 million','5000万~1亿',7);
+INSERT INTO capital(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'100 million~1 billion','100 million~1 billion','1~10亿',8);
+INSERT INTO capital(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'1~10 billion','1~10 billion','10~100亿',9);
+INSERT INTO capital(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'>10 billion','>10 billion','100亿以上',10);
+        
 INSERT INTO caseorigin(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'--None--', '--None--', '--空白--', 1);
 INSERT INTO caseorigin(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'Email', 'Email', '电子邮件', 2);
 INSERT INTO caseorigin(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'Phone', 'Phone', '电话', 3);
@@ -690,7 +817,19 @@ INSERT INTO casetype(id, value, label_en_us, label_zh_cn, sequence) VALUES (next
 INSERT INTO casetype(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'Product', 'Product', '产品', 2);
 INSERT INTO casetype(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'User', 'User', '用户', 3);
 
+INSERT INTO companysize(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'--None--','--None--','--空白--', 1);
+INSERT INTO companysize(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'1~10 Person','1~10 Person','1~10人', 2);
+INSERT INTO companysize(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'10~50 Person','10~50 Person','10~50人', 3);
+INSERT INTO companysize(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'50~100 Person','50~100 Person','50~100人', 4);
+INSERT INTO companysize(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'100~1000 Person','100~1000 Person','100~1000人', 5);
+INSERT INTO companysize(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'1000~3000 Person','1000~3000 Person','1000~3000人', 6);
+INSERT INTO companysize(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'3000~10000 Person','3000~10000 Person','3000~10000人', 7);
+INSERT INTO companysize(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'>10000 Person','>10000 Person','10000以上', 8)
+        
 INSERT INTO currency(id, name, code, symbol) VALUES (nextval('hibernate_sequence'),'US Dollars','USD', '$');
+INSERT INTO currency(id, name, code, symbol) VALUES (nextval('hibernate_sequence'),'RMB','RMB', '￥');
+INSERT INTO currency(id, name, code, symbol) VALUES (nextval('hibernate_sequence'),'EURO','EURO', '€');
+INSERT INTO currency(id, name, code, symbol) VALUES (nextval('hibernate_sequence'),'JPY','JPY', '￥');
 
 INSERT INTO documentcategory(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'--None--', '--None--', '--空白--', 1);
 INSERT INTO documentcategory(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'Marketing', 'Marketing', '市场', 2);
@@ -777,6 +916,13 @@ INSERT INTO meetingstatus(id, value, label_en_us, label_zh_cn, sequence) VALUES 
 INSERT INTO opportunitytype(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'--None--', '--None--', '--空白--', 1);
 INSERT INTO opportunitytype(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'Existing Business', 'Existing Business', '已有生意', 2);
 INSERT INTO opportunitytype(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'New Business', 'New Business', '新生意', 3);
+
+INSERT INTO religious(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'--None--', '--None--', '--空白--',1);
+INSERT INTO religious(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'Buddhism', 'Buddhism', '佛教',2);
+INSERT INTO religious(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'Christianity', 'Christianity', '基督教',3);
+INSERT INTO religious(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'Islam ', 'Islam ', '伊斯兰教',4);
+INSERT INTO religious(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'Taoism', 'Taoism', '道教',5);
+INSERT INTO religious(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'Other', 'Other', '其它',6);
 
 INSERT INTO reminderoption(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'10', '10 minutes prior', '提前10分钟', 1);
 INSERT INTO reminderoption(id, value, label_en_us, label_zh_cn, sequence) VALUES (nextval('hibernate_sequence'),'15', '15 minutes prior', '提前15分钟', 2);

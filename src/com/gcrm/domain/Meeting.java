@@ -19,7 +19,6 @@ public class Meeting extends BaseEntity implements Serializable {
     private boolean reminder_email;
     private ReminderOption reminder_option_email;
     private EmailTemplate reminder_template;
-    private String description;
     private String notes;
     private User assigned_to;
     private Set<Lead> leads = new HashSet<Lead>(0);
@@ -140,21 +139,6 @@ public class Meeting extends BaseEntity implements Serializable {
      */
     public void setLocation(String location) {
         this.location = location;
-    }
-
-    /**
-     * @return the description
-     */
-    public String getDescription() {
-        return description;
-    }
-
-    /**
-     * @param description
-     *            the description to set
-     */
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     /**

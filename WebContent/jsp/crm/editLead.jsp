@@ -20,11 +20,21 @@
 <script type="text/javascript">
     function save() {
     	$('#convert_btn').linkbutton('disable');
+        $("input[name='lead.other_street']").removeAttr("disabled"); 
+        $("input[name='lead.other_city']").removeAttr("disabled"); 
+        $("input[name='lead.other_state']").removeAttr("disabled"); 
+        $("input[name='lead.other_postal_code']").removeAttr("disabled"); 
+        $("input[name='lead.other_country']").removeAttr("disabled"); 
         baseSave("Lead");
 	}
 
 	function saveClose() {
 		$('#convert_btn').linkbutton('disable');
+        $("input[name='lead.other_street']").removeAttr("disabled"); 
+        $("input[name='lead.other_city']").removeAttr("disabled"); 
+        $("input[name='lead.other_state']").removeAttr("disabled"); 
+        $("input[name='lead.other_postal_code']").removeAttr("disabled"); 
+        $("input[name='lead.other_country']").removeAttr("disabled"); 
 		baseSaveClose("Lead");
 	}
 	
@@ -69,8 +79,8 @@
 	  
 	  function copyAddress(){
 		if ($('#copy_checkbox').attr('checked')) { 
-			$("input[name='lead.other_address']").attr("value",$("input[name='lead.primary_address']").val());	
-			$("input[name='lead.other_address']").attr("disabled","disabled"); 
+			$("input[name='lead.other_street']").attr("value",$("input[name='lead.primary_street']").val());	
+			$("input[name='lead.other_street']").attr("disabled","disabled"); 
 			$("input[name='lead.other_city']").attr("value",$("input[name='lead.primary_city']").val());
 			$("input[name='lead.other_city']").attr("disabled","disabled");
 			$("input[name='lead.other_state']").attr("value",$("input[name='lead.primary_state']").val());
@@ -80,7 +90,7 @@
 			$("input[name='lead.other_country']").attr("value",$("input[name='lead.primary_country']").val());
 			$("input[name='lead.other_country']").attr("disabled","disabled");
 		} else {
-			$("input[name='lead.other_address']").removeAttr("disabled"); 
+			$("input[name='lead.other_street']").removeAttr("disabled"); 
 			$("input[name='lead.other_city']").removeAttr("disabled"); 
 			$("input[name='lead.other_state']").removeAttr("disabled"); 
 			$("input[name='lead.other_postal_code']").removeAttr("disabled"); 
@@ -105,7 +115,8 @@
 			  $('#tt').tabs('close', '<s:text name='tab.relations'/>');
 			  if ($("#seleteIDs").val() == ""){
 				     $("#addObjectForm").form('validate');
-			  }			  
+			  }	
+			  $('#convert_btn').linkbutton('disable');
 		}
 		if ($("#saveFlag").val() == "true"){
 			$.messager.show({  
@@ -216,6 +227,10 @@
           <s:hidden name="relationValue" id="relationValue"
             value="%{relationValue}" />
           <s:hidden id="seleteIDs" name="seleteIDs" value="%{seleteIDs}" />
+          <s:hidden id="createdBy" name="createdBy" />
+          <s:hidden id="createdOn" name="createdOn" />
+          <s:hidden id="updatedBy" name="updatedBy" />
+          <s:hidden id="updatedOn" name="updatedOn" />          
 
           <table style="" cellspacing="10" cellpadding="0" width="100%">
             <s:actionerror />
@@ -414,7 +429,7 @@
               </table>
 
               <div class="section-header">
-                <span> <s:text name="span.shipping_address" /> (<a
+                <span> <s:text name="span.other_address" /> (<a
                   href="#" onclick="otherMap()"><s:text
                       name="link.map" /></a>)
                 </span>
@@ -472,7 +487,10 @@
                     class="record-value" onclick="copyAddress();" /></td>
                 </tr>
               </table>
+            </div>
 
+            <div title="<s:text name='tab.details'/>"
+              style="padding: 10px;">
               <div class="section-header">
                 <span><s:text name="span.other_info" /></span>
               </div>
@@ -506,11 +524,16 @@
 								    fit: true,
 						            mode:'remote',
 						            columns:[[  
-									           {field:'id',title:'<s:text name="entity.id.label" />',width:60},  
-									           {field:'name',title:'<s:text name="entity.name.label" />',width:100},  
-									           {field:'office_phone',title:'<s:text name="entity.office_phone.label" />',width:120},  
-									           {field:'email',title:'<s:text name="entity.email.label" />',width:100},
-									           {field:'assigned_to.name',title:'<s:text name="entity.assigned_to.label" />',width:100}  
+                                    {field:'id',title:'<s:text name="entity.id.label" />',width:60},  
+                                    {field:'name',title:'<s:text name="entity.name.label" />',width:100},  
+                                    {field:'office_phone',title:'<s:text name="entity.office_phone.label" />',width:120},  
+                                    {field:'email',title:'<s:text name="entity.email.label" />',width:100},
+                                    {field:'bill_street',title:'<s:text name="entity.billing_street.label" />',width:100},
+                                    {field:'bill_city',title:'<s:text name="entity.billing_city.label" />',width:100},
+                                    {field:'bill_state',title:'<s:text name="entity.billing_state.label" />',width:100},
+                                    {field:'bill_country',title:'<s:text name="entity.billing_country.label" />',width:100},
+                                    {field:'bill_postal_code',title:'<s:text name="entity.billing_postal_code.label" />',width:100},
+                                    {field:'assigned_to.name',title:'<s:text name="entity.assigned_to.label" />',width:100}  
 						            ]]  
 						        ">
                   </select></td>
@@ -636,30 +659,6 @@
 						            ]]  
 						        ">
                   </select></td>
-                  <td class="td-mass-update"></td>
-                  <td class="td-label"></td>
-                  <td class="td-value"></td>
-                </tr>
-              </table>
-            </div>
-
-            <div title="<s:text name='tab.details'/>"
-              style="padding: 10px;">
-              <div class="section-header">
-                <span><s:text name="span.description" /></span>
-              </div>
-              <table style="" cellspacing="10" cellpadding="0"
-                width="100%">
-                <tr>
-                  <td class="td-mass-update"><input id="massUpdate"
-                    name="massUpdate" type="checkbox" class="massUpdate"
-                    value="description" /></td>
-                  <td class="td-label" valign="top"><label
-                    class="record-label"><s:text
-                        name="entity.description.label"></s:text>：</label></td>
-                  <td class="td-value" valign="top"><s:textarea
-                      name="lead.description" rows="20"
-                      cssStyle="width:500px;" cssClass="record-value" /></td>
                   <td class="td-mass-update"><input id="massUpdate"
                     name="massUpdate" type="checkbox" class="massUpdate"
                     value="notes" /></td>
@@ -667,8 +666,7 @@
                     class="record-label"><s:text
                         name="entity.notes.label"></s:text>：</label></td>
                   <td class="td-value" valign="top"><s:textarea
-                      name="lead.notes" rows="20"
-                      cssStyle="width:450px;" cssClass="record-value" /></td>
+                      name="lead.notes" rows="5" cssStyle="width:350px;" cssClass="record-value" /></td>
                 </tr>
               </table>
 
