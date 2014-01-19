@@ -967,5 +967,7 @@ update role set created_by=3,owner=3,created_on=now();
 
 INSERT INTO emailtemplate(id, name, type, subject, text_only, html_body) VALUES (nextval('hibernate_sequence'),'Default Meeting Remind Email Template', 'meetingRemind','Meeting Remind', false, '<p>Subject:$meeting.subject</p><p>Sart Date:$meeting.start_date</p><p>Location:$meeting.location</p>');
 INSERT INTO emailtemplate(id, name, type, subject, text_only, html_body) VALUES (nextval('hibernate_sequence'),'Default Call Remind Email Template', 'callRemind','Call Remind', false, '<p>Subject:$call.subject</p><p>Sart Date:$call.start_date</p>');
+INSERT INTO emailtemplate(id, name, type, subject, text_only, html_body) VALUES (nextval('hibernate_sequence'),'Default Meeting Invite Email Template', 'meetingInvite','Meeting Invite', false, '<p>Subject:$meeting.subject</p><p>Sart Date:$meeting.start_date</p><p>Location:$meeting.location</p>');
+INSERT INTO emailtemplate(id, name, type, subject, text_only, html_body) VALUES (nextval('hibernate_sequence'),'Default Call Invite Email Template', 'callInvite','Call Invite', false, '<p>Subject:$call.subject</p><p>Sart Date:$call.start_date</p>');
 
 
