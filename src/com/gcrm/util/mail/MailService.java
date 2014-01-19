@@ -19,11 +19,13 @@ import java.io.File;
 import java.util.List;
 import java.util.Properties;
 
+import javax.mail.Message;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
 import javax.mail.internet.MimeMessage;
 
 import org.springframework.core.task.TaskExecutor;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 
 import com.gcrm.domain.EmailSetting;
@@ -36,15 +38,7 @@ public class MailService {
     private TaskExecutor taskExecutor;
     private IBaseService<EmailSetting> baseService;
 
-    public void asynSendSimpleMail(final SimpleMailMessage msg) {
-        taskExecutor.execute(new Runnable() {
-            public void run() {
-                sendSimpleMail(msg);
-            }
-        });
-    }
-
-    public void sendSimpleMail(SimpleMailMessage msg) {
+    public void sendSimpleMail(String toAddress) throws Exception {
         List<EmailSetting> emailSettings = baseService
                 .getAllObjects(EmailSetting.class.getSimpleName());
         EmailSetting emailSetting = null;
@@ -53,13 +47,25 @@ public class MailService {
         } else {
             return;
         }
-        JavaMailSenderImpl sender = this.prepareSender(emailSetting);
-        if (sender != null) {
-            sender.send(msg);
+        Session mailSession = this.createSmtpSession(emailSetting);
+        if (mailSession != null) {
+            Transport transport = mailSession.getTransport();
+            MimeMessage msg = new MimeMessage(mailSession);
+            MimeMessageHelper helper = new MimeMessageHelper(msg, true, "utf-8");
+            helper.setFrom(emailSetting.getFrom_address());
+            helper.setTo(toAddress);
+            helper.setSubject("Test Mail From " + emailSetting.getFrom_name());
+            helper.setText(
+                    "This is test mail from " + emailSetting.getFrom_name(),
+                    true);
+            transport.connect();
+            transport.sendMessage(msg,
+                    msg.getRecipients(Message.RecipientType.TO));
         }
     }
 
-    public void sendSystemSimpleMail(SimpleMailMessage msg) {
+    public void sendSystemSimpleMail(String toAddress, String subject,
+            String text) throws Exception {
         List<EmailSetting> emailSettings = baseService
                 .getAllObjects(EmailSetting.class.getSimpleName());
         EmailSetting emailSetting = null;
@@ -68,10 +74,18 @@ public class MailService {
         } else {
             return;
         }
-        msg.setFrom(emailSetting.getFrom_address());
-        JavaMailSenderImpl sender = this.prepareSender(emailSetting);
-        if (sender != null) {
-            sender.send(msg);
+        Session mailSession = this.createSmtpSession(emailSetting);
+        if (mailSession != null) {
+            Transport transport = mailSession.getTransport();
+            MimeMessage msg = new MimeMessage(mailSession);
+            MimeMessageHelper helper = new MimeMessageHelper(msg, true, "utf-8");
+            helper.setFrom(emailSetting.getFrom_address());
+            helper.setTo(toAddress);
+            helper.setSubject(subject);
+            helper.setText(text, true);
+            transport.connect();
+            transport.sendMessage(msg,
+                    msg.getRecipients(Message.RecipientType.TO));
         }
     }
 
@@ -102,9 +116,11 @@ public class MailService {
         if (from == null) {
             from = emailSetting.getFrom_address();
         }
-        JavaMailSenderImpl sender = this.prepareSender(emailSetting);
-        if (sender != null) {
-            MimeMessage msg = sender.createMimeMessage();
+        Session mailSession = createSmtpSession(emailSetting);
+
+        if (mailSession != null) {
+            Transport transport = mailSession.getTransport();
+            MimeMessage msg = new MimeMessage(mailSession);
             MimeMessageHelper helper = new MimeMessageHelper(msg, true, "utf-8");
             helper.setFrom(from);
             helper.setTo(to);
@@ -121,46 +137,70 @@ public class MailService {
                     }
                 }
             }
-
-            sender.send(msg);
+            transport.connect();
+            transport.sendMessage(msg,
+                    msg.getRecipients(Message.RecipientType.TO));
         }
 
     }
 
-    private JavaMailSenderImpl prepareSender(EmailSetting emailSetting) {
+    private Session createSmtpSession(EmailSetting emailSetting) {
+        final Properties props = new Properties();
 
-        Properties javaMailProperties = new Properties();
-        javaMailProperties.put("mail.smtp.auth", "true");
-        JavaMailSenderImpl sender = new JavaMailSenderImpl();
         int emailProvider = emailSetting.getEmail_provider();
+        String smtpUsername = null;
+        String smtpPassword = null;
         switch (emailProvider) {
         case EmailSetting.PROVIDER_GMAIL:
-            sender.setHost("smtp.gmail.com");
-            sender.setUsername(emailSetting.getGmail_address());
-            sender.setPassword(emailSetting.getGmail_password());
+            props.setProperty("mail.host", "smtp.gmail.com");
+            props.setProperty("mail.smtp.auth", "true");
+            props.setProperty("mail.smtp.port", "" + 587);
+            props.setProperty("mail.transport.protocol", "smtp");
+            props.setProperty("mail.smtp.starttls.enable", "true");
+            smtpUsername = emailSetting.getGmail_address();
+            smtpPassword = emailSetting.getGmail_password();
             break;
         case EmailSetting.PROVIDER_YAHOO:
-            sender.setHost("smtp.mail.yahoo.com");
-            sender.setUsername(emailSetting.getYahoo_mail_ID());
-            sender.setPassword(emailSetting.getYahoo_mail_password());
+            props.setProperty("mail.host", "smtp.mail.yahoo.com");
+            props.setProperty("mail.smtp.auth", "true");
+            props.setProperty("mail.smtp.port", "" + 587);
+            props.setProperty("mail.transport.protocol", "smtp");
+            props.setProperty("mail.smtp.starttls.enable", "true");
+            smtpUsername = emailSetting.getYahoo_mail_ID();
+            smtpPassword = emailSetting.getYahoo_mail_password();
             break;
         case EmailSetting.PROVIDER_OTHER:
-            sender.setHost(emailSetting.getSmtp_server());
-            sender.setPort(emailSetting.getSmtp_port());
-            sender.setUsername(emailSetting.getSmtp_username());
-            sender.setPassword(emailSetting.getSmtp_password());
+            props.setProperty("mail.host", emailSetting.getSmtp_server());
+            props.setProperty("mail.smtp.auth",
+                    String.valueOf(emailSetting.isSmtp_authentication()));
+            props.setProperty("mail.smtp.port",
+                    "" + emailSetting.getSmtp_port());
+            smtpUsername = emailSetting.getSmtp_username();
+            smtpPassword = emailSetting.getSmtp_password();
             switch (emailSetting.getSmtp_protocol()) {
             case EmailSetting.PROTOCOL_SSL:
-                sender.setProtocol("smtps");
+                props.setProperty("mail.transport.protocol", "smtps");
                 break;
             case EmailSetting.PROTOCOL_TLS:
-                javaMailProperties.put("mail.smtp.starttls.enable", "true");
+                props.setProperty("mail.transport.protocol", "smtp");
+                props.setProperty("mail.smtp.starttls.enable", "true");
+                break;
+            default:
+                props.setProperty("mail.transport.protocol", "smtp");
                 break;
             }
             break;
         }
-        sender.setJavaMailProperties(javaMailProperties);
-        return sender;
+
+        final String userName = smtpUsername;
+        final String password = smtpPassword;
+        return Session.getDefaultInstance(props,
+                new javax.mail.Authenticator() {
+                    @Override
+                    protected PasswordAuthentication getPasswordAuthentication() {
+                        return new PasswordAuthentication(userName, password);
+                    }
+                });
     }
 
     /**

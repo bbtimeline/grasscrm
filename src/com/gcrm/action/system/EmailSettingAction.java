@@ -17,8 +17,6 @@ package com.gcrm.action.system;
 
 import java.util.List;
 
-import org.springframework.mail.SimpleMailMessage;
-
 import com.gcrm.action.crm.BaseEditAction;
 import com.gcrm.domain.EmailSetting;
 import com.gcrm.service.IBaseService;
@@ -75,18 +73,7 @@ public class EmailSettingAction extends BaseEditAction implements Preparable {
      * @return the SUCCESS result
      */
     public String sendEmail() throws Exception {
-        List<EmailSetting> emailSettings = baseService
-                .getAllObjects(EmailSetting.class.getSimpleName());
-        if (emailSettings != null && emailSettings.size() > 0) {
-            emailSetting = emailSettings.get(0);
-        }
-        SimpleMailMessage ms = new SimpleMailMessage();
-        ms.setFrom(emailSetting.getFrom_address());
-
-        ms.setTo(this.getEmailAddress());
-        ms.setSubject("Test Mail From " + emailSetting.getFrom_name());
-        ms.setText("This is test mail from " + emailSetting.getFrom_name());
-        mailService.sendSimpleMail(ms);
+        mailService.sendSimpleMail(this.getEmailAddress());
         return SUCCESS;
     }
 

@@ -443,15 +443,17 @@ public class EditMeetingAction extends BaseEditAction implements Preparable {
             String realPath = ServletActionContext.getRequest().getSession()
                     .getServletContext().getRealPath("/upload");
             String targetDirectory = realPath;
-            String[] tNames = new String[uploads.length];
-            File[] tFiles = new File[uploads.length];
-            for (int i = 0; i < uploads.length; i++) {
-                tNames[i] = generateFileName(uploadFileNames[i]);
-                File target = new File(targetDirectory, tNames[i]);
-                FileUtils.copyFile(uploads[i], target);
-                tFiles[i] = target;
+            File[] tFiles = null;
+            if (uploads != null) {
+                String[] tNames = new String[uploads.length];
+                tFiles = new File[uploads.length];
+                for (int i = 0; i < uploads.length; i++) {
+                    tNames[i] = generateFileName(uploadFileNames[i]);
+                    File target = new File(targetDirectory, tNames[i]);
+                    FileUtils.copyFile(uploads[i], target);
+                    tFiles[i] = target;
+                }
             }
-
             mailService.asynSendHtmlMail(from, tos, subject, content,
                     this.getUploadFileName(), tFiles);
         }

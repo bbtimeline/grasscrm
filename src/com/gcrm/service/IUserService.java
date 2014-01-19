@@ -45,9 +45,10 @@ public interface IUserService extends IBaseService<User> {
      * @param content
      *            email content
      * @return success flag
+     * @throws Exception
      * @throws serviceException
      */
     public boolean forgetPassword(String username, String email,
-            String subject, String content) throws ServiceException;
+            String subject, String content) throws ServiceException, Exception;
 
 }

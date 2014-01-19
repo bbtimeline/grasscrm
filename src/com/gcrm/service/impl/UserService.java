@@ -17,7 +17,6 @@ package com.gcrm.service.impl;
 
 import java.util.List;
 
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.security.authentication.encoding.Md5PasswordEncoder;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,7 +63,7 @@ public class UserService extends BaseService<User> implements IUserService {
      */
     @Override
     public boolean forgetPassword(String username, String email,
-            String subject, String content) throws ServiceException {
+            String subject, String content) throws Exception {
         List<User> users = this.userDao.findByParams(
                 "from User where name =  ? and email = ?", new String[] {
                         username, email });
@@ -82,11 +81,8 @@ public class UserService extends BaseService<User> implements IUserService {
             this.makePersistent(user);
 
             // Sends the new password to user
-            SimpleMailMessage ms = new SimpleMailMessage();
-            ms.setTo(email);
-            ms.setSubject(subject);
-            ms.setText(content + newPassword);
-            mailService.sendSystemSimpleMail(ms);
+            mailService.sendSystemSimpleMail(email, subject, content
+                    + newPassword);
             flag = true;
         }
         return flag;
