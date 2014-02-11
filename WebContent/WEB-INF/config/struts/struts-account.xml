@@ -110,7 +110,7 @@
         <action name="saveAccount" class="editAccountAction" method="save">
 			<interceptor-ref name="prepareInterceptor" /> 
             <result name="input">/jsp/crm/editAccount.jsp</result>          
-    	    <result type="redirectAction">editAccount.action?id=${id}</result>
+    	    <result type="redirectAction">editAccount.action?id=${id}&amp;saveFlag=${saveFlag}</result>
         </action>
         
         <action name="saveCloseAccount" class="editAccountAction" method="save">

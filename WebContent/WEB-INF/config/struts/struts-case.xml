@@ -90,7 +90,7 @@
         <action name="saveCase" class="editCaseAction" method="save">
 			<interceptor-ref name="prepareInterceptor" /> 
             <result name="input">/jsp/crm/editCaseInstance.jsp</result> 
-            <result type="redirectAction">editCaseInstance.action?id=${id}</result>
+            <result type="redirectAction">editCaseInstance.action?id=${id}&amp;saveFlag=${saveFlag}</result>
         </action>
 
         <action name="saveCloseCase" class="editCaseAction" method="save">

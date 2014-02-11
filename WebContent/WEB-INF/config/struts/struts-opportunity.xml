@@ -98,7 +98,7 @@
         <action name="saveOpportunity" class="editOpportunityAction" method="save">
 			<interceptor-ref name="prepareInterceptor" /> 
             <result name="input">/jsp/crm/editOpportunity.jsp</result>          
-    	    <result type="redirectAction">editOpportunity.action?id=${id}</result>
+    	    <result type="redirectAction">editOpportunity.action?id=${id}&amp;saveFlag=${saveFlag}</result>
         </action>
 
         <action name="saveCloseOpportunity" class="editOpportunityAction" method="save">

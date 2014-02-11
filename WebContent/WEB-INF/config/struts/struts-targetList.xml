@@ -106,7 +106,7 @@
         <action name="saveTargetList" class="editTargetListAction" method="save">
 			<interceptor-ref name="prepareInterceptor" /> 
             <result name="input">/jsp/crm/editTargetList.jsp</result>          
-    	    <result>/jsp/crm/editTargetList.jsp</result>
+    	    <result type="redirectAction">editTargetList.action?id=${id}&amp;saveFlag=${saveFlag}</result> 
         </action>
 
         <action name="saveCloseTargetList" class="editTargetListAction" method="save">

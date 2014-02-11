@@ -73,7 +73,7 @@
         <action name="saveDocument" class="editDocumentAction" method="save">
 			<interceptor-ref name="prepareInterceptor" /> 
             <result name="input">/jsp/crm/editDocument.jsp</result>
-            <result type="redirectAction">editDocument.action?id=${id}</result>
+            <result type="redirectAction">editDocument.action?id=${id}&amp;saveFlag=${saveFlag}</result>
         </action>
  
         <action name="saveCloseDocument" class="editDocumentAction" method="save">

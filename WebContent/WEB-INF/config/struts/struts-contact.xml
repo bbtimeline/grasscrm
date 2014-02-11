@@ -106,7 +106,7 @@
         <action name="saveContact" class="editContactAction" method="save">
 			<interceptor-ref name="prepareInterceptor" /> 
             <result name="input">/jsp/crm/editContact.jsp</result>
-            <result type="redirectAction">editContact.action?id=${id}</result>
+            <result type="redirectAction">editContact.action?id=${id}&amp;saveFlag=${saveFlag}</result>
         </action>
 
         <action name="saveCloseContact" class="editContactAction" method="save">

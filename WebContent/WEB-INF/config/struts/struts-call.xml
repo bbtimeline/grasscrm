@@ -78,7 +78,7 @@
         <action name="saveCall" class="editCallAction" method="save">
 			<interceptor-ref name="prepareInterceptor" /> 
             <result name="input">/jsp/crm/editCall.jsp</result>
-            <result type="redirectAction">editCall.action?id=${id}</result> 
+            <result type="redirectAction">editCall.action?id=${id}&amp;saveFlag=${saveFlag}</result> 
         </action>
 
         <action name="saveCloseCall" class="editCallAction" method="save">

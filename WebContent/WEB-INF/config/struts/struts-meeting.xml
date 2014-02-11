@@ -77,8 +77,8 @@
                         
         <action name="saveMeeting" class="editMeetingAction" method="save">
 			<interceptor-ref name="prepareInterceptor" /> 
-            <result name="input">/jsp/crm/editMeeting.jsp</result>          
-    	    <result>/jsp/crm/editMeeting.jsp</result>
+            <result name="input">/jsp/crm/editMeeting.jsp</result>
+            <result type="redirectAction">editMeeting.action?id=${id}&amp;saveFlag=${saveFlag}</result> 
         </action>
 
         <action name="saveCloseMeeting" class="editMeetingAction" method="save">

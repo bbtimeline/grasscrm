@@ -62,7 +62,7 @@
         <action name="saveCampaign" class="editCampaignAction" method="save">
 			<interceptor-ref name="prepareInterceptor" /> 
             <result name="input">/jsp/crm/editCampaign.jsp</result>
-            <result type="redirectAction">editCampaign.action?id=${id}</result>
+            <result type="redirectAction">editCampaign.action?id=${id}&amp;saveFlag=${saveFlag}</result>
         </action>
 
         <action name="saveCloseCampaign" class="editCampaignAction" method="save">
