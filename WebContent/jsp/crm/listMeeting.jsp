@@ -64,7 +64,7 @@
 		   	colModel:[
 		   		{name:'id',index:'id', width:120, key: true,sorttype:"int",resizable:true, hidden:true},
 		   		{name:'subject',index:'subject', width:150, resizable:true, formatter:urlFmatter},
-		   		{name:'status.name',index:'status.name', width:150, resizable:true, formatter:urlFmatter},
+		   		{name:'status.label_<%=(String)session.getAttribute("locale")%>',index:'status.label_<%=(String)session.getAttribute("locale")%>', width:150, resizable:true, formatter:urlFmatter},
 		   		{name:'start_date',index:'start_date', width:150, resizable:true, formatter:urlFmatter, stype:'select', 
 			   		editoptions:{value:"<%=DateTimeUtil.getSelectOptions()%>"}},
 		   		{name:'end_date',index:'end_date', width:150, resizable:true, formatter:urlFmatter, stype:'select', 

@@ -114,14 +114,12 @@ public class ListMeetingAction extends BaseListAction {
      * 
      * @return list JSON data
      */
-    public static void getListJson(Iterator<Meeting> meetings,
-            long totalRecords, SearchCondition searchCondition, boolean isList)
-            throws Exception {
+    public void getListJson(Iterator<Meeting> meetings, long totalRecords,
+            SearchCondition searchCondition, boolean isList) throws Exception {
 
         StringBuilder jsonBuilder = new StringBuilder("");
         jsonBuilder
                 .append(getJsonHeader(totalRecords, searchCondition, isList));
-
         String statusName = null;
         String assignedTo = null;
         while (meetings.hasNext()) {
@@ -143,7 +141,6 @@ public class ListMeetingAction extends BaseListAction {
                 endDateString = dateTimeFormat.format(endDate);
             }
             String location = instance.getLocation();
-
             if (isList) {
                 User user = instance.getAssigned_to();
                 if (user != null) {

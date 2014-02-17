@@ -692,7 +692,7 @@ public class EditDocumentAction extends BaseEditAction implements Preparable {
      * @param publishDate
      *            the publishDate to set
      */
-    public void setPublishDate(String publishDateS) {
+    public void setPublishDateS(String publishDateS) {
         this.publishDateS = publishDateS;
     }
 
