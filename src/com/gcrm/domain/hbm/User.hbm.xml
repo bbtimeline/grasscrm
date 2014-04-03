@@ -13,7 +13,7 @@
    name="first_name" type="string"/>
   <property column="last_name" generated="never" lazy="false"
    name="last_name" type="string"/>
-  <many-to-one cascade="save-update" class="UserStatus" column="status" name="status"/>
+  <many-to-one cascade="save-update" class="UserStatus" column="status" name="status" lazy="false"/>
   <property column="password" generated="never" lazy="false"
    name="password" type="string"/>
   <property column="title" generated="never" lazy="false" name="title" type="string"/>

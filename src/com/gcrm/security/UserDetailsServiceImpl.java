@@ -26,6 +26,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import com.gcrm.domain.Role;
 import com.gcrm.domain.User;
+import com.gcrm.domain.UserStatus;
 import com.gcrm.service.IUserService;
 import com.gcrm.util.security.UserUtil;
 
@@ -49,6 +50,11 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             throw new UsernameNotFoundException(
                     "Hasn't found user information.");
         }
+        if (UserStatus.STATUS_INACTIVE.equalsIgnoreCase(user.getStatus()
+                .getValue())) {
+            throw new RuntimeException("User hasn't been actived!");
+        }
+
         userDetails.setUsername(user.getName());
         String password = user.getPassword();
         if (password == null) {
